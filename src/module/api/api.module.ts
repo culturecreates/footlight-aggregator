@@ -9,7 +9,7 @@ import {AuthenticationService} from "./service/authentication";
 
 @Module({
     imports: [],
-    controllers: [EventController, AuthenticationController],
+    controllers: [AuthenticationController, EventController],
     providers: [PersonService, PlaceService, OrganizationService, EventService, AuthenticationService],
     exports: []
 })
