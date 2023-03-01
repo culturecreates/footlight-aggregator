@@ -4,7 +4,7 @@ import {PlaceService} from "../place/place.service";
 import {OrganizationService} from "../organization/organization.service";
 import {Artsdata, ArtsDataUrls} from "../../constants/artsdata-urls";
 import {SharedService} from "../shared";
-import {PlaceDTO} from "../../dto/place";
+import {AuthHeaderExtractor} from "../../helper/auth-header.helper";
 
 @Injectable()
 
@@ -16,8 +16,11 @@ export class EventService {
         private readonly _placeService: PlaceService) {
     }
 
-    async syncEntities() {
+    async syncEntities(request: Request) {
+        const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
         //Sync Organizations
+
+
         await this._organizationService.syncOrganizations();
         //Sync People
         await this._personService.syncPeople();

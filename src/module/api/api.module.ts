@@ -4,11 +4,13 @@ import {OrganizationService} from "./service/organization/organization.service";
 import {PlaceService} from "./service/place/place.service";
 import {PersonService} from "./service/person/person.service";
 import {EventController} from "./controller/event/event.controller";
+import {AuthenticationController} from "./controller/authentication";
+import {AuthenticationService} from "./service/authentication";
 
 @Module({
     imports: [],
-    controllers: [EventController],
-    providers: [PersonService, PlaceService, OrganizationService, EventService],
+    controllers: [EventController, AuthenticationController],
+    providers: [PersonService, PlaceService, OrganizationService, EventService, AuthenticationService],
     exports: []
 })
 export class ApiModule {

@@ -13,6 +13,7 @@ async function bootstrap() {
     const config = new DocumentBuilder()
         .setTitle('Footlight ETL Tool')
         .setDescription('The footlight etl tool')
+        .addBearerAuth()
         .setVersion('v0.0.0')
         .build();
     const document = SwaggerModule.createDocument(app, config);
