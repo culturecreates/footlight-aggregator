@@ -31,7 +31,7 @@ export class SharedService {
         }).then(data => {
             return data.json();
         });
-        if (!(postResponse?.statusCode !== 202)) {
+        if (postResponse?.statusCode !== 202) {
             console.log('Something went wrong.')
         }
     }

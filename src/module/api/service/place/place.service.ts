@@ -1,6 +1,9 @@
 import {SharedService} from "../shared/shared.service";
 import {PlaceDTO} from "../../dto/place";
 import {Artsdata, ArtsDataUrls} from "../../constants/artsdata-urls";
+import {PersonDTO} from "../../dto/person";
+import {SERVER} from "../../config";
+import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.constants";
 
 export class PlaceService {
 
@@ -10,7 +13,7 @@ export class PlaceService {
         let count = 0;
         for (const id of placeIds) {
             await new Promise(r => setTimeout(r, 500));
-            await this.addPlaceToFootlight(id, calendarId);
+            await this.addPlaceToFootlight(id, calendarId, token);
             count++;
         }
         console.log(`Successfully synchronised ${count} Places.`);
@@ -23,7 +26,7 @@ export class PlaceService {
             .map(place => place.id.value.replace(Artsdata.RESOURCE_URI_PREFIX, ''));
     }
 
-    async addPlaceToFootlight(id: string, calendarId: string) {
+    async addPlaceToFootlight(id: string, calendarId: string, token: string) {
         const placeFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PLACE_BY_ID);
         const {
             id: artsDataId,
@@ -38,15 +41,13 @@ export class PlaceService {
         const sameAs = sameAsValues ? sameAsValues.map(val => ({uri: val})) : [];
         sameAs.push({uri: artsDataId});
         const placeToAdd = new PlaceDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
-        await this._pushPlaceToFootlight(calendarId, placeToAdd)
-        //TODO
-        //Add place to footlight-admin POST
+        await this._pushPlaceToFootlight(calendarId, token, placeToAdd)
         console.log(placeToAdd);
     }
 
 
-    private async _pushPlaceToFootlight(calendarId: string, placeToAdd: PlaceDTO) {
-        //TODO
-
+    private async _pushPlaceToFootlight(calendarId: string, token: string, personToAdd: PersonDTO) {
+        const url = SERVER.FOOTLIGHT_API_BASE_URL + FootlightPaths.ADD_PLACE;
+        await SharedService.postToFootlight(calendarId, token, url, personToAdd);
     }
 }

@@ -4,6 +4,8 @@ import {PlaceService} from "../place/place.service";
 import {OrganizationService} from "../organization/organization.service";
 import {Artsdata, ArtsDataUrls} from "../../constants/artsdata-urls";
 import {SharedService} from "../shared";
+import {SERVER} from "../../config";
+import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.constants";
 
 @Injectable()
 
@@ -16,19 +18,20 @@ export class EventService {
     }
 
     async syncEntities(token: string, calendarId: string) {
-        //Sync Organizations
+        //Sync Organizations - tested
         await this._organizationService.syncOrganizations(calendarId, token);
         //Sync People
-        // await this._personService.syncPeople(calendarId, token);
+        await this._personService.syncPeople(calendarId, token);
         // //Sync Places
-        // await this._placeService.syncPlaces(calendarId, token);
+        await this._placeService.syncPlaces(calendarId, token);
         //Sync Events
-        // await this._syncEvents(calendarId, token);
+        await this._syncEvents(calendarId, token);
 
         console.log('Successfully synchronised Entities.');
     }
 
-    async addEventToFootlight(id: string) {
+    async addEventToFootlight(calendarId: string, token: string, id: string) {
+        //TODO the URL is incorrect
         const eventFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.EVENT_BY_ID);
         const {
             id: artsDataId,
@@ -42,10 +45,9 @@ export class EventService {
         } = eventFetched;
         const sameAs = sameAsValues ? sameAsValues.map(val => ({uri: val})) : [];
         sameAs.push({uri: artsDataId});
-        // const eventToAdd = new EventDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
         //TODO
-        //Add place to footlight-admin POST
-        // console.log(placeToAdd);
+        // const eventToAdd = new EventDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
+        // await this._pushEventsToFootlight(calendarId, token, eventToAdd);
     }
 
     private async _fetchEventIdsFromArtsData() {
@@ -56,13 +58,18 @@ export class EventService {
     }
 
 
-    private async _syncEvents(calendarId: string,token:string) {
+    private async _syncEvents(calendarId: string, token: string) {
         const eventIds = await this._fetchEventIdsFromArtsData();
         console.log("Event Ids:" + eventIds);
         const promises = []
         for (const id of eventIds) {
-            promises.push(this.addEventToFootlight(id));
+            promises.push(this.addEventToFootlight(calendarId, token, id));
         }
         await Promise.all(promises);
+    }
+
+    private async _pushEventsToFootlight(calendarId: string, token: string, eventToAdd: any) {
+        const url = SERVER.FOOTLIGHT_API_BASE_URL + FootlightPaths.ADD_EVENT;
+        await SharedService.postToFootlight(calendarId, token, url, eventToAdd);
     }
 }
