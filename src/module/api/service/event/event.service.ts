@@ -4,7 +4,6 @@ import {PlaceService} from "../place/place.service";
 import {OrganizationService} from "../organization/organization.service";
 import {Artsdata, ArtsDataUrls} from "../../constants/artsdata-urls";
 import {SharedService} from "../shared";
-import {AuthHeaderExtractor} from "../../helper/auth-header.helper";
 
 @Injectable()
 
@@ -16,18 +15,15 @@ export class EventService {
         private readonly _placeService: PlaceService) {
     }
 
-    async syncEntities(request: Request) {
-        const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
+    async syncEntities(token: string, calendarId: string) {
         //Sync Organizations
-
-
-        await this._organizationService.syncOrganizations();
+        await this._organizationService.syncOrganizations(calendarId, token);
         //Sync People
-        await this._personService.syncPeople();
-        //Sync Places
-        await this._placeService.syncPlaces();
+        // await this._personService.syncPeople(calendarId, token);
+        // //Sync Places
+        // await this._placeService.syncPlaces(calendarId, token);
         //Sync Events
-        // await this._syncEvents();
+        // await this._syncEvents(calendarId, token);
 
         console.log('Successfully synchronised Entities.');
     }
@@ -60,7 +56,7 @@ export class EventService {
     }
 
 
-    private async _syncEvents() {
+    private async _syncEvents(calendarId: string,token:string) {
         const eventIds = await this._fetchEventIdsFromArtsData();
         console.log("Event Ids:" + eventIds);
         const promises = []

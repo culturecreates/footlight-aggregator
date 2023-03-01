@@ -7,17 +7,15 @@ export class PersonService {
     constructor() {
     }
 
-    async syncPeople() {
+    async syncPeople(calendarId: string, token: string) {
         const peopleIds = await this._fetchAllPersonIdsFromArtsData();
-        console.log('Places :: count:' + peopleIds.length + ', Artsdata ids: ' + peopleIds)
-        const people = [];
+        console.log('People :: count:' + peopleIds.length + ', Artsdata ids: ' + peopleIds)
         let count = 0;
         for (const id of peopleIds) {
             await new Promise(r => setTimeout(r, 500));
-            people.push(await this.addPersonToFootlight(id));
+            await this.addPersonToFootlight(id, calendarId);
             count++;
         }
-        console.log(people);
         console.log(`Successfully synchronised ${count} People.`);
     }
 
@@ -29,7 +27,7 @@ export class PersonService {
     }
 
 
-    async addPersonToFootlight(id: string) {
+    async addPersonToFootlight(id: string, calendarId: string) {
         const personFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_BY_ID);
         const {
             id: artsDataId,
@@ -43,6 +41,11 @@ export class PersonService {
         const sameAs = sameAsValues ? sameAsValues?.map(val => ({uri: val})) : [];
         sameAs.push({uri: artsDataId});
         const personToAdd = new PersonDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
+        this._pushPersonToFootlight(calendarId, personToAdd);
         console.log(personToAdd);
+    }
+
+    private _pushPersonToFootlight(calendarId: string, personToAdd: PersonDTO) {
+        //TODO
     }
 }

@@ -11,14 +11,29 @@ export class SharedService {
 
     public static async fetchUrl(url: string) {
         let artsDataResponse;
-            artsDataResponse = await fetch(url)
-                .then(data => {
-                    return data.json();
-                });
+        artsDataResponse = await fetch(url)
+            .then(data => {
+                return data.json();
+            });
         return artsDataResponse;
-        // const entities = artsDataResponse.data;
-        // return entities?.filter(entity => entity.id.startsWith('http://kg.artsdata.ca/resource/'))
-        //     .map(entity => entity.id.replace('http://kg.artsdata.ca/resource/', ''));
+    }
+
+    public static async postToFootlight(calendarId: string, token: string, url: string, body) {
+        const postResponse = await fetch(url, {
+            body: JSON.stringify(body),
+            headers: {
+                Accept: "*/*",
+                Authorization: `Bearer ${token}`,
+                "calendar-id": calendarId,
+                "Content-Type": "application/json"
+            },
+            method: "POST"
+        }).then(data => {
+            return data.json();
+        });
+        if (!(postResponse?.statusCode !== 202)) {
+            console.log('Something went wrong.')
+        }
     }
 
 }

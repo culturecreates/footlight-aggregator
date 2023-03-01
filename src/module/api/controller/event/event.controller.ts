@@ -1,8 +1,9 @@
-import {Controller, Put, Req} from "@nestjs/common";
-import {ApiBearerAuth, ApiOperation, ApiTags} from "@nestjs/swagger";
+import {Controller, Put, Query, Req} from "@nestjs/common";
+import {ApiBearerAuth, ApiOperation, ApiQuery, ApiTags} from "@nestjs/swagger";
 import {ApiStatusCode} from "../../enum/api-status-code.enum";
 import {ApiResponseEnum} from "../../enum/api-response.enum";
 import {EventService} from "../../service/event/event.service";
+import {AuthHeaderExtractor} from "../../helper/auth-header.helper";
 
 @Controller('events')
 @ApiTags('Event APIs')
@@ -13,8 +14,15 @@ export class EventController {
 
     @Put('sync')
     @ApiOperation({summary: 'Sync event from Arts data to footlight.'})
-    async getEvent(@Req() request: Request): Promise<ApiResponseEnum> {
-        await this._eventService.syncEntities(request);
+    @ApiQuery({
+        name: "calendar-id",
+        description: "**calendar-id (The calendar identifier)**",
+        required: true,
+        explode: true
+    })
+    async getEvent(@Req() request: Request, @Query("calendar-id") calendarId?: string): Promise<ApiResponseEnum> {
+        const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
+        await this._eventService.syncEntities(token,calendarId);
         return {status: ApiStatusCode.SUCCESS, message: 'Syncing people completed.'};
     }
 }

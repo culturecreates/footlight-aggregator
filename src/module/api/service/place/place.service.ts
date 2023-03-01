@@ -4,17 +4,15 @@ import {Artsdata, ArtsDataUrls} from "../../constants/artsdata-urls";
 
 export class PlaceService {
 
-    async syncPlaces() {
+    async syncPlaces(calendarId: string, token: string) {
         const placeIds = await this._fetchAllPlaceIdsFromArtsData();
         console.log('Places :: count:' + placeIds.length + ', Artsdata ids: ' + placeIds)
-        const places = [];
         let count = 0;
         for (const id of placeIds) {
             await new Promise(r => setTimeout(r, 500));
-            places.push(await this.addPlaceToFootlight(id));
+            await this.addPlaceToFootlight(id, calendarId);
             count++;
         }
-        console.log(places);
         console.log(`Successfully synchronised ${count} Places.`);
     }
 
@@ -25,7 +23,7 @@ export class PlaceService {
             .map(place => place.id.value.replace(Artsdata.RESOURCE_URI_PREFIX, ''));
     }
 
-    async addPlaceToFootlight(id: string) {
+    async addPlaceToFootlight(id: string, calendarId: string) {
         const placeFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PLACE_BY_ID);
         const {
             id: artsDataId,
@@ -40,10 +38,15 @@ export class PlaceService {
         const sameAs = sameAsValues ? sameAsValues.map(val => ({uri: val})) : [];
         sameAs.push({uri: artsDataId});
         const placeToAdd = new PlaceDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
+        await this._pushPlaceToFootlight(calendarId, placeToAdd)
         //TODO
         //Add place to footlight-admin POST
         console.log(placeToAdd);
     }
 
 
+    private async _pushPlaceToFootlight(calendarId: string, placeToAdd: PlaceDTO) {
+        //TODO
+
+    }
 }
