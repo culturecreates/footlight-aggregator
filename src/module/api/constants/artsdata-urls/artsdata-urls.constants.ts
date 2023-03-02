@@ -7,6 +7,7 @@ export const ArtsDataUrls = {
     PERSON_BY_ID: 'http://api.artsdata.ca/ranked/ARTSDATA_ID?format=json&frame=ranked_person_footlight',
     PLACE_BY_ID: 'http://api.artsdata.ca/ranked/ARTSDATA_ID?format=json&frame=ranked_place_footlight',
     ORGANIZATION_BY_ID: 'http://api.artsdata.ca/ranked/ARTSDATA_ID?format=json&frame=ranked_org_footlight',
+    PERSON_ORGANIZATION_BY_ID: 'http://api.artsdata.ca/ranked/ARTSDATA_ID?format=json&frame=ranked_org_person_footlight',
     EVENT_BY_ID: 'http://api.artsdata.ca/ranked/ARTSDATA_ID?format=json&frame=ranked_events_footlight',
 };
 

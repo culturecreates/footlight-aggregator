@@ -18,7 +18,7 @@ export class SharedService {
         return artsDataResponse;
     }
 
-    public static async postToFootlight(calendarId: string, token: string, url: string, body) {
+    public static async callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
         const postResponse = await fetch(url, {
             body: JSON.stringify(body),
             headers: {
@@ -27,13 +27,19 @@ export class SharedService {
                 "calendar-id": calendarId,
                 "Content-Type": "application/json"
             },
-            method: "POST"
+            method: method
         }).then(data => {
             return data.json();
         });
-        if (postResponse?.statusCode !== 202) {
-            console.log('Something went wrong.')
-        }
+        return postResponse;
+    }
+
+    public static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
+        return await this.callFootlightAPI("POST", calendarId, token, url, body);
+    }
+
+    public static async updateEntityInFootlight(calendarId: string, token: string, url: string, body: any) {
+        return await this.callFootlightAPI("PATCH", calendarId, token, url, body);
     }
 
 }
