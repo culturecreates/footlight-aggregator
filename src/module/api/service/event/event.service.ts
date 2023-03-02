@@ -17,20 +17,20 @@ export class EventService {
         private readonly _placeService: PlaceService) {
     }
 
-    async syncEntities(token: string, calendarId: string, source: string) {
+    async syncEntities(token: string, calendarId: string, source: string, footlightBaseUrl: string) {
         //Sync Organizations
-        await this._organizationService.syncOrganizations(calendarId, token, source);
+        await this._organizationService.syncOrganizations(calendarId, token, source, footlightBaseUrl);
         //Sync People
-        await this._personService.syncPeople(calendarId, token, source);
+        await this._personService.syncPeople(calendarId, token, source, footlightBaseUrl);
         // //Sync Places
-        await this._placeService.syncPlaces(calendarId, token, source);
+        await this._placeService.syncPlaces(calendarId, token, source, footlightBaseUrl);
         //Sync Events
-        await this._syncEvents(calendarId, token, source);
+        await this._syncEvents(calendarId, token, source, footlightBaseUrl);
 
         console.log('Successfully synchronised Entities.');
     }
 
-    async addEventToFootlight(calendarId: string, token: string, id: string) {
+    async addEventToFootlight(calendarId: string, token: string, id: string, footlightBaseUrl: string) {
         //TODO the URL is incorrect
         const eventFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.EVENT_BY_ID);
         const {
@@ -47,7 +47,7 @@ export class EventService {
         sameAs.push({uri: artsDataId});
         //TODO
         // const eventToAdd = new EventDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
-        // await this._pushEventsToFootlight(calendarId, token, eventToAdd);
+        // await this._pushEventsToFootlight(footlightBaseUrl,calendarId, token, eventToAdd);
     }
 
     private async _fetchEventIdsFromArtsData(source: string) {
@@ -58,12 +58,12 @@ export class EventService {
     }
 
 
-    private async _syncEvents(calendarId: string, token: string, source: string) {
+    private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
         const eventIds = await this._fetchEventIdsFromArtsData(source);
         console.log("Event Ids:" + eventIds);
         const promises = []
         for (const id of eventIds) {
-            promises.push(this.addEventToFootlight(calendarId, token, id));
+            promises.push(this.addEventToFootlight(calendarId, token, id, footlightBaseUrl));
         }
         await Promise.all(promises);
     }

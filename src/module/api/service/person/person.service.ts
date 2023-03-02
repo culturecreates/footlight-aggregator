@@ -1,7 +1,6 @@
 import {PersonDTO} from "../../dto/person";
 import {SharedService} from "../shared";
 import {Artsdata, ArtsDataUrls} from "../../constants/artsdata-urls";
-import {SERVER} from "../../config";
 import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.constants";
 
 export class PersonService {
@@ -9,13 +8,13 @@ export class PersonService {
     constructor() {
     }
 
-    async syncPeople(calendarId: string, token: string, source: string) {
+    async syncPeople(calendarId: string, token: string, source: string, footlightUrl: string) {
         const peopleIds = await this._fetchAllPersonIdsFromArtsData(source);
         console.log('People :: count:' + peopleIds.length + ', Artsdata ids: ' + peopleIds)
         let count = 0;
         for (const id of peopleIds) {
             await new Promise(r => setTimeout(r, 500));
-            await this.addPersonToFootlight(id, calendarId, token);
+            await this.addPersonToFootlight(id, calendarId, token, footlightUrl);
             count++;
         }
         console.log(`Successfully synchronised ${count} People.`);
@@ -29,7 +28,7 @@ export class PersonService {
     }
 
 
-    async addPersonToFootlight(id: string, calendarId: string, token: string) {
+    async addPersonToFootlight(id: string, calendarId: string, token: string, footlightUrl: string) {
         const personFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_BY_ID);
         const {
             id: artsDataId,
@@ -43,11 +42,12 @@ export class PersonService {
         const sameAs = sameAsValues ? sameAsValues?.map(val => ({uri: val})) : [];
         sameAs.push({uri: artsDataId});
         const personToAdd = new PersonDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
-        await this._pushPersonToFootlight(calendarId, token, personToAdd);
+        await this._pushPersonToFootlight(footlightUrl, calendarId, token, personToAdd);
     }
 
-    private async _pushPersonToFootlight(calendarId: string, token: string, personToAdd: PersonDTO) {
-        const url = SERVER.FOOTLIGHT_API_BASE_URL + FootlightPaths.ADD_PEOPLE;
+    private async _pushPersonToFootlight(footlightUrl: string, calendarId: string, token: string,
+                                         personToAdd: PersonDTO) {
+        const url = footlightUrl + FootlightPaths.ADD_PEOPLE;
         await SharedService.postToFootlight(calendarId, token, url, personToAdd);
     }
 }

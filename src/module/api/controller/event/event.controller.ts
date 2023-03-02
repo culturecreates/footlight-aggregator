@@ -27,12 +27,20 @@ export class EventController {
         explode: true,
         example: 'http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca'
     })
+    @ApiQuery({
+        name: "footlight-base-url",
+        description: "**footlight base url (Base url)**",
+        required: true,
+        explode: true,
+        example: 'https://staging.api.cms.footlight.io'
+    })
     async getEvent(
         @Req() request: Request,
         @Query("calendar-id") calendarId?: string,
+        @Query("footlight-base-url") footlightBaseUrl?: string,
         @Query("source") source?: string): Promise<ApiResponseEnum> {
         const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-        await this._eventService.syncEntities(token, calendarId, source);
+        await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl);
         return {status: ApiStatusCode.SUCCESS, message: 'Syncing people completed.'};
     }
 }
