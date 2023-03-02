@@ -9,8 +9,8 @@ export class PersonService {
     constructor() {
     }
 
-    async syncPeople(calendarId: string, token: string) {
-        const peopleIds = await this._fetchAllPersonIdsFromArtsData();
+    async syncPeople(calendarId: string, token: string, source: string) {
+        const peopleIds = await this._fetchAllPersonIdsFromArtsData(source);
         console.log('People :: count:' + peopleIds.length + ', Artsdata ids: ' + peopleIds)
         let count = 0;
         for (const id of peopleIds) {
@@ -21,8 +21,8 @@ export class PersonService {
         console.log(`Successfully synchronised ${count} People.`);
     }
 
-    async _fetchAllPersonIdsFromArtsData() {
-        const url = ArtsDataUrls.PEOPLE;
+    async _fetchAllPersonIdsFromArtsData(source: string) {
+        const url = ArtsDataUrls.PEOPLE + '&source=' + source;
         const artsDatResponse = await SharedService.fetchUrl(url);
         return artsDatResponse.filter(person => person.id.value?.startsWith(Artsdata.RESOURCE_URI_PREFIX))
             .map(person => person.id.value.replace(Artsdata.RESOURCE_URI_PREFIX, ''));
@@ -44,7 +44,6 @@ export class PersonService {
         sameAs.push({uri: artsDataId});
         const personToAdd = new PersonDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
         await this._pushPersonToFootlight(calendarId, token, personToAdd);
-        console.log(personToAdd);
     }
 
     private async _pushPersonToFootlight(calendarId: string, token: string, personToAdd: PersonDTO) {

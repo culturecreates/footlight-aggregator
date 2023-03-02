@@ -17,15 +17,15 @@ export class EventService {
         private readonly _placeService: PlaceService) {
     }
 
-    async syncEntities(token: string, calendarId: string) {
-        //Sync Organizations - tested
-        await this._organizationService.syncOrganizations(calendarId, token);
+    async syncEntities(token: string, calendarId: string, source: string) {
+        //Sync Organizations
+        await this._organizationService.syncOrganizations(calendarId, token, source);
         //Sync People
-        await this._personService.syncPeople(calendarId, token);
+        await this._personService.syncPeople(calendarId, token, source);
         // //Sync Places
-        await this._placeService.syncPlaces(calendarId, token);
+        await this._placeService.syncPlaces(calendarId, token, source);
         //Sync Events
-        await this._syncEvents(calendarId, token);
+        await this._syncEvents(calendarId, token, source);
 
         console.log('Successfully synchronised Entities.');
     }
@@ -50,16 +50,16 @@ export class EventService {
         // await this._pushEventsToFootlight(calendarId, token, eventToAdd);
     }
 
-    private async _fetchEventIdsFromArtsData() {
-        const url = ArtsDataUrls.EVENTS;
+    private async _fetchEventIdsFromArtsData(source: string) {
+        const url = ArtsDataUrls.EVENTS + '&source=' + source;
         const artsDataResponse = await SharedService.fetchUrl(url);
         return artsDataResponse.data?.filter(event => event.id.startsWith(Artsdata.RESOURCE_URI_PREFIX))
             .map(event => event.id.replace(Artsdata.RESOURCE_URI_PREFIX, ''));
     }
 
 
-    private async _syncEvents(calendarId: string, token: string) {
-        const eventIds = await this._fetchEventIdsFromArtsData();
+    private async _syncEvents(calendarId: string, token: string, source: string) {
+        const eventIds = await this._fetchEventIdsFromArtsData(source);
         console.log("Event Ids:" + eventIds);
         const promises = []
         for (const id of eventIds) {

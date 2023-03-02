@@ -20,9 +20,19 @@ export class EventController {
         required: true,
         explode: true
     })
-    async getEvent(@Req() request: Request, @Query("calendar-id") calendarId?: string): Promise<ApiResponseEnum> {
+    @ApiQuery({
+        name: "source",
+        description: "**source (Website graphs used by Tout Culture)**",
+        required: true,
+        explode: true,
+        example: 'http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca'
+    })
+    async getEvent(
+        @Req() request: Request,
+        @Query("calendar-id") calendarId?: string,
+        @Query("source") source?: string): Promise<ApiResponseEnum> {
         const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-        await this._eventService.syncEntities(token,calendarId);
+        await this._eventService.syncEntities(token, calendarId, source);
         return {status: ApiStatusCode.SUCCESS, message: 'Syncing people completed.'};
     }
 }

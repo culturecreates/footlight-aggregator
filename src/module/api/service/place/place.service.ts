@@ -7,8 +7,8 @@ import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.const
 
 export class PlaceService {
 
-    async syncPlaces(calendarId: string, token: string) {
-        const placeIds = await this._fetchAllPlaceIdsFromArtsData();
+    async syncPlaces(calendarId: string, token: string, source: string) {
+        const placeIds = await this._fetchAllPlaceIdsFromArtsData(source);
         console.log('Places :: count:' + placeIds.length + ', Artsdata ids: ' + placeIds)
         let count = 0;
         for (const id of placeIds) {
@@ -19,8 +19,8 @@ export class PlaceService {
         console.log(`Successfully synchronised ${count} Places.`);
     }
 
-    async _fetchAllPlaceIdsFromArtsData() {
-        const url = ArtsDataUrls.PLACES;
+    async _fetchAllPlaceIdsFromArtsData(source: string) {
+        const url = ArtsDataUrls.PLACES + '&source=' + source;
         const artsDataResponse = await SharedService.fetchUrl(url);
         return artsDataResponse.filter(place => place.id.value.startsWith(Artsdata.RESOURCE_URI_PREFIX))
             .map(place => place.id.value.replace(Artsdata.RESOURCE_URI_PREFIX, ''));
@@ -42,7 +42,6 @@ export class PlaceService {
         sameAs.push({uri: artsDataId});
         const placeToAdd = new PlaceDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
         await this._pushPlaceToFootlight(calendarId, token, placeToAdd)
-        console.log(placeToAdd);
     }
 
 

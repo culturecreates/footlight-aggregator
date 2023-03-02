@@ -6,8 +6,8 @@ import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.const
 
 export class OrganizationService {
 
-    async syncOrganizations(calendarId: string, token: string) {
-        const organizationIds = await this._fetchAllOrganizationIdsFromArtsData();
+    async syncOrganizations(calendarId: string, token: string, source: string) {
+        const organizationIds = await this._fetchAllOrganizationIdsFromArtsData(source);
         console.log('Organizations :: count:' + organizationIds.length + ', Artsdata ids: ' + organizationIds)
         let count = 0;
         for (const id of organizationIds) {
@@ -18,8 +18,8 @@ export class OrganizationService {
         console.log(`Successfully synchronised ${count} Organizations.`);
     }
 
-    private async _fetchAllOrganizationIdsFromArtsData() {
-        const url = ArtsDataUrls.ORGANIZATIONS;
+    private async _fetchAllOrganizationIdsFromArtsData(source: string) {
+        const url = ArtsDataUrls.ORGANIZATIONS + '&source=' + source;
         const artsDataResponse = await SharedService.fetchUrl(url);
         const entities = artsDataResponse.data;
         return entities?.filter(entity => entity.id.startsWith(Artsdata.RESOURCE_URI_PREFIX))
@@ -43,7 +43,6 @@ export class OrganizationService {
         const organizationToAdd = new OrganizationDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
         //Add org to footlight-admin POST
         await this._pushOrganizationToFootlight(calendarId, token, organizationToAdd);
-        console.log(organizationToAdd);
     }
 
     private async _pushOrganizationToFootlight(calendarId: string, token: string, organizationToAdd: OrganizationDTO) {
