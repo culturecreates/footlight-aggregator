@@ -19,16 +19,18 @@ export class PersonOrganizationService {
         for (const uri of entityUris) {
             const id = uri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, '');
             const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_ORGANIZATION_BY_ID);
-            const {type} = entityFetched;
-            let entityId: string;
-            if (type === PersonOrganizationType.PERSON) {
-                entityId = await this._personService.getFootlightIdentifier(calendarId, token, footlightUrl,
-                    entityFetched);
-            } else if (type === PersonOrganizationType.ORGANIZATION) {
-                entityId = await this._organizationService.getFootlightIdentifier(calendarId, token, footlightUrl,
-                    entityFetched);
+            if (entityFetched) {
+                const {type} = entityFetched;
+                let entityId: string;
+                if (type === PersonOrganizationType.PERSON) {
+                    entityId = await this._personService.getFootlightIdentifier(calendarId, token, footlightUrl,
+                        entityFetched);
+                } else if (type === PersonOrganizationType.ORGANIZATION) {
+                    entityId = await this._organizationService.getFootlightIdentifier(calendarId, token, footlightUrl,
+                        entityFetched);
+                }
+                personOrganizations.push({entityId, type});
             }
-            personOrganizations.push({entityId, type});
         }
         return personOrganizations;
     }

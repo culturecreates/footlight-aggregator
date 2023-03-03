@@ -19,19 +19,23 @@ export class SharedService {
     }
 
     public static async callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
-        const postResponse = await fetch(url, {
-            body: JSON.stringify(body),
-            headers: {
-                Accept: "*/*",
-                Authorization: `Bearer ${token}`,
-                "calendar-id": calendarId,
-                "Content-Type": "application/json"
-            },
-            method: method
-        }).then(data => {
-            return data.json();
-        });
-        return postResponse;
+        try {
+            const postResponse = await fetch(url, {
+                body: JSON.stringify(body),
+                headers: {
+                    Accept: "*/*",
+                    Authorization: `Bearer ${token}`,
+                    "calendar-id": calendarId,
+                    "Content-Type": "application/json"
+                },
+                method: method
+            }).then(data => {
+                return data.json();
+            });
+            return postResponse;
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     public static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {

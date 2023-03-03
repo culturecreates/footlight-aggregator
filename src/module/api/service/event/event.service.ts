@@ -19,48 +19,45 @@ export class EventService {
         private readonly _personOrganizationService: PersonOrganizationService) {
     }
 
-    async syncEntities(token: string, calendarId: string, source: string, footlightBaseUrl: string) {
-        //Sync Events
-        await this._syncEvents(calendarId, token, source, footlightBaseUrl);
-    }
-
-    async addEventToFootlight(calendarId: string, token: string, event: any, footlightBaseUrl: string) {
-        const {
-            id: artsDataId, type, additionalType, name, location: locations, description, url, startDateTime,
-            endDateTime, performer, organizer, sponsor, sameAs: sameAsValues
-        } = event;
-        const sameAs = sameAsValues ? sameAsValues.map(val => ({uri: val})) : [];
-        sameAs.push({uri: artsDataId});
-        const location = locations?.[0];
-        const locationId: string = await this._placeService.getFootlightIdentifier(calendarId, token, footlightBaseUrl,
-            location);
-        const performerDetails = performer?.length ? await this._personOrganizationService
-            .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer) : undefined;
-        const organizerDetails = organizer?.length ? await this._personOrganizationService
-            .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer) : undefined;
-        const sponsorDetails = sponsor?.length ? await this._personOrganizationService
-            .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor) : undefined;
-
-        const eventToAdd = new EventDTO(name, description, {place: {entityId: locationId}}, sameAs,
-            {uri: url}, startDateTime, organizerDetails,
-            performerDetails, sponsorDetails);
-        const eventId = await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
-        console.log(`Created event with id: ${eventId}`)
-    }
-
-    private async _fetchEventIdsFromArtsData(source: string) {
-        const url = ArtsDataUrls.EVENTS + '&source=' + source;
-        const artsDataResponse = await SharedService.fetchUrl(url);
-        return artsDataResponse.data?.filter(event => event.id.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
-    }
-
     private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
-        const events = await this._fetchEventIdsFromArtsData(source);
+        const events = await this._fetchEventsFromArtsData(source);
         console.log("Event::  count:" + events.length);
         for (const event of events) {
             await this.addEventToFootlight(calendarId, token, event, footlightBaseUrl);
         }
         console.log('Successfully synchronised Events and linked entities.');
+    }
+
+    async syncEntities(token: string, calendarId: string, source: string, footlightBaseUrl: string) {
+        await this._syncEvents(calendarId, token, source, footlightBaseUrl);
+    }
+
+    async addEventToFootlight(calendarId: string, token: string, event: any, footlightBaseUrl: string) {
+        const {location: locations, performer, organizer, sponsor} = event;
+        const location = locations?.[0];
+        const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
+            footlightBaseUrl, location) : undefined;
+        const performers = performer?.length ? await this._personOrganizationService
+            .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer) : undefined;
+        const organizers = organizer?.length ? await this._personOrganizationService
+            .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer) : undefined;
+        const collaborators = sponsor?.length ? await this._personOrganizationService
+            .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor) : undefined;
+
+        const eventToAdd = event;
+        eventToAdd.locationId = locationId ? {place: {entityId: locationId}} : locationId;
+        eventToAdd.performers = performers;
+        eventToAdd.organizers = organizers;
+        eventToAdd.collaborators = collaborators;
+
+        const eventId = await this. _pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
+        console.log(`Created event with id: ${eventId}`)
+    }
+
+    private async _fetchEventsFromArtsData(source: string) {
+        const url = ArtsDataUrls.EVENTS + '&source=' + source;
+        const artsDataResponse = await SharedService.fetchUrl(url);
+        return artsDataResponse.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
     }
 
     private async _pushEventsToFootlight(calendarId: string, token: string, footlightBaseUrl: string,

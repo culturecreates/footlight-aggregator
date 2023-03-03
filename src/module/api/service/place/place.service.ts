@@ -7,13 +7,9 @@ export class PlaceService {
 
     async getPlaceDetailsFromArtsData(artsDataId: string) {
         const placeFetched = await SharedService.fetchFromArtsDataById(artsDataId, ArtsDataUrls.PLACE_BY_ID);
-        const {
-            id: artsDataUri, name, alternateName, description, disambiguatingDescription, url,
-            sameAs: sameAsValues, address
-        } = placeFetched;
-        const sameAs = sameAsValues ? sameAsValues.map(val => ({uri: val})) : [];
-        sameAs.push({uri: artsDataUri});
-        const placeToAdd = new PlaceDTO(name, alternateName, description, disambiguatingDescription, url, sameAs);
+        // const {address} = placeFetched;
+        //TODO create postal address - compare with same
+        const placeToAdd: PlaceDTO = placeFetched;
         return placeToAdd;
     }
 
@@ -27,8 +23,8 @@ export class PlaceService {
     async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string) {
         const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, '');
         const placeDetails = await this.getPlaceDetailsFromArtsData(artsDataId);
-        const pushResponse = await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails);
-        return pushResponse.id;
+        const pushResponse = placeDetails ? await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails) : undefined;
+        return placeDetails ? pushResponse.id : undefined;
     }
 
     // async syncPlaces(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
