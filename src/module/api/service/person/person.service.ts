@@ -12,9 +12,7 @@ export class PersonService {
     private async _pushPersonToFootlight(footlightUrl: string, calendarId: string, token: string,
                                          personToAdd: PersonDTO) {
         const url = footlightUrl + FootlightPaths.ADD_PEOPLE;
-        const response = await SharedService.addEntityToFootlight(calendarId, token, url, personToAdd);
-        //TODO if conflict, update;
-        return response;
+        return await SharedService.syncEntityWithFootlight(calendarId, token, url, personToAdd);
     }
 
     // async syncPeople(calendarId: string, token: string, source: string, footlightUrl: string) {

@@ -63,8 +63,7 @@ export class EventService {
     private async _pushEventsToFootlight(calendarId: string, token: string, footlightBaseUrl: string,
                                          eventToAdd: EventDTO) {
         const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
-        const postResponse = await SharedService.addEntityToFootlight(calendarId, token, url, eventToAdd);
-        //TODO if conflict, update;
+        const postResponse = await SharedService.syncEntityWithFootlight(calendarId, token, url, eventToAdd);
         return postResponse.id;
     }
 }

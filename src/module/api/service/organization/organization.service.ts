@@ -14,10 +14,7 @@ export class OrganizationService {
     private async _pushOrganizationToFootlight(footlightUrl: string, calendarId: string, token: string,
                                                organizationToAdd: OrganizationDTO) {
         const url = footlightUrl + FootlightPaths.ADD_ORGANIZATION;
-        const response = await SharedService.addEntityToFootlight(calendarId, token, url, organizationToAdd);
-        //TODO if conflict, update;
-        return response;
-
+        return await SharedService.syncEntityWithFootlight(calendarId, token, url, organizationToAdd);
     }
 
     // async syncOrganizations(calendarId: string, token: string, source: string, footlightUrl: string) {

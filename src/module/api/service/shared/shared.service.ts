@@ -5,8 +5,7 @@ export class SharedService {
     public static async fetchFromArtsDataById(id: string, baseUrl: string) {
         const url = baseUrl.replace(ArtsDataConstants.ARTS_DATA_ID.toString(), id);
         const artsDataResponse = await this.fetchUrl(url);
-        const entity = artsDataResponse.data?.[0];
-        return entity;
+        return artsDataResponse.data?.[0];
     }
 
     public static async fetchUrl(url: string) {
@@ -20,7 +19,7 @@ export class SharedService {
 
     public static async callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
         try {
-            const postResponse = await fetch(url, {
+            return await fetch(url, {
                 body: JSON.stringify(body),
                 headers: {
                     Accept: "*/*",
@@ -32,17 +31,33 @@ export class SharedService {
             }).then(data => {
                 return data.json();
             });
-            return postResponse;
         } catch (e) {
             console.log(e)
         }
     }
 
-    public static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
+    public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any) {
+        const addResponse = await this._addEntityToFootlight(calendarId, token, url, body);
+        if (addResponse.statusCode === 409) {
+            console.log('EntityExists! Trying to update the entity')
+            const existingEntityId = addResponse.error;
+            const updateResponse = await this._updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
+            if (updateResponse.statusCode === 202) {
+                return updateResponse
+            } else {
+                console.log(updateResponse);
+            }
+        }
+        return addResponse;
+    }
+
+    private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
         return await this.callFootlightAPI("POST", calendarId, token, url, body);
     }
 
-    public static async updateEntityInFootlight(calendarId: string, token: string, url: string, body: any) {
+    private static async _updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
+                                                  url: string, body: any) {
+        url = url + '/' + existingEntityId;
         return await this.callFootlightAPI("PATCH", calendarId, token, url, body);
     }
 
