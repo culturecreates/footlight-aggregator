@@ -1,6 +1,6 @@
 import {SharedService} from "../shared/shared.service";
 import {PlaceDTO} from "../../dto/place";
-import {Artsdata, ArtsDataUrls} from "../../constants/artsdata-urls";
+import {ArtsDataConstants, ArtsDataUrls} from "../../constants/artsdata-urls";
 import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.constants";
 
 export class PlaceService {
@@ -25,7 +25,7 @@ export class PlaceService {
     }
 
     async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string) {
-        const artsDataId = artsDataUri.replace(Artsdata.RESOURCE_URI_PREFIX, '');
+        const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, '');
         const placeDetails = await this.getPlaceDetailsFromArtsData(artsDataId);
         const pushResponse = await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails);
         return pushResponse.id;

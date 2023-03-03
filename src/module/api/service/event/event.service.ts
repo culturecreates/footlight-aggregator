@@ -2,7 +2,7 @@ import {PersonService} from "../person/person.service";
 import {Injectable} from "@nestjs/common";
 import {PlaceService} from "../place/place.service";
 import {OrganizationService} from "../organization/organization.service";
-import {Artsdata, ArtsDataUrls} from "../../constants/artsdata-urls";
+import {ArtsDataConstants, ArtsDataUrls} from "../../constants/artsdata-urls";
 import {SharedService} from "../shared";
 import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.constants";
 import {EventDTO} from "../../dto/event/event.dto";
@@ -51,7 +51,7 @@ export class EventService {
     private async _fetchEventIdsFromArtsData(source: string) {
         const url = ArtsDataUrls.EVENTS + '&source=' + source;
         const artsDataResponse = await SharedService.fetchUrl(url);
-        return artsDataResponse.data?.filter(event => event.id.startsWith(Artsdata.RESOURCE_URI_PREFIX));
+        return artsDataResponse.data?.filter(event => event.id.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
     }
 
     private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {

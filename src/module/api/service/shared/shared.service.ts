@@ -1,9 +1,9 @@
-import {Artsdata} from "../../constants/artsdata-urls";
+import {ArtsDataConstants} from "../../constants/artsdata-urls";
 
 export class SharedService {
 
     public static async fetchFromArtsDataById(id: string, baseUrl: string) {
-        const url = baseUrl.replace(Artsdata.ARTSDATA_ID.toString(), id);
+        const url = baseUrl.replace(ArtsDataConstants.ARTS_DATA_ID.toString(), id);
         const artsDataResponse = await this.fetchUrl(url);
         const entity = artsDataResponse.data?.[0];
         return entity;

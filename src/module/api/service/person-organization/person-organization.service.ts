@@ -1,5 +1,5 @@
 import {SharedService} from "../shared";
-import {Artsdata, ArtsDataUrls} from "../../constants/artsdata-urls";
+import {ArtsDataConstants, ArtsDataUrls} from "../../constants/artsdata-urls";
 import {PersonOrganizationType} from "../../enum/event.enum";
 import {PersonService} from "../person/person.service";
 import {OrganizationService} from "../organization/organization.service";
@@ -17,7 +17,7 @@ export class PersonOrganizationService {
                                                entityUris: string[]) {
         const personOrganizations = [];
         for (const uri of entityUris) {
-            const id = uri.replace(Artsdata.RESOURCE_URI_PREFIX, '');
+            const id = uri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, '');
             const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_ORGANIZATION_BY_ID);
             const {type} = entityFetched;
             let entityId: string;
