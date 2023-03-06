@@ -22,8 +22,7 @@ export class PlaceService {
     async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string) {
         const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, '');
         const placeDetails = await this.getPlaceDetailsFromArtsData(artsDataId);
-        const pushResponse = placeDetails ? await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails) : undefined;
-        return placeDetails ? pushResponse.id : undefined;
+        return placeDetails ? await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails) : undefined;
     }
 
     // async syncPlaces(calendarId: string, token: string, source: string, footlightBaseUrl: string) {

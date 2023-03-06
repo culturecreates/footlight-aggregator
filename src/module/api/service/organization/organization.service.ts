@@ -6,9 +6,7 @@ export class OrganizationService {
 
     async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string,
                                  organizationDetails: OrganizationDTO) {
-        const pushResponse =
-            await this._pushOrganizationToFootlight(footlightBaseUrl, calendarId, token, organizationDetails);
-        return pushResponse.id;
+        return await this._pushOrganizationToFootlight(footlightBaseUrl, calendarId, token, organizationDetails);
     }
 
     private async _pushOrganizationToFootlight(footlightUrl: string, calendarId: string, token: string,

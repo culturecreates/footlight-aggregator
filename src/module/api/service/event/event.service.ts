@@ -49,9 +49,10 @@ export class EventService {
         eventToAdd.performers = performers;
         eventToAdd.organizers = organizers;
         eventToAdd.collaborators = collaborators;
+        eventToAdd.image = undefined;
 
-        const eventId = await this. _pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
-        console.log(`Created event with id: ${eventId}`)
+        const eventId = await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
+        console.log(`Created/Modified event with id: ${eventId}`)
     }
 
     private async _fetchEventsFromArtsData(source: string) {
@@ -63,7 +64,8 @@ export class EventService {
     private async _pushEventsToFootlight(calendarId: string, token: string, footlightBaseUrl: string,
                                          eventToAdd: EventDTO) {
         const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
-        const postResponse = await SharedService.syncEntityWithFootlight(calendarId, token, url, eventToAdd);
-        return postResponse.id;
+        if (eventToAdd) {
+            return await SharedService.syncEntityWithFootlight(calendarId, token, url, eventToAdd);
+        }
     }
 }

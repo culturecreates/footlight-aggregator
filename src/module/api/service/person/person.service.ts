@@ -5,8 +5,7 @@ import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.const
 export class PersonService {
 
     async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, personDetails: PersonDTO) {
-        const pushResponse = await this._pushPersonToFootlight(footlightBaseUrl, calendarId, token, personDetails);
-        return pushResponse.id;
+        return await this._pushPersonToFootlight(footlightBaseUrl, calendarId, token, personDetails);
     }
 
     private async _pushPersonToFootlight(footlightUrl: string, calendarId: string, token: string,

@@ -1,4 +1,6 @@
 import {ArtsDataConstants} from "../../constants/artsdata-urls";
+import {Exception} from "../../helper/exception.helper";
+import {HttpStatus} from "@nestjs/common";
 
 export class SharedService {
 
@@ -18,8 +20,10 @@ export class SharedService {
     }
 
     public static async callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
+        let response;
+        let status: number;
         try {
-            return await fetch(url, {
+            response = await fetch(url, {
                 body: JSON.stringify(body),
                 headers: {
                     Accept: "*/*",
@@ -28,27 +32,37 @@ export class SharedService {
                     "Content-Type": "application/json"
                 },
                 method: method
-            }).then(data => {
-                return data.json();
+            }).then(response => {
+                status = response.status;
+                return response.json();
             });
         } catch (e) {
             console.log(e)
         }
+        return {status, response};
     }
 
     public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any) {
         const addResponse = await this._addEntityToFootlight(calendarId, token, url, body);
-        if (addResponse.statusCode === 409) {
-            console.log('EntityExists! Trying to update the entity')
-            const existingEntityId = addResponse.error;
+        const {status, response} = addResponse;
+        if (status === HttpStatus.CONFLICT) {
+            const existingEntityId = await response.error;
             const updateResponse = await this._updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
-            if (updateResponse.statusCode === 202) {
-                return updateResponse
+            if (updateResponse.status === 200) {
+                console.log(`Updated Entity (${existingEntityId}) in Footlight!`)
+                return existingEntityId
             } else {
-                console.log(updateResponse);
+                console.log('Updating Entity failed!')
             }
+        } else if (status === HttpStatus.OK) {
+            console.log(`Added Entity (${response.id}) to Footlight!`)
+        } else if (status === HttpStatus.UNAUTHORIZED) {
+            console.log("Unauthorized!")
+            Exception.unauthorized(response.message);
+        } else {
+            console.log("Some thing went wrong. ")
+            Exception.internalServerError("Some thing went wrong");
         }
-        return addResponse;
     }
 
     private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
