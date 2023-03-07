@@ -5,12 +5,14 @@ import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.const
 
 export class PlaceService {
 
-    async getPlaceDetailsFromArtsData(artsDataId: string) {
+    async getPlaceDetailsFromArtsData(calendarId: string, footlightBaseUrl: string, token: string, artsDataId: string) {
         const placeFetched = await SharedService.fetchFromArtsDataById(artsDataId, ArtsDataUrls.PLACE_BY_ID);
-        // const {address} = placeFetched;
-        //TODO create postal address - compare with same
+        const address = placeFetched.address;
+        const postalAddressUrl = footlightBaseUrl + FootlightPaths.ADD_POSTAL_ADDRESS;
+        const postalAddressId = await SharedService.syncEntityWithFootlight(calendarId, token, postalAddressUrl, address);
         const placeToAdd: PlaceDTO = placeFetched;
-        return placeToAdd;
+        placeToAdd.postalAddressId = postalAddressId ? {entityId: postalAddressId} : undefined;
+        return placeToAdd
     }
 
     private async _pushPlaceToFootlight(footlightBaseUrl: string, calendarId: string, token: string,
@@ -21,7 +23,7 @@ export class PlaceService {
 
     async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string) {
         const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, '');
-        const placeDetails = await this.getPlaceDetailsFromArtsData(artsDataId);
+        const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token, artsDataId);
         return placeDetails ? await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails) : undefined;
     }
 

@@ -19,7 +19,7 @@ export class SharedService {
         return artsDataResponse;
     }
 
-    public static async callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
+    private static async _callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
         let response;
         let status: number;
         try {
@@ -45,17 +45,18 @@ export class SharedService {
     public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any) {
         const addResponse = await this._addEntityToFootlight(calendarId, token, url, body);
         const {status, response} = addResponse;
-        if (status === HttpStatus.CONFLICT) {
+        if (status === HttpStatus.CREATED) {
+            console.log(`Added Entity (${response.id}) to Footlight!`);
+            return response.id;
+        } else if (status === HttpStatus.CONFLICT) {
             const existingEntityId = await response.error;
             const updateResponse = await this._updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
-            if (updateResponse.status === 200) {
+            if (updateResponse.status === HttpStatus.OK ) {
                 console.log(`Updated Entity (${existingEntityId}) in Footlight!`)
                 return existingEntityId
             } else {
                 console.log('Updating Entity failed!')
             }
-        } else if (status === HttpStatus.OK) {
-            console.log(`Added Entity (${response.id}) to Footlight!`)
         } else if (status === HttpStatus.UNAUTHORIZED) {
             console.log("Unauthorized!")
             Exception.unauthorized(response.message);
@@ -66,13 +67,13 @@ export class SharedService {
     }
 
     private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
-        return await this.callFootlightAPI("POST", calendarId, token, url, body);
+        return await this._callFootlightAPI("POST", calendarId, token, url, body);
     }
 
     private static async _updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
                                                   url: string, body: any) {
         url = url + '/' + existingEntityId;
-        return await this.callFootlightAPI("PATCH", calendarId, token, url, body);
+        return await this._callFootlightAPI("PATCH", calendarId, token, url, body);
     }
 
 }
