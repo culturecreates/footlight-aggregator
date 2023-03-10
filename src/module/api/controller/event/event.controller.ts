@@ -41,6 +41,6 @@ export class EventController {
         @Query("source") source?: string): Promise<ApiResponseEnum> {
         const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
         await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl);
-        return {status: ApiStatusCode.SUCCESS, message: 'Syncing people completed.'};
+        return {status: ApiStatusCode.SUCCESS, message: 'Syncing Events and related entities completed.'};
     }
 }

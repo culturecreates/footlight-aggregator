@@ -49,7 +49,8 @@ export class EventService {
         eventToAdd.performers = performers;
         eventToAdd.organizers = organizers;
         eventToAdd.collaborators = collaborators;
-        eventToAdd.image = undefined;
+        const imageUrl: string = eventToAdd.image
+        eventToAdd.image = {url: {uri: imageUrl}};
 
         const eventId = await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
         console.log(`Created/Modified event with id: ${eventId}`)
