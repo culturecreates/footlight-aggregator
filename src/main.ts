@@ -11,8 +11,9 @@ async function bootstrap() {
     const server = express();
     const app = await NestFactory.create(AppModule, new ExpressAdapter(server), {cors: true});
     const config = new DocumentBuilder()
-        .setTitle('Footlight ETL Tool')
-        .setDescription('The footlight etl tool')
+        .setTitle('Footlight Aggregator')
+        .setDescription('The footlight aggregator assists the footlight users to export events and related entities ' +
+            'from Artsdata to footlight')
         .addBearerAuth()
         .setVersion('v0.0.0')
         .build();
