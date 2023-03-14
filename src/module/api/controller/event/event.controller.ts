@@ -4,6 +4,7 @@ import {ApiStatusCode} from "../../enum/api-status-code.enum";
 import {ApiResponseEnum} from "../../enum/api-response.enum";
 import {EventService} from "../../service/event/event.service";
 import {AuthHeaderExtractor} from "../../helper/auth-header.helper";
+import {Request} from "express";
 
 @Controller('events')
 @ApiTags('Event APIs')
