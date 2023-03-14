@@ -1,6 +1,7 @@
 import {ArtsDataConstants} from "../../constants/artsdata-urls";
 import {Exception} from "../../helper/exception.helper";
 import {HttpStatus} from "@nestjs/common";
+import axios from "axios";
 
 export class SharedService {
 
@@ -11,35 +12,40 @@ export class SharedService {
     }
 
     public static async fetchUrl(url: string) {
-        let artsDataResponse;
-        artsDataResponse = await fetch(url)
-            .then(data => {
-                return data.json();
-            });
-        return artsDataResponse;
+        const artsDataResponse = await axios.get(url);
+        return artsDataResponse.data;
     }
 
     private static async _callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
-        let response;
-        let status: number;
-        try {
-            response = await fetch(url, {
-                body: JSON.stringify(body),
-                headers: {
-                    Accept: "*/*",
-                    Authorization: `Bearer ${token}`,
-                    "calendar-id": calendarId,
-                    "Content-Type": "application/json"
-                },
-                method: method
-            }).then(response => {
-                status = response.status;
-                return response.json();
+        const headers = {
+            Accept: "*/*",
+            Authorization: `Bearer ${token}`,
+            "calendar-id": calendarId,
+            "Content-Type": "application/json"
+        };
+        let responseData;
+        let responseStatus;
+        if (method === 'POST') {
+            await axios.post(url, body, {headers}).then(response => {
+                responseData = response.data;
+                responseStatus = response.status;
+            }).catch((reason) => {
+                responseData = reason.response.data;
+                responseStatus = reason.response.status;
             });
-        } catch (e) {
-            console.log(e)
+            return {status: responseStatus, response: responseData};
         }
-        return {status, response};
+        if (method === 'PATCH') {
+            await axios.patch(url, body, {headers}).then(response => {
+                responseData = response.data;
+                responseStatus = response.status;
+            }).catch((response) => {
+                responseData = response.data;
+                responseStatus = response.status;
+            });
+            return {status: responseStatus, response: responseData};
+        }
+        Exception.internalServerError('Method unsupported');
     }
 
     public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any) {
@@ -51,7 +57,7 @@ export class SharedService {
         } else if (status === HttpStatus.CONFLICT) {
             const existingEntityId = await response.error;
             const updateResponse = await this._updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
-            if (updateResponse.status === HttpStatus.OK ) {
+            if (updateResponse.status === HttpStatus.OK) {
                 console.log(`Updated Entity (${existingEntityId}) in Footlight!`)
                 return existingEntityId
             } else {
