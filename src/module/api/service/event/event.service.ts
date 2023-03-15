@@ -45,6 +45,7 @@ export class EventService {
             .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor) : undefined;
 
         const eventToAdd = event;
+        delete eventToAdd.location;
         eventToAdd.locationId = locationId ? {place: {entityId: locationId}} : locationId;
         eventToAdd.performers = performers;
         eventToAdd.organizers = organizers;

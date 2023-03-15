@@ -8,6 +8,7 @@ export class PlaceService {
     async getPlaceDetailsFromArtsData(calendarId: string, footlightBaseUrl: string, token: string, artsDataId: string) {
         const placeFetched = await SharedService.fetchFromArtsDataById(artsDataId, ArtsDataUrls.PLACE_BY_ID);
         const address = placeFetched.address;
+        delete placeFetched.address;
         const postalAddressUrl = footlightBaseUrl + FootlightPaths.ADD_POSTAL_ADDRESS;
         const postalAddressId = await SharedService.syncEntityWithFootlight(calendarId, token, postalAddressUrl, address);
         const placeToAdd: PlaceDTO = placeFetched;
