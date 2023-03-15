@@ -1,19 +1,20 @@
 import {Module} from "@nestjs/common";
-import {EventService} from "./service/event/event.service";
-import {OrganizationService} from "./service/organization/organization.service";
-import {PlaceService} from "./service/place/place.service";
-import {PersonService} from "./service/person/person.service";
-import {EventController} from "./controller/event/event.controller";
-import {AuthenticationController} from "./controller/authentication";
-import {AuthenticationService} from "./service/authentication";
-import {PersonOrganizationService} from "./service/person-organization/person-organization.service";
+import {
+    AuthenticationService,
+    EventService,
+    OrganizationService,
+    PersonOrganizationService,
+    PersonService,
+    PlaceService,
+    PostalAddressService
+} from "./service";
+import {AuthenticationController, EventController} from "./controller";
 
 @Module({
     imports: [],
     controllers: [AuthenticationController, EventController],
-    providers: [PersonOrganizationService, PersonService, PlaceService, OrganizationService, EventService,
-        AuthenticationService],
-    exports: []
+    providers: [PersonOrganizationService, EventService, PostalAddressService, PersonService, PlaceService,
+        OrganizationService, AuthenticationService]
 })
 export class ApiModule {
 }

@@ -3,13 +3,15 @@ import {ArtsDataConstants, ArtsDataUrls} from "../../constants/artsdata-urls";
 import {PersonOrganizationType} from "../../enum/event.enum";
 import {PersonService} from "../person/person.service";
 import {OrganizationService} from "../organization/organization.service";
-import {Injectable} from "@nestjs/common";
+import {Inject, Injectable} from "@nestjs/common";
 
 @Injectable()
 export class PersonOrganizationService {
 
     constructor(
+        @Inject(PersonService)
         private readonly _personService: PersonService,
+        @Inject(OrganizationService)
         private readonly _organizationService: OrganizationService) {
     }
 

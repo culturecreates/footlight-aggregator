@@ -1,4 +1,4 @@
-import {Controller, Put, Query, Req} from "@nestjs/common";
+import {Controller, Inject, Put, Query, Req} from "@nestjs/common";
 import {ApiBearerAuth, ApiOperation, ApiQuery, ApiTags} from "@nestjs/swagger";
 import {ApiStatusCode} from "../../enum/api-status-code.enum";
 import {ApiResponseEnum} from "../../enum/api-response.enum";
@@ -10,7 +10,8 @@ import {Request} from "express";
 @ApiTags('Event APIs')
 @ApiBearerAuth('bearer')
 export class EventController {
-    constructor(private readonly _eventService: EventService) {
+    constructor(@Inject(EventService)
+                private readonly _eventService: EventService) {
     }
 
     @Put('sync')

@@ -1,7 +1,9 @@
-import {SharedService} from "../shared/shared.service";
-import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.constants";
+import {SharedService} from "../../service";
+import {FootlightPaths} from "../../constants";
 import {PostalAddressDTO} from "../../dto";
+import {Injectable} from "@nestjs/common";
 
+@Injectable()
 export class PostalAddressService {
 
     private async _pushPostalAddressToFootlight(footlightBaseUrl: string, calendarId: string, token: string,
@@ -12,7 +14,7 @@ export class PostalAddressService {
 
     async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string,
                                  postalAddressToAdd: PostalAddressDTO) {
-        return await this._pushPostalAddressToFootlight(footlightBaseUrl, calendarId, token, postalAddressToAdd)
+        return await this._pushPostalAddressToFootlight(footlightBaseUrl, calendarId, token, postalAddressToAdd);
     }
 
 }

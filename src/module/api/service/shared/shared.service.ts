@@ -1,7 +1,8 @@
-import {ArtsDataConstants} from "../../constants/artsdata-urls";
-import {Exception} from "../../helper/exception.helper";
+import {ArtsDataConstants} from "../../constants";
+import {Exception} from "../../helper";
 import {HttpStatus} from "@nestjs/common";
 import axios from "axios";
+import {HttpMethodsEnum} from "../../enum";
 
 export class SharedService {
 
@@ -25,7 +26,7 @@ export class SharedService {
         };
         let responseData;
         let responseStatus;
-        if (method === 'POST') {
+        if (method === HttpMethodsEnum.POST) {
             await axios.post(url, body, {headers}).then(response => {
                 responseData = response.data;
                 responseStatus = response.status;
@@ -35,7 +36,7 @@ export class SharedService {
             });
             return {status: responseStatus, response: responseData};
         }
-        if (method === 'PATCH') {
+        if (method === HttpMethodsEnum.PATCH) {
             await axios.patch(url, body, {headers}).then(response => {
                 responseData = response.data;
                 responseStatus = response.status;
@@ -73,13 +74,13 @@ export class SharedService {
     }
 
     private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
-        return await this._callFootlightAPI("POST", calendarId, token, url, body);
+        return await this._callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
     }
 
     private static async _updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
                                                   url: string, body: any) {
         url = url + '/' + existingEntityId;
-        return await this._callFootlightAPI("PATCH", calendarId, token, url, body);
+        return await this._callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
     }
 
 }

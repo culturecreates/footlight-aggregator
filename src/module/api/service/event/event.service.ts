@@ -1,5 +1,5 @@
 import {PersonService} from "../person/person.service";
-import {Injectable} from "@nestjs/common";
+import {Inject, Injectable} from "@nestjs/common";
 import {PlaceService} from "../place/place.service";
 import {OrganizationService} from "../organization/organization.service";
 import {ArtsDataConstants, ArtsDataUrls} from "../../constants/artsdata-urls";
@@ -7,15 +7,22 @@ import {SharedService} from "../shared";
 import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.constants";
 import {EventDTO} from "../../dto/event/event.dto";
 import {PersonOrganizationService} from "../person-organization/person-organization.service";
+import {PostalAddressService} from "../postal-address";
 
 @Injectable()
 
 export class EventService {
 
     constructor(
+        @Inject(PersonService)
         private readonly _personService: PersonService,
+        @Inject(OrganizationService)
         private readonly _organizationService: OrganizationService,
+        @Inject(PostalAddressService)
+        private readonly _postalAddressService: PostalAddressService,
+        @Inject(PlaceService)
         private readonly _placeService: PlaceService,
+        @Inject(PersonOrganizationService)
         private readonly _personOrganizationService: PersonOrganizationService) {
     }
 
