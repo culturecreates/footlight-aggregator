@@ -4,21 +4,6 @@ import {ContactPointDTO} from "../contact-point";
 
 export class PlaceDTO {
 
-  constructor(
-      name: MultilingualString,
-      alternateName: MultilingualString[],
-      description: MultilingualString,
-      disambiguatingDescription: MultilingualString,
-      url: UriString,
-      sameAs: SameAs[]
-  ) {
-    this.name = name;
-    this.alternateName = alternateName;
-    this.description = description;
-    this.disambiguatingDescription = disambiguatingDescription;
-    this.url = url;
-    this.sameAs = sameAs;
-  }
   name: MultilingualString;
   description: MultilingualString;
   disambiguatingDescription: MultilingualString;

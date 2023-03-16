@@ -3,26 +3,13 @@ import {ContactPointDTO} from "../contact-point";
 import {PersonOrganizationWithRole} from "../../model/personOrganizationWithRole.model";
 import {EventStatus} from "../../enum/event.enum";
 import {Location} from "../../model/location.model";
+import {Image} from "../shared";
 
 export class EventDTO {
 
-    constructor(name: MultilingualString, description: MultilingualString, locationId: Location, sameAs: SameAs[], url: UriString,
-                startDateTime: Date, organizers: PersonOrganizationWithRole[], performers: PersonOrganizationWithRole[],
-                collaborators: PersonOrganizationWithRole[]) {
-        this.name = name;
-        this.description = description;
-        this.locationId = locationId;
-        this.sameAs = sameAs;
-        this.url = url;
-        this.startDateTime = startDateTime;
-        this.organizers = organizers;
-        this.performers = performers;
-        this.collaborators = collaborators;
-    }
-
     name: MultilingualString;
     description: MultilingualString;
-    // image?: Image;
+    image: Image;
     sameAs: SameAs[];
     locationId: Location;
     url: UriString;

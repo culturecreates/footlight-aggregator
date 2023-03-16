@@ -83,4 +83,11 @@ export class SharedService {
         return await this._callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
     }
 
+    static formatAlternateNames(alternateName: { fr: string[], en: string[] }) {
+        const alternateNames = [];
+        const {en, fr} = alternateName;
+        alternateNames.push(en.map(label => ({en: label})));
+        alternateNames.push(fr.map(label => ({fr: label})));
+        return alternateNames.length ? alternateNames : undefined;
+    }
 }

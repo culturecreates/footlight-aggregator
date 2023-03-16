@@ -21,6 +21,18 @@ export class PersonOrganizationService {
         for (const uri of entityUris) {
             const id = uri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, '');
             const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_ORGANIZATION_BY_ID);
+            const {image, logo, alternateName} = entityFetched;
+            if (image) {
+                const imageUrl = image
+                entityFetched.image = {url: {uri: imageUrl}};
+            }
+            if (logo) {
+                const logoUrl = logo
+                entityFetched.logo = {url: {uri: logoUrl}};
+            }
+            entityFetched.alternateName = alternateName?.length
+                ? SharedService.formatAlternateNames(alternateName) : undefined
+
             if (entityFetched) {
                 const {type} = entityFetched;
                 let entityId: string;

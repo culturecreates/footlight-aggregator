@@ -40,7 +40,7 @@ export class EventService {
     }
 
     async addEventToFootlight(calendarId: string, token: string, event: any, footlightBaseUrl: string) {
-        const {location: locations, performer, organizer, sponsor} = event;
+        const {location: locations, performer, organizer, sponsor, alternateName} = event;
         const location = locations?.[0];
         const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
             footlightBaseUrl, location) : undefined;
@@ -57,6 +57,7 @@ export class EventService {
         eventToAdd.performers = performers;
         eventToAdd.organizers = organizers;
         eventToAdd.collaborators = collaborators;
+        eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : undefined
         const imageUrl: string = eventToAdd.image
         eventToAdd.image = {url: {uri: imageUrl}};
 

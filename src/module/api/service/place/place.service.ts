@@ -12,11 +12,17 @@ export class PlaceService {
 
     async getPlaceDetailsFromArtsData(calendarId: string, footlightBaseUrl: string, token: string, artsDataId: string) {
         const placeFetched = await SharedService.fetchFromArtsDataById(artsDataId, ArtsDataUrls.PLACE_BY_ID);
-        const address = placeFetched.address;
+        if (!placeFetched) {
+            return undefined;
+        }
+        const {address, alternateName} = placeFetched
         delete placeFetched.address;
         const postalAddressId = await this._postalAddressService
             .getFootlightIdentifier(calendarId, token, footlightBaseUrl, address);
         const placeToAdd: PlaceDTO = placeFetched;
+        placeToAdd.alternateName = alternateName?.length
+            ? SharedService.formatAlternateNames(alternateName) : undefined
+
         placeToAdd.postalAddressId = postalAddressId ? {entityId: postalAddressId} : undefined;
         return placeToAdd
     }
@@ -30,7 +36,8 @@ export class PlaceService {
     async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string) {
         const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, '');
         const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token, artsDataId);
-        return placeDetails ? await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails) : undefined;
+        return placeDetails ? await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails)
+            : undefined;
     }
 
 }
