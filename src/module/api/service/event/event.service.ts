@@ -1,12 +1,8 @@
-import {PersonService} from "../person/person.service";
+import {OrganizationService, PersonOrganizationService, PersonService, PlaceService} from "../../service";
 import {Inject, Injectable} from "@nestjs/common";
-import {PlaceService} from "../place/place.service";
-import {OrganizationService} from "../organization/organization.service";
-import {ArtsDataConstants, ArtsDataUrls} from "../../constants/artsdata-urls";
+import {ArtsDataConstants, ArtsDataUrls, FootlightPaths} from "../../constants";
 import {SharedService} from "../shared";
-import {FootlightPaths} from "../../constants/artsdata-urls/footlight-urls.constants";
-import {EventDTO} from "../../dto/event/event.dto";
-import {PersonOrganizationService} from "../person-organization/person-organization.service";
+import {EventDTO} from "../../dto";
 import {PostalAddressService} from "../postal-address";
 
 @Injectable()
@@ -62,7 +58,7 @@ export class EventService {
         eventToAdd.image = {url: {uri: imageUrl}};
 
         const eventId = await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
-        console.log(`Created/Modified event with id: ${eventId}`)
+        console.log(`Synchronised event with id: ${eventId}`)
     }
 
     private async _fetchEventsFromArtsData(source: string) {

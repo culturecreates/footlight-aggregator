@@ -1,8 +1,7 @@
 import {SharedService} from "../shared";
-import {ArtsDataConstants, ArtsDataUrls} from "../../constants/artsdata-urls";
-import {PersonOrganizationType} from "../../enum/event.enum";
-import {PersonService} from "../person/person.service";
-import {OrganizationService} from "../organization/organization.service";
+import {ArtsDataConstants, ArtsDataUrls} from "../../constants";
+import {PersonOrganizationType} from "../../enum";
+import {OrganizationService, PersonService} from "../../service";
 import {Inject, Injectable} from "@nestjs/common";
 
 @Injectable()

@@ -1,7 +1,7 @@
 import {Body, Controller, Inject, Post} from '@nestjs/common';
 import {ApiOperation, ApiTags} from '@nestjs/swagger';
-import {AuthenticationService} from "../../service/authentication";
-import {UserLoginDTO} from "../../dto/authentication/authentication.dto";
+import {AuthenticationService} from "../../service";
+import {UserLoginDTO} from "../../dto";
 
 
 @ApiTags('Authentication API')

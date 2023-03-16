@@ -1,5 +1,5 @@
 import {Injectable} from "@nestjs/common";
-import {UserLoginDTO} from "../../dto/authentication/authentication.dto";
+import {UserLoginDTO} from "../../dto";
 import {SERVER} from "../../config";
 import axios from 'axios';
 
