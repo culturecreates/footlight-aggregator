@@ -1,5 +1,5 @@
 import {OrganizationService, PersonOrganizationService, PersonService, PlaceService} from "../../service";
-import {Inject, Injectable} from "@nestjs/common";
+import {forwardRef, Inject, Injectable} from "@nestjs/common";
 import {ArtsDataConstants, ArtsDataUrls, FootlightPaths} from "../../constants";
 import {SharedService} from "../shared";
 import {EventDTO} from "../../dto";
@@ -10,15 +10,15 @@ import {PostalAddressService} from "../postal-address";
 export class EventService {
 
     constructor(
-        @Inject(PersonService)
+        @Inject(forwardRef(() => PersonService))
         private readonly _personService: PersonService,
-        @Inject(OrganizationService)
+        @Inject(forwardRef(() => OrganizationService))
         private readonly _organizationService: OrganizationService,
-        @Inject(PostalAddressService)
+        @Inject(forwardRef(() => PostalAddressService))
         private readonly _postalAddressService: PostalAddressService,
-        @Inject(PlaceService)
+        @Inject(forwardRef(() => PlaceService))
         private readonly _placeService: PlaceService,
-        @Inject(PersonOrganizationService)
+        @Inject(forwardRef(() => PersonOrganizationService))
         private readonly _personOrganizationService: PersonOrganizationService) {
     }
 
