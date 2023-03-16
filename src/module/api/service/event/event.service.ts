@@ -62,7 +62,8 @@ export class EventService {
     }
 
     private async _fetchEventsFromArtsData(source: string) {
-        const url = ArtsDataUrls.EVENTS + '&source=' + source;
+        const limit = 300;
+        const url = ArtsDataUrls.EVENTS + '&source=' + source + '&limit=' + limit;
         const artsDataResponse = await SharedService.fetchUrl(url);
         return artsDataResponse.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
     }
