@@ -54,11 +54,10 @@ export class EventService {
         eventToAdd.organizers = organizers;
         eventToAdd.collaborators = collaborators;
         eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : undefined
-        const imageUrl: string = eventToAdd.image
-        eventToAdd.image = {url: {uri: imageUrl}};
+        
 
         const eventId = await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
-        console.log(`Synchronised event with id: ${eventId}`)
+        console.log(`Synchronised event with id: ${JSON.stringify(eventToAdd.sameAs)}`)
     }
 
     private async _fetchEventsFromArtsData(source: string) {

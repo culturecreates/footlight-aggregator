@@ -68,12 +68,13 @@ export class SharedService {
             console.log("Unauthorized!")
             Exception.unauthorized(response.message);
         } else {
-            console.log("Some thing went wrong. ")
+            console.log(`Some thing went wrong.${JSON.stringify(body)} `)
             Exception.internalServerError("Some thing went wrong");
         }
     }
 
     private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
+        console.log (`Adding ${url.split('/').slice(-1)}...`)
         return await this._callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
     }
 
