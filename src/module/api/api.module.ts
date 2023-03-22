@@ -9,12 +9,13 @@ import {
     PostalAddressService
 } from "./service";
 import {AuthenticationController, EventController} from "./controller";
+import {TaxonomyService} from "./service/taxonomy";
 
 @Module({
     imports: [],
     controllers: [AuthenticationController, EventController],
     providers: [PersonOrganizationService, EventService, PostalAddressService, PersonService, PlaceService,
-        OrganizationService, AuthenticationService]
+        OrganizationService, AuthenticationService,TaxonomyService]
 })
 export class ApiModule {
 }

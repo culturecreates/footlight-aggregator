@@ -4,6 +4,8 @@ import {ArtsDataConstants, ArtsDataUrls, FootlightPaths} from "../../constants";
 import {SharedService} from "../shared";
 import {EventDTO} from "../../dto";
 import {PostalAddressService} from "../postal-address";
+import {TaxonomyService} from "../taxonomy";
+import {MultilingualString} from "../../model";
 
 @Injectable()
 
@@ -19,14 +21,30 @@ export class EventService {
         @Inject(forwardRef(() => PlaceService))
         private readonly _placeService: PlaceService,
         @Inject(forwardRef(() => PersonOrganizationService))
-        private readonly _personOrganizationService: PersonOrganizationService) {
+        private readonly _personOrganizationService: PersonOrganizationService,
+        @Inject(forwardRef(() => TaxonomyService))
+        private readonly _taxonomyService: TaxonomyService) {
     }
+
+    private taxonomies;
+    private eventTypeConceptMap;
+    private audienceConceptMap;
 
     private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
         const events = await this._fetchEventsFromArtsData(source);
-        console.log("Event::  count:" + events.length);
+        console.log("Event count:" + events.length);
+
+        this.taxonomies = await this._taxonomyService.getTaxonomy(calendarId, token, footlightBaseUrl, "EVENT");
+
+        if (this.taxonomies) {
+            this._extractEventTypeAndAudienceType(this.taxonomies);
+        }
         for (const event of events) {
-            await this.addEventToFootlight(calendarId, token, event, footlightBaseUrl);
+            try {
+                await this.addEventToFootlight(calendarId, token, event, footlightBaseUrl);
+            } catch (e) {
+                console.log(`Error while adding Event ${event.url}` + e);
+            }
         }
         console.log('Successfully synchronised Events and linked entities.');
     }
@@ -36,7 +54,7 @@ export class EventService {
     }
 
     async addEventToFootlight(calendarId: string, token: string, event: any, footlightBaseUrl: string) {
-        const {location: locations, performer, organizer, sponsor, alternateName} = event;
+        const {location: locations, performer, organizer, sponsor, alternateName, keywords, audience} = event;
         const location = locations?.[0];
         const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
             footlightBaseUrl, location) : undefined;
@@ -53,10 +71,10 @@ export class EventService {
         eventToAdd.performers = performers;
         eventToAdd.organizers = organizers;
         eventToAdd.collaborators = collaborators;
-        eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : undefined
-        
-
-        const eventId = await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
+        eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
+        eventToAdd.additionalType = keywords?.length ? this._findMatchingConcepts(keywords, this.eventTypeConceptMap) : [];
+        eventToAdd.audience = audience?.length ? this._findMatchingConcepts(audience, this.audienceConceptMap) : [];
+        await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
         console.log(`Synchronised event with id: ${JSON.stringify(eventToAdd.sameAs)}`)
     }
 
@@ -73,5 +91,24 @@ export class EventService {
         if (eventToAdd) {
             return await SharedService.syncEntityWithFootlight(calendarId, token, url, eventToAdd);
         }
+    }
+
+    private _extractEventTypeAndAudienceType(taxonomies) {
+        const eventTypeTaxonomy = taxonomies.find(taxonomy => taxonomy.mappedToField === 'EventType');
+        this.eventTypeConceptMap = eventTypeTaxonomy?.concept?.map(concept => {
+            return {id: concept.id, name: concept.name}
+        });
+        const audienceTaxonomy = taxonomies.find(taxonomy => taxonomy.mappedToField === 'Audience');
+        this.audienceConceptMap = audienceTaxonomy?.concept?.map(concept => {
+            return {id: concept.id, name: concept.name}
+        });
+    }
+
+    private _findMatchingConcepts(keywords: string[], conceptMap: { id: string, name: MultilingualString }[]) {
+        const matchingConcepts = conceptMap
+            ?.filter(concept => keywords.includes(concept.name.en) || keywords.includes(concept.name.fr))
+        return matchingConcepts?.map(concept => {
+            return {entityId: concept.id}
+        });
     }
 }

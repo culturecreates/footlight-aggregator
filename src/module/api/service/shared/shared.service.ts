@@ -12,8 +12,8 @@ export class SharedService {
         return artsDataResponse.data?.[0];
     }
 
-    public static async fetchUrl(url: string) {
-        const artsDataResponse = await axios.get(url);
+    public static async fetchUrl(url: string, headers?: any) {
+        const artsDataResponse = await axios.get(url,{headers});
         return artsDataResponse.data;
     }
 
@@ -74,7 +74,7 @@ export class SharedService {
     }
 
     private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
-        console.log (`Adding ${url.split('/').slice(-1)}...`)
+        console.log(`Adding ${url.split('/').slice(-1)}...`)
         return await this._callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
     }
 
