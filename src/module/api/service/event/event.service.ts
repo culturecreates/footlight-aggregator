@@ -31,7 +31,7 @@ export class EventService {
     private audienceConceptMap;
 
     private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
-        const events = await this._fetchEventsFromArtsData(source);
+        let events = await this._fetchEventsFromArtsData(source);
         console.log("Event count:" + events.length);
 
         this.taxonomies = await this._taxonomyService.getTaxonomy(calendarId, token, footlightBaseUrl, "EVENT");
@@ -39,6 +39,7 @@ export class EventService {
         if (this.taxonomies) {
             this._extractEventTypeAndAudienceType(this.taxonomies);
         }
+        events = events.filter(event => event.offers);
         for (const event of events) {
             try {
                 await this.addEventToFootlight(calendarId, token, event, footlightBaseUrl);
@@ -54,7 +55,7 @@ export class EventService {
     }
 
     async addEventToFootlight(calendarId: string, token: string, event: any, footlightBaseUrl: string) {
-        const {location: locations, performer, organizer, sponsor, alternateName, keywords, audience} = event;
+        const {location: locations, performer, organizer, sponsor, alternateName, keywords, audience, offers} = event;
         const location = locations?.[0];
         const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
             footlightBaseUrl, location) : undefined;
@@ -64,6 +65,7 @@ export class EventService {
             .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer) : undefined;
         const collaborators = sponsor?.length ? await this._personOrganizationService
             .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor) : undefined;
+        delete event?.image?.uri;
 
         const eventToAdd = event;
         delete eventToAdd.location;
@@ -74,6 +76,8 @@ export class EventService {
         eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
         eventToAdd.additionalType = keywords?.length ? this._findMatchingConcepts(keywords, this.eventTypeConceptMap) : [];
         eventToAdd.audience = audience?.length ? this._findMatchingConcepts(audience, this.audienceConceptMap) : [];
+        //TODO remove the line below once offer is changed to offerConfiguration model
+        eventToAdd.offerConfiguration = {url: {uri: offers.url}, type: offers.type};
         await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
         console.log(`Synchronised event with id: ${JSON.stringify(eventToAdd.sameAs)}`)
     }
