@@ -13,7 +13,7 @@ export class SharedService {
     }
 
     public static async fetchUrl(url: string, headers?: any) {
-        const artsDataResponse = await axios.get(url,{headers});
+        const artsDataResponse = await axios.get(url, {headers});
         return artsDataResponse.data;
     }
 
@@ -60,10 +60,10 @@ export class SharedService {
             const updateResponse = await this._updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
             if (updateResponse.status === HttpStatus.OK) {
                 console.log(`Updated Entity (${existingEntityId}) in Footlight!`)
-                return existingEntityId
             } else {
                 console.log('Updating Entity failed!')
             }
+            return existingEntityId;
         } else if (status === HttpStatus.UNAUTHORIZED) {
             console.log("Unauthorized!")
             Exception.unauthorized(response.message);

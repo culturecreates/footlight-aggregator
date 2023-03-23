@@ -31,7 +31,7 @@ export class EventService {
     private audienceConceptMap;
 
     private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
-        let events = await this._fetchEventsFromArtsData(source);
+        const events = await this._fetchEventsFromArtsData(source);
         console.log("Event count:" + events.length);
 
         this.taxonomies = await this._taxonomyService.getTaxonomy(calendarId, token, footlightBaseUrl, "EVENT");
@@ -39,7 +39,6 @@ export class EventService {
         if (this.taxonomies) {
             this._extractEventTypeAndAudienceType(this.taxonomies);
         }
-        events = events.filter(event => event.offers);
         for (const event of events) {
             try {
                 await this.addEventToFootlight(calendarId, token, event, footlightBaseUrl);
@@ -74,10 +73,10 @@ export class EventService {
         eventToAdd.organizers = organizers;
         eventToAdd.collaborators = collaborators;
         eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
-        eventToAdd.additionalType = keywords?.length ? this._findMatchingConcepts(keywords, this.eventTypeConceptMap) : [];
-        eventToAdd.audience = audience?.length ? this._findMatchingConcepts(audience, this.audienceConceptMap) : [];
+        eventToAdd.additionalType = this._findMatchingConcepts(keywords, this.eventTypeConceptMap);
+        eventToAdd.audience = this._findMatchingConcepts(audience, this.audienceConceptMap);
         //TODO remove the line below once offer is changed to offerConfiguration model
-        eventToAdd.offerConfiguration = {url: {uri: offers.url}, type: offers.type};
+        // eventToAdd.offerConfiguration = {url: {uri: offers.url}, type: offers.type};
         await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
         console.log(`Synchronised event with id: ${JSON.stringify(eventToAdd.sameAs)}`)
     }
@@ -109,8 +108,15 @@ export class EventService {
     }
 
     private _findMatchingConcepts(keywords: string[], conceptMap: { id: string, name: MultilingualString }[]) {
-        const matchingConcepts = conceptMap
-            ?.filter(concept => keywords.includes(concept.name.en) || keywords.includes(concept.name.fr))
+        let matchingConcepts;
+
+        matchingConcepts = keywords?.length ? conceptMap
+            ?.filter(concept => keywords?.includes(concept.name.en) || keywords?.includes(concept.name.fr)) : [];
+        if (!matchingConcepts?.length) {
+            matchingConcepts = conceptMap
+                ?.filter(concept => 'not specified' === concept.name.en.toLowerCase() ||
+                    'indéterminé' === concept.name.fr.toLowerCase())
+        }
         return matchingConcepts?.map(concept => {
             return {entityId: concept.id}
         });
