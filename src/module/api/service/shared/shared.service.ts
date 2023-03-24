@@ -31,8 +31,8 @@ export class SharedService {
                 responseData = response.data;
                 responseStatus = response.status;
             }).catch((reason) => {
-                responseData = reason.response.data;
-                responseStatus = reason.response.status;
+                responseData = reason.response?.data;
+                responseStatus = reason.response?.status;
             });
             return {status: responseStatus, response: responseData};
         }

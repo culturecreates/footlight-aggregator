@@ -8,7 +8,11 @@ export class TaxonomyService {
     async getTaxonomy(calendarId: string, token: string, footlightBaseUrl: string, className: string) {
         try {
             const taxonomyData = await this._fetchTaxonomyAndConcepts(footlightBaseUrl, calendarId, token, className);
-            return taxonomyData.data;
+            const taxonomies = taxonomyData.data;
+            for (const taxonomy of taxonomies) {
+                taxonomy.concept = this._flattenConcepts(taxonomy.concept);
+            }
+            return taxonomies;
         } catch (e) {
             console.log('Error while fetching taxonomies');
         }
@@ -30,4 +34,14 @@ export class TaxonomyService {
         return await SharedService.fetchUrl(url, headers);
     }
 
+    private _flattenConcepts(concepts: any[]) {
+
+        concepts.forEach((concept) => {
+            const children = concept.children;
+            if (concept.children?.length) {
+                concepts.push(...this._flattenConcepts(children));
+            }
+        });
+        return concepts;
+    }
 }
