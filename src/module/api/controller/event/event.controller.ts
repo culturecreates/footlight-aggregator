@@ -1,4 +1,4 @@
-import {Controller, Inject, Put, Query, Req} from "@nestjs/common";
+import {Controller, Inject, Param, Put, Query, Req} from "@nestjs/common";
 import {ApiBearerAuth, ApiOperation, ApiQuery, ApiTags} from "@nestjs/swagger";
 import {ApiResponseEnum, ApiStatusCode} from "../../enum";
 import {EventService} from "../../service";
@@ -35,7 +35,7 @@ export class EventController {
         explode: true,
         example: 'https://staging.api.cms.footlight.io'
     })
-    async getEvent(
+    async syncEvents(
         @Req() request: Request,
         @Query("calendar-id") calendarId?: string,
         @Query("footlight-base-url") footlightBaseUrl?: string,
@@ -43,5 +43,39 @@ export class EventController {
         const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
         await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl);
         return {status: ApiStatusCode.SUCCESS, message: 'Syncing Events and related entities completed.'};
+    }
+
+
+    @Put(':id/sync')
+    @ApiOperation({summary: 'Re-sync an event by id.'})
+    @ApiQuery({
+        name: "calendar-id",
+        description: "**calendar-id (The calendar identifier)**",
+        required: true,
+        explode: true
+    })
+    @ApiQuery({
+        name: "source",
+        description: "**source (Website graphs used by Tout Culture)**",
+        required: true,
+        explode: true,
+        example: 'http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca'
+    })
+    @ApiQuery({
+        name: "footlight-base-url",
+        description: "**footlight base url (Base url)**",
+        required: true,
+        explode: true,
+        example: 'https://staging.api.cms.footlight.io'
+    })
+    async syncEventById(
+        @Req() request: Request,
+        @Param("id") id: string,
+        @Query("calendar-id") calendarId?: string,
+        @Query("footlight-base-url") footlightBaseUrl?: string,
+        @Query("source") source?: string): Promise<ApiResponseEnum> {
+        const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
+        await this._eventService.syncEventById(token, calendarId, id, source, footlightBaseUrl);
+        return {status: ApiStatusCode.SUCCESS, message: 'Resyncing event completed..'};
     }
 }

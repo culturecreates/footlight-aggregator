@@ -1,4 +1,4 @@
-import {ArtsDataConstants} from "../../constants";
+import {ArtsDataConstants, FootlightPaths} from "../../constants";
 import {Exception} from "../../helper";
 import {HttpStatus} from "@nestjs/common";
 import axios from "axios";
@@ -9,12 +9,12 @@ export class SharedService {
     public static async fetchFromArtsDataById(id: string, baseUrl: string) {
         const url = baseUrl.replace(ArtsDataConstants.ARTS_DATA_ID.toString(), id);
         const artsDataResponse = await this.fetchUrl(url);
-        return artsDataResponse.data?.[0];
+        return artsDataResponse.data.data?.[0];
     }
 
     public static async fetchUrl(url: string, headers?: any) {
         const artsDataResponse = await axios.get(url, {headers});
-        return artsDataResponse.data;
+        return artsDataResponse;
     }
 
     private static async _callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
@@ -47,6 +47,19 @@ export class SharedService {
             return {status: responseStatus, response: responseData};
         }
         Exception.internalServerError('Method unsupported');
+    }
+
+    public static async patchEventInFootlight(calendarId: string, token: string, footlightBaseUrl: string,
+                                              eventId: string, dto: any) {
+
+        const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
+        const updateResponse = await this._updateEntityInFootlight(calendarId, token, eventId, url, dto);
+        if (updateResponse.status === HttpStatus.OK) {
+            console.log(`The event successfully synchronised.`);
+            return {message: "The event successfully synchronised."}
+        } else {
+            Exception.badRequest('Updating Entity failed!');
+        }
     }
 
     public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any) {

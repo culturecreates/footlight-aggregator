@@ -31,7 +31,8 @@ export class TaxonomyService {
             "calendar-id": calendarId,
             "Content-Type": "application/json"
         };
-        return await SharedService.fetchUrl(url, headers);
+        const taxonomyResponse = await SharedService.fetchUrl(url, headers);
+        return taxonomyResponse.data;
     }
 
     private _flattenConcepts(concepts: any[]) {

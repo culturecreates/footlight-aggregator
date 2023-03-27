@@ -13,4 +13,8 @@ export class Exception {
         throw new InternalServerErrorException(msg);
     }
 
+    static badRequest(msg: string) {
+        throw new BadRequestException(msg);
+    }
+
 }
