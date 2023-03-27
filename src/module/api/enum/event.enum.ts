@@ -8,3 +8,8 @@ export enum PersonOrganizationType {
     PERSON = "Person",
     ORGANIZATION = "Organization"
 }
+
+export enum OfferCategory {
+    FREE = 'FREE',
+    PAYING = 'PAYING'
+}

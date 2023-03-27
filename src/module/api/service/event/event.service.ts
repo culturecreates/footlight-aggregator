@@ -6,6 +6,7 @@ import {EventDTO} from "../../dto";
 import {PostalAddressService} from "../postal-address";
 import {TaxonomyService} from "../taxonomy";
 import {MultilingualString} from "../../model";
+import {OfferCategory} from "../../enum";
 
 @Injectable()
 
@@ -54,7 +55,16 @@ export class EventService {
     }
 
     async addEventToFootlight(calendarId: string, token: string, event: any, footlightBaseUrl: string) {
-        const {location: locations, performer, organizer, sponsor, alternateName, keywords, audience, offers} = event;
+        const {
+            location: locations,
+            performer,
+            organizer,
+            sponsor,
+            alternateName,
+            keywords,
+            audience,
+            offerConfiguration
+        } = event;
         const location = locations?.[0];
         const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
             footlightBaseUrl, location) : undefined;
@@ -75,8 +85,7 @@ export class EventService {
         eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
         eventToAdd.additionalType = this._findMatchingConcepts(keywords, this.eventTypeConceptMap);
         eventToAdd.audience = this._findMatchingConcepts(audience, this.audienceConceptMap);
-        //TODO remove the line below once offer is changed to offerConfiguration model
-        // eventToAdd.offerConfiguration = {url: {uri: offers.url}, type: offers.type};
+        eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
         await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventToAdd);
         console.log(`Synchronised event with id: ${JSON.stringify(eventToAdd.sameAs)}`)
     }
@@ -105,6 +114,20 @@ export class EventService {
         this.audienceConceptMap = audienceTaxonomy?.concept?.map(concept => {
             return {id: concept.id, name: concept.name}
         });
+    }
+
+    private _formatOfferConfiguration(offerConfiguration) {
+        const {url, price, type} = offerConfiguration;
+        let name;
+        if (price !== '0') {
+            name = {en: price, fr: price};
+        }
+        return {
+            url: {uri: url},
+            category: price === '0' ? OfferCategory.FREE : OfferCategory.PAYING,
+            name: price !== '0' ? name : undefined,
+            type
+        }
     }
 
     private _findMatchingConcepts(keywords: string[], conceptMap: { id: string, name: MultilingualString }[]) {
