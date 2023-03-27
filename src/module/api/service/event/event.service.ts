@@ -33,14 +33,16 @@ export class EventService {
   private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
     const events = await this._fetchEventsFromArtsData(source);
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
-    console.log("Fetched Event Count :" + events.length);
+    const fetchedEventCount = events.length;
+    let syncCount = 0;
     for (const event of events) {
+      syncCount++;
       try {
         const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl);
         await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted);
-        console.log(`Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
+        console.log(`(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
       } catch (e) {
-        console.log(`Error while adding Event ${event.url}` + e);
+        console.log(`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
       }
     }
     console.log("Successfully synchronised Events and linked entities.");
@@ -72,9 +74,9 @@ export class EventService {
       .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor) : undefined;
     delete event?.image?.uri;
     const formattedKeywords = [];
-    keywords.forEach(keyword => {
+    keywords?.forEach(keyword => {
       if (keyword.startsWith("[")) {
-        formattedKeywords.push(JSON.parse(keyword));
+        formattedKeywords.push(...JSON.parse(keyword));
       } else {
         formattedKeywords.push(keyword);
       }

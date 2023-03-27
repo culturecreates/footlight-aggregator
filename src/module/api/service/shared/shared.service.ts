@@ -55,7 +55,7 @@ export class SharedService {
         const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
         const updateResponse = await this._updateEntityInFootlight(calendarId, token, eventId, url, dto);
         if (updateResponse.status === HttpStatus.OK) {
-            console.log(`The event successfully synchronised.`);
+            console.log(`\tThe event successfully synchronised.`);
             return {message: "The event successfully synchronised."}
         } else {
             Exception.badRequest('Updating Entity failed!');
@@ -66,33 +66,34 @@ export class SharedService {
         const addResponse = await this._addEntityToFootlight(calendarId, token, url, body);
         const {status, response} = addResponse;
         if (status === HttpStatus.CREATED) {
-            console.log(`Added Entity (${response.id}) to Footlight!`);
+            console.log(`\tAdded Entity (${response.id}) to Footlight!`);
             return response.id;
         } else if (status === HttpStatus.CONFLICT) {
             const existingEntityId = await response.error;
             const updateResponse = await this._updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
             if (updateResponse.status === HttpStatus.OK) {
-                console.log(`Updated Entity (${existingEntityId}) in Footlight!`)
+                console.log(`\tUpdated Entity (${existingEntityId}) in Footlight!`)
             } else {
-                console.log('Updating Entity failed!')
+                console.log('\tUpdating Entity failed!')
             }
             return existingEntityId;
         } else if (status === HttpStatus.UNAUTHORIZED) {
-            console.log("Unauthorized!")
+            console.log("\tUnauthorized!")
             Exception.unauthorized(response.message);
         } else {
-            console.log(`Some thing went wrong.${JSON.stringify(body)} `)
+            console.log(`\tSome thing went wrong.${JSON.stringify(body)} `)
             Exception.internalServerError("Some thing went wrong");
         }
     }
 
     private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
-        console.log(`Adding ${url.split('/').slice(-1)}...`)
+        console.log(`\tAdding ${url.split('/').slice(-1)}...`)
         return await this._callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
     }
 
     private static async _updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
                                                   url: string, body: any) {
+        console.log(`\tUpdating ${url.split('/').slice(-1)}...`)
         url = url + '/' + existingEntityId;
         return await this._callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
     }
