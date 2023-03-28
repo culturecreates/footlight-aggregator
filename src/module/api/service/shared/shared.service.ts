@@ -1,108 +1,130 @@
-import {ArtsDataConstants, FootlightPaths} from "../../constants";
-import {Exception} from "../../helper";
-import {HttpStatus} from "@nestjs/common";
+import { ArtsDataConstants } from "../../constants";
+import { Exception } from "../../helper";
+import { HttpStatus } from "@nestjs/common";
 import axios from "axios";
-import {HttpMethodsEnum} from "../../enum";
+import { HttpMethodsEnum } from "../../enum";
+import { FootlightPaths } from "../../constants/footlight-urls";
 
 export class SharedService {
 
-    public static async fetchFromArtsDataById(id: string, baseUrl: string) {
-        const url = baseUrl.replace(ArtsDataConstants.ARTS_DATA_ID.toString(), id);
-        const artsDataResponse = await this.fetchUrl(url);
-        return artsDataResponse.data.data?.[0];
+  public static async fetchFromArtsDataById(id: string, baseUrl: string) {
+    const url = baseUrl.replace(ArtsDataConstants.ARTS_DATA_ID.toString(), id);
+    const artsDataResponse = await this.fetchUrl(url);
+    return artsDataResponse.data.data?.[0];
+  }
+
+  public static async fetchUrl(url: string, headers?: any) {
+    return await axios.get(url, { headers });
+  }
+
+  private static async _callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
+    const headers = this.createHeaders(token, calendarId);
+    let responseData;
+    let responseStatus;
+    if (method === HttpMethodsEnum.POST) {
+      await axios.post(url, body, { headers }).then(response => {
+        responseData = response.data;
+        responseStatus = response.status;
+      }).catch((reason) => {
+        responseData = reason.response?.data;
+        responseStatus = reason.response?.status;
+      });
+      return { status: responseStatus, response: responseData };
     }
-
-    public static async fetchUrl(url: string, headers?: any) {
-        const artsDataResponse = await axios.get(url, {headers});
-        return artsDataResponse;
+    if (method === HttpMethodsEnum.PATCH) {
+      await axios.patch(url, body, { headers }).then(response => {
+        responseData = response.data;
+        responseStatus = response.status;
+      }).catch((response) => {
+        responseData = response.data;
+        responseStatus = response.status;
+      });
+      return { status: responseStatus, response: responseData };
     }
+    Exception.internalServerError("Method unsupported");
+  }
 
-    private static async _callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
-        const headers = {
-            Accept: "*/*",
-            Authorization: `Bearer ${token}`,
-            "calendar-id": calendarId,
-            "Content-Type": "application/json"
-        };
-        let responseData;
-        let responseStatus;
-        if (method === HttpMethodsEnum.POST) {
-            await axios.post(url, body, {headers}).then(response => {
-                responseData = response.data;
-                responseStatus = response.status;
-            }).catch((reason) => {
-                responseData = reason.response?.data;
-                responseStatus = reason.response?.status;
-            });
-            return {status: responseStatus, response: responseData};
-        }
-        if (method === HttpMethodsEnum.PATCH) {
-            await axios.patch(url, body, {headers}).then(response => {
-                responseData = response.data;
-                responseStatus = response.status;
-            }).catch((response) => {
-                responseData = response.data;
-                responseStatus = response.status;
-            });
-            return {status: responseStatus, response: responseData};
-        }
-        Exception.internalServerError('Method unsupported');
+  public static async patchEventInFootlight(calendarId: string, token: string, footlightBaseUrl: string,
+                                            eventId: string, dto: any) {
+
+    const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
+    const updateResponse = await this._updateEntityInFootlight(calendarId, token, eventId, url, dto);
+    if (updateResponse.status === HttpStatus.OK) {
+      console.log(`\tThe event successfully synchronised.`);
+      return { message: "The event successfully synchronised." };
+    } else {
+      Exception.badRequest("Updating Entity failed!");
     }
+  }
 
-    public static async patchEventInFootlight(calendarId: string, token: string, footlightBaseUrl: string,
-                                              eventId: string, dto: any) {
-
-        const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
-        const updateResponse = await this._updateEntityInFootlight(calendarId, token, eventId, url, dto);
+  public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any, currentUserId: string) {
+    const addResponse = await this._addEntityToFootlight(calendarId, token, url, body);
+    const { status, response } = addResponse;
+    if (status === HttpStatus.CREATED) {
+      console.log(`\tAdded Entity (${response.id} : ${body.uri}) to Footlight!`);
+      return response.id;
+    } else if (status === HttpStatus.CONFLICT) {
+      const existingEntityId = await response.error;
+      const existingEntity = await this._getEntityFromFootlight(calendarId, token, existingEntityId, url);
+      if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
+        const updateResponse = await this._updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
         if (updateResponse.status === HttpStatus.OK) {
-            console.log(`\tThe event successfully synchronised.`);
-            return {message: "The event successfully synchronised."}
+          console.log(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
         } else {
-            Exception.badRequest('Updating Entity failed!');
+          console.log("\tUpdating Entity failed!");
         }
-    }
+      } else {
+        console.log("\tEntity cannot be modified. Since this entity is updated latest by a different user.");
+      }
 
-    public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any) {
-        const addResponse = await this._addEntityToFootlight(calendarId, token, url, body);
-        const {status, response} = addResponse;
-        if (status === HttpStatus.CREATED) {
-            console.log(`\tAdded Entity (${response.id}) to Footlight!`);
-            return response.id;
-        } else if (status === HttpStatus.CONFLICT) {
-            const existingEntityId = await response.error;
-            const updateResponse = await this._updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
-            if (updateResponse.status === HttpStatus.OK) {
-                console.log(`\tUpdated Entity (${existingEntityId}) in Footlight!`)
-            } else {
-                console.log('\tUpdating Entity failed!')
-            }
-            return existingEntityId;
-        } else if (status === HttpStatus.UNAUTHORIZED) {
-            console.log("\tUnauthorized!")
-            Exception.unauthorized(response.message);
-        } else {
-            console.log(`\tSome thing went wrong.${JSON.stringify(body)} `)
-            Exception.internalServerError("Some thing went wrong");
-        }
+      return existingEntityId;
+    } else if (status === HttpStatus.UNAUTHORIZED) {
+      console.log("\tUnauthorized!");
+      Exception.unauthorized(response.message);
+    } else {
+      console.log(`\tSome thing went wrong.${JSON.stringify(body)} `);
+      Exception.internalServerError("Some thing went wrong");
     }
+  }
 
-    private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
-        console.log(`\tAdding ${url.split('/').slice(-1)}...`)
-        return await this._callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
-    }
+  private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
+    console.log(`\tAdding ${url.split("/").slice(-1)}...`);
+    return await this._callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
+  }
 
-    private static async _updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
-                                                  url: string, body: any) {
-        console.log(`\tUpdating ${url.split('/').slice(-1)}...`)
-        url = url + '/' + existingEntityId;
-        return await this._callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
-    }
+  private static async _updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
+                                                url: string, body: any) {
+    console.log(`\tUpdating ${url.split("/").slice(-1)}...`);
+    url = url + "/" + existingEntityId;
+    return await this._callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
+  }
 
-    static formatAlternateNames(alternateName: { fr: string[], en: string[] }) {
-        const alternateNames = [];
-        const {en, fr} = alternateName;
-        alternateNames.push(en.map(label => ({en: label})));
-        alternateNames.push(fr.map(label => ({fr: label})));
-        return alternateNames.length ? alternateNames : undefined;
+  private static async _getEntityFromFootlight(calendarId: string, token: string, existingEntityId: any, url: string) {
+    console.log(`\tFetching entity ${url.split("/").slice(-1)}...`);
+    url = url + "/" + existingEntityId;
+
+    const headers = this.createHeaders(token, calendarId);
+    const existingEntity = await SharedService.fetchUrl(url, headers);
+    return existingEntity.data;
+  }
+
+  static formatAlternateNames(alternateName: { fr: string[], en: string[] }) {
+    const alternateNames = [];
+    const { en, fr } = alternateName;
+    alternateNames.push(en.map(label => ({ en: label })));
+    alternateNames.push(fr.map(label => ({ fr: label })));
+    return alternateNames.length ? alternateNames : undefined;
+  }
+
+  static createHeaders(token: string, calendarId?: string) {
+    const headers = {
+      Accept: "*/*",
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    };
+    if (calendarId) {
+      headers["calendar-id"] = calendarId;
     }
+    return headers;
+  }
 }

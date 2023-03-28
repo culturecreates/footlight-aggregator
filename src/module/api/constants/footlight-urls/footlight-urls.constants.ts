@@ -4,5 +4,6 @@ export const FootlightPaths = {
     ADD_POSTAL_ADDRESS: '/postal-addresses',
     ADD_ORGANIZATION: '/organizations',
     ADD_EVENT: '/events',
-    GET_TAXONOMY:'/taxonomy'
+    GET_TAXONOMY:'/taxonomy',
+    GET_CURRENT_USER:'/users/current'
 };

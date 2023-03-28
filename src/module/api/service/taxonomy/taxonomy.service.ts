@@ -1,6 +1,6 @@
-import {FootlightPaths} from "../../constants";
 import {SharedService} from "../shared";
 import {Injectable} from "@nestjs/common";
+import { FootlightPaths } from "../../constants/footlight-urls";
 
 @Injectable()
 export class TaxonomyService {

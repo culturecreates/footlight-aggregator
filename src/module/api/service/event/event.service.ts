@@ -1,6 +1,6 @@
 import { OrganizationService, PersonOrganizationService, PersonService, PlaceService } from "../../service";
 import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
-import { ArtsDataConstants, ArtsDataUrls, FootlightPaths } from "../../constants";
+import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { SharedService } from "../shared";
 import { EventDTO } from "../../dto";
 import { PostalAddressService } from "../postal-address";
@@ -8,6 +8,7 @@ import { TaxonomyService } from "../taxonomy";
 import { MultilingualString } from "../../model";
 import { OfferCategory } from "../../enum";
 import { Exception } from "../../helper";
+import { FootlightPaths } from "../../constants/footlight-urls";
 
 @Injectable()
 export class EventService {
@@ -31,6 +32,7 @@ export class EventService {
   private audienceConceptMap;
 
   private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
+    const currentUser = await this._fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const events = await this._fetchEventsFromArtsData(source);
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const fetchedEventCount = events.length;
@@ -38,8 +40,8 @@ export class EventService {
     for (const event of events) {
       syncCount++;
       try {
-        const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl);
-        await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted);
+        const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id);
+        await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
         console.log(`(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
       } catch (e) {
         console.log(`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
@@ -52,20 +54,20 @@ export class EventService {
     await this._syncEvents(calendarId, token, source, footlightBaseUrl);
   }
 
-  async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string) {
+  async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string) {
     const {
       location: locations, performer, organizer, sponsor, alternateName, keywords, audience,
       offerConfiguration, startDate, startDateTime, endDate, endDateTime
     } = event;
     const location = locations?.[0];
     const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
-      footlightBaseUrl, location) : undefined;
+      footlightBaseUrl, location, currentUserId) : undefined;
     const performers = performer?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer) : undefined;
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer, currentUserId) : undefined;
     const organizers = organizer?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer) : undefined;
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer, currentUserId) : undefined;
     const collaborators = sponsor?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor) : undefined;
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId) : undefined;
     delete event?.image?.uri;
     const formattedKeywords = [];
     keywords?.forEach(keyword => {
@@ -105,12 +107,7 @@ export class EventService {
 
   private async _fetchEventFromFootlight(token: string, calendarId: string, eventId: string, footlightBaseUrl: string) {
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT + `/${eventId}`;
-    const headers = {
-      Accept: "*/*",
-      Authorization: `Bearer ${token}`,
-      "calendar-id": calendarId,
-      "Content-Type": "application/json"
-    };
+    const headers = SharedService.createHeaders(token, calendarId);
     const footlightResponse = await SharedService.fetchUrl(url, headers);
     const { status, data } = footlightResponse;
     if (status !== HttpStatus.OK) {
@@ -120,10 +117,10 @@ export class EventService {
   }
 
   private async _pushEventsToFootlight(calendarId: string, token: string, footlightBaseUrl: string,
-                                       eventToAdd: EventDTO) {
+                                       eventToAdd: EventDTO, currentUserId: string) {
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
     if (eventToAdd) {
-      return await SharedService.syncEntityWithFootlight(calendarId, token, url, eventToAdd);
+      return await SharedService.syncEntityWithFootlight(calendarId, token, url, eventToAdd, currentUserId);
     }
   }
 
@@ -177,7 +174,8 @@ export class EventService {
     }
     const eventsFromArtsData = await this._fetchEventsFromArtsData(source);
     const eventMatching = eventsFromArtsData.find(event => event.uri === artsDataUrl);
-    const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl);
+    const currentUser = await this._fetchCurrentUser(footlightBaseUrl, token, calendarId);
+    const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id);
     return await SharedService.patchEventInFootlight(calendarId, token, footlightBaseUrl, eventId, eventFormatted);
   }
 
@@ -193,5 +191,13 @@ export class EventService {
     const eventStartDate = startDateTime ? startDateTime.trim().split("T")[0] : startDate.trim();
     const eventEndDate = endDateTime ? endDateTime.trim().split("T")[0] : endDate.trim();
     return eventEndDate === eventStartDate;
+  }
+
+  private async _fetchCurrentUser(footlightBaseUrl: string, token: string, calendarId: string) {
+    console.log(`Fetching current user info`);
+    const url = footlightBaseUrl + FootlightPaths.GET_CURRENT_USER;
+    const headers = SharedService.createHeaders(token, calendarId);
+    const userResponse = await SharedService.fetchUrl(url, headers);
+    return userResponse.data;
   }
 }
