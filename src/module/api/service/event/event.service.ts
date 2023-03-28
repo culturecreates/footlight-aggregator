@@ -54,14 +54,8 @@ export class EventService {
 
   async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string) {
     const {
-      location: locations,
-      performer,
-      organizer,
-      sponsor,
-      alternateName,
-      keywords,
-      audience,
-      offerConfiguration
+      location: locations, performer, organizer, sponsor, alternateName, keywords, audience,
+      offerConfiguration, startDate, startDateTime, endDate, endDateTime
     } = event;
     const location = locations?.[0];
     const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
@@ -81,6 +75,7 @@ export class EventService {
         formattedKeywords.push(keyword);
       }
     });
+    const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
 
     const eventToAdd = event;
     delete eventToAdd.location;
@@ -93,10 +88,15 @@ export class EventService {
     eventToAdd.additionalType = this._findMatchingConcepts(formattedKeywords, this.eventTypeConceptMap);
     eventToAdd.audience = this._findMatchingConcepts(audience, this.audienceConceptMap);
     eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
+    if (isSingleDayEvent) {
+      delete eventToAdd.endDate;
+      delete eventToAdd.endDateTime;
+    }
     return eventToAdd;
   }
 
   private async _fetchEventsFromArtsData(source: string) {
+    console.log(`Fetching events from Artsdata. Source: ${source}`);
     const limit = 300;
     const url = ArtsDataUrls.EVENTS + "&source=" + source + "&limit=" + limit;
     const artsDataResponse = await SharedService.fetchUrl(url);
@@ -182,9 +182,16 @@ export class EventService {
   }
 
   private async _fetchTaxonomies(calendarId: string, token: string, footlightBaseUrl: string, className: string) {
+    console.log("Fetching taxonomies");
     this.taxonomies = await this._taxonomyService.getTaxonomy(calendarId, token, footlightBaseUrl, className);
     if (this.taxonomies) {
       this._extractEventTypeAndAudienceType(this.taxonomies);
     }
+  }
+
+  private _findIfSingleDayEvent(startDate: any, startDateTime: any, endDate: any, endDateTime: any) {
+    const eventStartDate = startDateTime ? startDateTime.trim().split("T")[0] : startDate.trim();
+    const eventEndDate = endDateTime ? endDateTime.trim().split("T")[0] : endDate.trim();
+    return eventEndDate === eventStartDate;
   }
 }
