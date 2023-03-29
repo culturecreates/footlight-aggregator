@@ -4,10 +4,12 @@ import {ApiResponseEnum, ApiStatusCode} from "../../enum";
 import {EventService} from "../../service";
 import {AuthHeaderExtractor} from "../../helper";
 import {Request} from "express";
+import { Environment } from "../../enum/environments.enum";
 
 @Controller('events')
 @ApiTags('Event APIs')
 @ApiBearerAuth('bearer')
+
 export class EventController {
     constructor(@Inject(EventService)
                 private readonly _eventService: EventService) {
@@ -30,10 +32,9 @@ export class EventController {
     })
     @ApiQuery({
         name: "footlight-base-url",
-        description: "**footlight base url (Base url)**",
+        description: "Select the environment",
         required: true,
-        explode: true,
-        example: 'https://staging.api.cms.footlight.io'
+        enum: Object.values(Environment)
     })
     async syncEvents(
         @Req() request: Request,
@@ -63,10 +64,9 @@ export class EventController {
     })
     @ApiQuery({
         name: "footlight-base-url",
-        description: "**footlight base url (Base url)**",
+        description: "Select the environment",
         required: true,
-        explode: true,
-        example: 'https://staging.api.cms.footlight.io'
+        enum: Object.values(Environment)
     })
     async syncEventById(
         @Req() request: Request,
@@ -76,6 +76,6 @@ export class EventController {
         @Query("source") source?: string): Promise<ApiResponseEnum> {
         const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
         await this._eventService.syncEventById(token, calendarId, id, source, footlightBaseUrl);
-        return {status: ApiStatusCode.SUCCESS, message: 'Resyncing event completed..'};
+        return {status: ApiStatusCode.SUCCESS, message: 'Re-syncing event completed..'};
     }
 }
