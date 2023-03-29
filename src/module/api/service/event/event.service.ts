@@ -197,7 +197,11 @@ export class EventService {
     console.log(`Fetching current user info`);
     const url = footlightBaseUrl + FootlightPaths.GET_CURRENT_USER;
     const headers = SharedService.createHeaders(token, calendarId);
-    const userResponse = await SharedService.fetchUrl(url, headers);
-    return userResponse.data;
+    try {
+      const userResponse = await SharedService.fetchUrl(url, headers);
+      return userResponse.data;
+    } catch (e) {
+      Exception.unauthorized('Something went wrong.')
+    }
   }
 }

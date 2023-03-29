@@ -1,8 +1,8 @@
 import { SharedService } from "../shared";
 import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { PersonOrganizationType } from "../../enum";
-import { OrganizationService, PersonService } from "../../service";
-import { Inject, Injectable } from "@nestjs/common";
+import { OrganizationService, PersonService, PlaceService } from "../../service";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 
 @Injectable()
 export class PersonOrganizationService {
@@ -11,7 +11,9 @@ export class PersonOrganizationService {
     @Inject(PersonService)
     private readonly _personService: PersonService,
     @Inject(OrganizationService)
-    private readonly _organizationService: OrganizationService) {
+    private readonly _organizationService: OrganizationService,
+    @Inject(forwardRef(() => PlaceService))
+    private readonly _placeService: PlaceService) {
   }
 
   async fetchPersonOrganizationFromFootlight(calendarId: string, token: string, footlightUrl: string,
@@ -37,8 +39,15 @@ export class PersonOrganizationService {
           entityId = await this._personService.getFootlightIdentifier(calendarId, token, footlightUrl,
             entityFetched, currentUserId);
         } else if (type === PersonOrganizationType.ORGANIZATION) {
+          const place = entityFetched.place;
+          if (entityFetched.place) {
+            const placeId: string = await this._placeService.getFootlightIdentifier(calendarId, token,
+              footlightUrl, place, currentUserId);
+            entityFetched.place = { entityId: placeId };
+          }
+
           entityId = await this._organizationService.getFootlightIdentifier(calendarId, token, footlightUrl,
-            entityFetched,currentUserId);
+            entityFetched, currentUserId);
         }
         personOrganizations.push({ entityId, type });
       }
