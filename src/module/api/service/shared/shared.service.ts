@@ -17,7 +17,7 @@ export class SharedService {
     return await axios.get(url, { headers });
   }
 
-  private static async _callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
+  static async callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
     const headers = this.createHeaders(token, calendarId);
     let responseData;
     let responseStatus;
@@ -89,14 +89,14 @@ export class SharedService {
 
   private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
     console.log(`\tAdding ${url.split("/").slice(-1)}...`);
-    return await this._callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
+    return await this.callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
   }
 
   private static async _updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
                                                 url: string, body: any) {
     console.log(`\tUpdating ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
-    return await this._callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
+    return await this.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
   }
 
   private static async _getEntityFromFootlight(calendarId: string, token: string, existingEntityId: any, url: string) {

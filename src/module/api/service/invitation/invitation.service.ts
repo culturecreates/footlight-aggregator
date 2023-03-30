@@ -19,7 +19,7 @@ export class InvitationService {
       complete: async (results) => {
         console.log("results:", results);
         for (const result of results.data) {
-          await this._sendInvitation(result.firstName, result.lasName, result.emailAddress,
+          await this._sendInvitation(result.firstName, result.lastName, result.emailAddress,
             result.role, calendarId, token, footlightUrl);
         }
       }
