@@ -8,7 +8,7 @@ import { TaxonomyService } from "../taxonomy";
 import { MultilingualString } from "../../model";
 import { OfferCategory } from "../../enum";
 import { Exception } from "../../helper";
-import { FootlightPaths } from "../../constants/footlight-urls";
+import { Concept, FootlightPaths } from "../../constants/footlight-urls";
 
 @Injectable()
 export class EventService {
@@ -156,8 +156,8 @@ export class EventService {
       ?.filter(concept => keywords?.includes(concept.name.en) || keywords?.includes(concept.name.fr)) : [];
     if (!matchingConcepts?.length) {
       matchingConcepts = conceptMap
-        ?.filter(concept => "not specified" === concept.name.en.toLowerCase() ||
-          "indéterminé" === concept.name.fr.toLowerCase());
+        ?.filter(concept => Concept.NOT_SPECIFIED.en === concept.name.en.toLowerCase() ||
+          Concept.NOT_SPECIFIED.fr === concept.name.fr.toLowerCase());
     }
     return matchingConcepts?.map(concept => {
       return { entityId: concept.id };
