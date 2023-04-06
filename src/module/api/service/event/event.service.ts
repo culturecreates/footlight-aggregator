@@ -153,11 +153,11 @@ export class EventService {
     let matchingConcepts;
 
     matchingConcepts = keywords?.length ? conceptMap
-      ?.filter(concept => keywords?.includes(concept.name.en) || keywords?.includes(concept.name.fr)) : [];
+      ?.filter(concept => keywords?.includes(concept.name?.en) || keywords?.includes(concept.name?.fr)) : [];
     if (!matchingConcepts?.length) {
       matchingConcepts = conceptMap
-        ?.filter(concept => Concept.NOT_SPECIFIED.en === concept.name.en.toLowerCase() ||
-          Concept.NOT_SPECIFIED.fr === concept.name.fr.toLowerCase());
+        ?.filter(concept => Concept.NOT_SPECIFIED.en === concept.name?.en?.toLowerCase() ||
+          Concept.NOT_SPECIFIED.fr === concept.name?.fr?.toLowerCase());
     }
     return matchingConcepts?.map(concept => {
       return { entityId: concept.id };
