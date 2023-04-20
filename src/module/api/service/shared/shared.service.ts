@@ -1,10 +1,11 @@
 import { ArtsDataConstants } from "../../constants";
 import { Exception } from "../../helper";
-import { HttpStatus } from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import axios from "axios";
 import { HttpMethodsEnum } from "../../enum";
 import { FootlightPaths } from "../../constants/footlight-urls";
 
+@Injectable()
 export class SharedService {
 
   public static async fetchFromArtsDataById(id: string, baseUrl: string) {
@@ -126,5 +127,17 @@ export class SharedService {
       headers["calendar-id"] = calendarId;
     }
     return headers;
+  }
+
+  async fetchCurrentUser(footlightBaseUrl: string, token: string, calendarId: string) {
+    console.log(`Fetching current user info`);
+    const url = footlightBaseUrl + FootlightPaths.GET_CURRENT_USER;
+    const headers = SharedService.createHeaders(token, calendarId);
+    try {
+      const userResponse = await SharedService.fetchUrl(url, headers);
+      return userResponse.data;
+    } catch (e) {
+      Exception.unauthorized('Something went wrong.')
+    }
   }
 }
