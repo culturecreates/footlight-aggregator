@@ -32,10 +32,10 @@ export class OrganizationController {
   })
   @ApiQuery({
     name: "source",
-    description: "**source (Website graphs used by Tout Culture)**",
+    description: "**source (Graph name)**",
     required: true,
     explode: true,
-    example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
+    example: "http://kg.artsdata.ca/SigneLavalOrgs"
   })
   async syncOrganizations(
     @Req() request: Request,

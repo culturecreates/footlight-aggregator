@@ -8,9 +8,9 @@ import { forwardRef, Inject, Injectable } from "@nestjs/common";
 export class PersonOrganizationService {
 
   constructor(
-    @Inject(PersonService)
+    @Inject(forwardRef(() =>PersonService))
     private readonly _personService: PersonService,
-    @Inject(OrganizationService)
+    @Inject(forwardRef(() =>OrganizationService))
     private readonly _organizationService: OrganizationService,
     @Inject(forwardRef(() => PlaceService))
     private readonly _placeService: PlaceService) {
@@ -22,7 +22,7 @@ export class PersonOrganizationService {
     for (const uri of entityUris) {
       const id = uri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
       const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_ORGANIZATION_BY_ID);
-      const { image, logo, alternateName } = entityFetched;
+      const { alternateName } = entityFetched;
       entityFetched.alternateName = alternateName?.length
         ? SharedService.formatAlternateNames(alternateName) : undefined;
 

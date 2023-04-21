@@ -5,12 +5,15 @@ export const ArtsDataUrls = {
 
     // PEOPLE: 'https://api.artsdata.ca/person?format=json',
     // PLACES: 'https://api.artsdata.ca/place?format=json',
-    ORGANIZATIONS: 'https://api.artsdata.ca/organizations?format=json',
+    // ORGANIZATIONS: 'https://api.artsdata.ca/organizations?format=json',
     // PERSON_BY_ID: 'http://api.artsdata.ca/ranked/ARTS_DATA_ID?format=json&frame=ranked_person_footlight',
     // ORGANIZATION_BY_ID: 'http://api.artsdata.ca/ranked/ARTS_DATA_ID?format=json&frame=ranked_org_footlight',
+    ARTSDATA_SPARQL_ENDPOINT: 'https://kg.artsdata.ca/query'
 };
 
 export const ArtsDataConstants = {
     ARTS_DATA_ID: 'ARTS_DATA_ID',
-    RESOURCE_URI_PREFIX: 'http://kg.artsdata.ca/resource/'
+    RESOURCE_URI_PREFIX: 'http://kg.artsdata.ca/resource/',
+    RESOURCE_URI_PREFIX_HTTPS: 'https://kg.artsdata.ca/resource/',
+    SPARQL_QUERY_FOR_ORGANIZATION:`PREFIX schema: <http://schema.org/>select ?adid where { graph <GRAPH_NAME> {  ?s a schema:Organization .} ?adid schema:sameAs ?s . filter(contains(str(?adid), \"kg.artsdata.ca\"))} `
 };

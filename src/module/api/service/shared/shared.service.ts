@@ -18,6 +18,11 @@ export class SharedService {
     return await axios.get(url, { headers });
   }
 
+  public static async postUrl(url: string, body?: any, headers?: any) {
+    return await axios.post(url, body, { headers });
+  }
+
+
   static async callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
     const headers = this.createHeaders(token, calendarId);
     let responseData;
@@ -137,7 +142,7 @@ export class SharedService {
       const userResponse = await SharedService.fetchUrl(url, headers);
       return userResponse.data;
     } catch (e) {
-      Exception.unauthorized('Something went wrong.')
+      Exception.unauthorized("Something went wrong.");
     }
   }
 }

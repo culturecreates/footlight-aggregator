@@ -4,6 +4,7 @@ import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { PlaceService } from "../place";
+import { PersonOrganizationService } from "../person-organization";
 
 @Injectable()
 export class OrganizationService {
@@ -11,7 +12,10 @@ export class OrganizationService {
     @Inject(forwardRef(() => SharedService))
     private readonly _sharedService: SharedService,
     @Inject(forwardRef(() => PlaceService))
-    private readonly _placeService: PlaceService) {
+    private readonly _placeService: PlaceService,
+    @Inject(forwardRef(() => PersonOrganizationService))
+    private readonly _personOrganizationService: PersonOrganizationService
+  ) {
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string,
@@ -33,8 +37,13 @@ export class OrganizationService {
     for (const organization of organizations) {
       syncCount++;
       try {
-        const organizationFormatted = await this.formatOrganization(calendarId, token, organization, footlightBaseUrl, currentUser.id);
-        await this._pushOrganizationToFootlight(calendarId, token, footlightBaseUrl, organizationFormatted, currentUser.id);
+        let id = organization.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
+        id = organization.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX_HTTPS, "");
+        const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_ORGANIZATION_BY_ID);
+        const { alternateName } = entityFetched;
+        entityFetched.alternateName = alternateName?.length
+          ? SharedService.formatAlternateNames(alternateName) : undefined;
+        await this._pushOrganizationToFootlight(footlightBaseUrl,calendarId, token, entityFetched, currentUser.id);
         console.log(`(${syncCount}/${fetchedOrganizationCount}) Synchronised event with id: ${JSON.stringify(fetchedOrganizationCount.sameAs)}`);
       } catch (e) {
         console.log(`(${syncCount}/${fetchedOrganizationCount}) Error while adding Event ${organization.url}` + e);
@@ -43,21 +52,13 @@ export class OrganizationService {
   }
 
   private async _fetchOrganizationsFromArtsData(source: string) {
-    console.log(`Fetching events from Artsdata. Source: ${source}`);
-    const limit = 300;
-    // const url = ArtsDataUrls.ORGANIZATIONS + "&source=" + source + "&limit=" + limit;
-    const url = ArtsDataUrls.ORGANIZATIONS + "&limit=" + limit;
-    const artsDataResponse = await SharedService.fetchUrl(url);
-    return artsDataResponse.data.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
+    console.log(`Fetching organizations from Artsdata. Source: ${source}`);
+    const query = encodeURI(ArtsDataConstants.SPARQL_QUERY_FOR_ORGANIZATION.replace("GRAPH_NAME", source));
+    const url = ArtsDataUrls.ARTSDATA_SPARQL_ENDPOINT;
+    const artsDataResponse = await SharedService.postUrl(url, "query=" + query, {});
+    return artsDataResponse.data.results.bindings.map(adid => {
+      return { url: adid.adid.value };
+    });
   }
 
-  private async formatOrganization(calendarId: string, token: any, organization: any, footlightUrl: string, currentUserId: string) {
-    const place = organization.place;
-    if (organization.place) {
-      const placeId: string = await this._placeService.getFootlightIdentifier(calendarId, token,
-        footlightUrl, place, currentUserId);
-      organization.place = { entityId: placeId };
-    }
-    return organization;
-  }
 }

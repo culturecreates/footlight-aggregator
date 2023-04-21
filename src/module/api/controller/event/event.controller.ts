@@ -31,7 +31,7 @@ export class EventController {
   })
   @ApiQuery({
     name: "source",
-    description: "**source (Website graphs used by Tout Culture)**",
+    description: "**source (Graph)**",
     required: true,
     explode: true,
     example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
