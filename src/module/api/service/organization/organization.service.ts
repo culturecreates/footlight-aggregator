@@ -46,7 +46,7 @@ export class OrganizationService {
         await this._pushOrganizationToFootlight(footlightBaseUrl,calendarId, token, entityFetched, currentUser.id);
         console.log(`(${syncCount}/${fetchedOrganizationCount}) Synchronised event with id: ${JSON.stringify(fetchedOrganizationCount.sameAs)}`);
       } catch (e) {
-        console.log(`(${syncCount}/${fetchedOrganizationCount}) Error while adding Event ${organization.url}` + e);
+        console.error(`(${syncCount}/${fetchedOrganizationCount}) Error while adding Event ${organization.url}` + e);
       }
     }
   }

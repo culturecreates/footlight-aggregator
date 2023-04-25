@@ -77,7 +77,7 @@ export class SharedService {
         if (updateResponse.status === HttpStatus.OK) {
           console.log(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
         } else {
-          console.log("\tUpdating Entity failed!");
+          console.error("\tUpdating Entity failed!");
         }
       } else {
         console.log("\tEntity cannot be modified. Since this entity is updated latest by a different user.");
@@ -85,10 +85,10 @@ export class SharedService {
 
       return existingEntityId;
     } else if (status === HttpStatus.UNAUTHORIZED) {
-      console.log("\tUnauthorized!");
+      console.error("\tUnauthorized!");
       Exception.unauthorized(response.message);
     } else {
-      console.log(`\tSome thing went wrong.${JSON.stringify(body)} `);
+      console.error(`\tSome thing went wrong.${JSON.stringify(body)} `);
       Exception.internalServerError("Some thing went wrong");
     }
   }

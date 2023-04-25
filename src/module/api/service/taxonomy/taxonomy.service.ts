@@ -14,7 +14,7 @@ export class TaxonomyService {
             }
             return taxonomies;
         } catch (e) {
-            console.log('Error while fetching taxonomies');
+            console.error('Error while fetching taxonomies');
         }
     }
 

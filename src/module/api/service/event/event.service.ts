@@ -51,7 +51,7 @@ export class EventService {
         await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
         console.log(`(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
       } catch (e) {
-        console.log(`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
+        console.error(`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
       }
     }
     console.log("Successfully synchronised Events and linked entities.");

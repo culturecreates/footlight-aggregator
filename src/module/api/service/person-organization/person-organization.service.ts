@@ -39,6 +39,12 @@ export class PersonOrganizationService {
               footlightUrl, place, currentUserId);
             entityFetched.place = { entityId: placeId };
           }
+          if(entityFetched.logo){
+            const logoUrl = entityFetched.logo.url;
+            if(logoUrl instanceof Array){
+              entityFetched.logo.url = logoUrl?.[0];
+            }
+          }
 
           entityId = await this._organizationService.getFootlightIdentifier(calendarId, token, footlightUrl,
             entityFetched, currentUserId);
