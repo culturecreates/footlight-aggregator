@@ -46,6 +46,9 @@ export class EventService {
     let syncCount = 0;
     for (const event of events) {
       syncCount++;
+      if(syncCount<50){
+        continue;
+      }
       try {
         const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id);
         await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
@@ -95,6 +98,9 @@ export class EventService {
     eventToAdd.keywords = formattedKeywords;
     eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
     eventToAdd.additionalType = this._findMatchingConcepts(formattedKeywords, this.eventTypeConceptMap);
+    if (audience) {
+      console.log(audience);
+    }
     eventToAdd.audience = this._findMatchingConcepts(audience, this.audienceConceptMap);
     eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
     if (isSingleDayEvent) {
@@ -158,17 +164,27 @@ export class EventService {
 
   private _findMatchingConcepts(keywords: string[], conceptMap: { id: string, name: MultilingualString }[]) {
     let matchingConcepts;
+    const keywordsFormatted = [];
+    if (keywords) {
+      for (const keyword of keywords) {
+        if (keyword.startsWith("[") && keyword.endsWith("]")) {
+          keywordsFormatted.push(...JSON.parse(keyword));
+        } else {
+          keywordsFormatted.push(keyword);
+        }
+      }
 
-    matchingConcepts = keywords?.length ? conceptMap
-      ?.filter(concept => keywords?.includes(concept.name?.en) || keywords?.includes(concept.name?.fr)) : [];
-    if (!matchingConcepts?.length) {
-      matchingConcepts = conceptMap
-        ?.filter(concept => Concept.NOT_SPECIFIED.en === concept.name?.en?.toLowerCase() ||
-          Concept.NOT_SPECIFIED.fr === concept.name?.fr?.toLowerCase());
+      matchingConcepts = keywordsFormatted?.length ? conceptMap
+        ?.filter(concept => keywordsFormatted?.includes(concept.name?.en) || keywordsFormatted?.includes(concept.name?.fr)) : [];
+      if (!matchingConcepts?.length) {
+        matchingConcepts = conceptMap
+          ?.filter(concept => Concept.NOT_SPECIFIED.en === concept.name?.en?.toLowerCase() ||
+            Concept.NOT_SPECIFIED.fr === concept.name?.fr?.toLowerCase());
+      }
+      return matchingConcepts?.map(concept => {
+        return { entityId: concept.id };
+      });
     }
-    return matchingConcepts?.map(concept => {
-      return { entityId: concept.id };
-    });
   }
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string) {
