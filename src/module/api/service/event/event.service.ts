@@ -46,7 +46,7 @@ export class EventService {
     let syncCount = 0;
     for (const event of events) {
       syncCount++;
-      if(syncCount<50){
+      if (syncCount < 50) {
         continue;
       }
       try {
@@ -98,9 +98,6 @@ export class EventService {
     eventToAdd.keywords = formattedKeywords;
     eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
     eventToAdd.additionalType = this._findMatchingConcepts(formattedKeywords, this.eventTypeConceptMap);
-    if (audience) {
-      console.log(audience);
-    }
     eventToAdd.audience = this._findMatchingConcepts(audience, this.audienceConceptMap);
     eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
     if (isSingleDayEvent) {
@@ -189,17 +186,24 @@ export class EventService {
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string) {
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
-    const existingEvent = await this._fetchEventFromFootlight(token, calendarId, eventId, footlightBaseUrl);
-    const sameAs = existingEvent.sameAs;
-    const artsDataUrl = sameAs.find(sameAs => sameAs?.uri?.includes(ArtsDataConstants.RESOURCE_URI_PREFIX))?.uri;
-    if (!artsDataUrl) {
-      Exception.badRequest("The event is not linked to Artsdata.");
-    }
-    const eventsFromArtsData = await this._fetchEventsFromArtsData(source);
-    const eventMatching = eventsFromArtsData.find(event => event.uri === artsDataUrl);
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
-    const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id);
-    return await SharedService.patchEventInFootlight(calendarId, token, footlightBaseUrl, eventId, eventFormatted);
+    const existingEvent = await this._fetchEventFromFootlight(token, calendarId, eventId, footlightBaseUrl);
+    if (!existingEvent.modifiedByUserId || existingEvent.modifiedByUserId === currentUser.id) {
+      const sameAs = existingEvent.sameAs;
+      const artsDataUrl = sameAs.find(sameAs => sameAs?.uri?.includes(ArtsDataConstants.RESOURCE_URI_PREFIX))?.uri;
+      if (!artsDataUrl) {
+        Exception.badRequest("The event is not linked to Artsdata.");
+      }
+      const eventsFromArtsData = await this._fetchEventsFromArtsData(source);
+      const eventMatching = eventsFromArtsData.find(event => event.uri === artsDataUrl);
+      const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
+      const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id);
+      return await SharedService.patchEventInFootlight(calendarId, token, footlightBaseUrl, eventId, eventFormatted);
+    } else {
+      console.log("\tEntity cannot be modified. Since this entity is updated latest by a different user.");
+    }
+
+
   }
 
   private async _fetchTaxonomies(calendarId: string, token: string, footlightBaseUrl: string, className: string) {
