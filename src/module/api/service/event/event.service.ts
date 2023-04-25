@@ -46,9 +46,6 @@ export class EventService {
     let syncCount = 0;
     for (const event of events) {
       syncCount++;
-      if (syncCount < 50) {
-        continue;
-      }
       try {
         const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id);
         await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
