@@ -14,10 +14,11 @@ import { TaxonomyService } from "./service/taxonomy";
 import { InvitationService } from "./service/invitation";
 import { InvitationController } from "./controller/invitation";
 import { OrganizationController } from "./controller/organization";
+import { PlaceController } from "./controller/place";
 
 @Module({
   imports: [],
-  controllers: [AuthenticationController, EventController, OrganizationController, InvitationController],
+  controllers: [AuthenticationController, EventController, PlaceController, OrganizationController, InvitationController],
   providers: [PersonOrganizationService, EventService, PostalAddressService, PersonService, PlaceService,
     OrganizationService, AuthenticationService, TaxonomyService, InvitationService, SharedService]
 })

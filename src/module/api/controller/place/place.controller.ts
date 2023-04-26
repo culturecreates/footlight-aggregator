@@ -1,23 +1,23 @@
 import { Controller, Inject, Put, Query, Req } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { OrganizationService } from "../../service";
+import { PlaceService } from "../../service";
 import { Environment } from "../../enum/environments.enum";
 import { Request } from "express";
 import { ApiResponseEnum, ApiStatusCode } from "../../enum";
 import { AuthHeaderExtractor } from "../../helper";
 
 
-@ApiTags("Organization API")
+@ApiTags("Place API")
 @ApiBearerAuth("bearer")
-@Controller('/organizations')
-export class OrganizationController {
+@Controller('places/')
+export class PlaceController {
   constructor(
-    @Inject(OrganizationService)
-    private readonly _organizationService: OrganizationService) {
+    @Inject(PlaceService)
+    private readonly _placeService: PlaceService) {
   }
 
   @Put("sync")
-  @ApiOperation({ summary: "Sync organizations from Arts data to footlight." })
+  @ApiOperation({ summary: "Sync places from Arts data to footlight." })
   @ApiQuery({
     name: "footlight-base-url",
     description: "Select the environment",
@@ -35,15 +35,15 @@ export class OrganizationController {
     description: "**source (Graph name)**",
     required: true,
     explode: true,
-    example: "http://kg.artsdata.ca/SigneLavalOrgs"
+    example: "http://kg.artsdata.ca/culture-creates/footlight/signelaval-com"
   })
-  async syncOrganizations(
+  async syncPlaces(
     @Req() request: Request,
     @Query("footlight-base-url") footlightBaseUrl?: string,
     @Query("calendar-id") calendarId?: string,
     @Query("source") source?: string): Promise<ApiResponseEnum> {
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-    await this._organizationService.syncOrganizations(token, calendarId, source, footlightBaseUrl);
-    return { status: ApiStatusCode.SUCCESS, message: "Syncing Organizations completed." };
+    await this._placeService.syncPlaces(token, calendarId, source, footlightBaseUrl);
+    return { status: ApiStatusCode.SUCCESS, message: "Syncing Places completed." };
   }
 }

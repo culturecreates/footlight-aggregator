@@ -15,5 +15,6 @@ export const ArtsDataConstants = {
     ARTS_DATA_ID: 'ARTS_DATA_ID',
     RESOURCE_URI_PREFIX: 'http://kg.artsdata.ca/resource/',
     RESOURCE_URI_PREFIX_HTTPS: 'https://kg.artsdata.ca/resource/',
-    SPARQL_QUERY_FOR_ORGANIZATION:`PREFIX schema: <http://schema.org/>select ?adid where { graph <GRAPH_NAME> {  ?s a schema:Organization .} ?adid schema:sameAs ?s . filter(contains(str(?adid), \"kg.artsdata.ca\"))} `
+    SPARQL_QUERY_FOR_ORGANIZATION:`PREFIX schema: <http://schema.org/>select ?adid where { graph <GRAPH_NAME> { ?s a schema:Organization .} ?adid schema:sameAs ?s. filter(contains(str(?adid), \"kg.artsdata.ca\"))} `,
+    SPARQL_QUERY_FOR_PLACES:`PREFIX schema: <http://schema.org/>select ?adid where { graph <GRAPH_NAME> { ?s a schema:Place .} ?adid schema:sameAs ?s. filter(contains(str(?adid), \"kg.artsdata.ca\"))} `
 };
