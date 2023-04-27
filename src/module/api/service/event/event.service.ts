@@ -11,7 +11,7 @@ import { EventDTO } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
 import { MultilingualString } from "../../model";
-import { OfferCategory } from "../../enum";
+import { HttpMethodsEnum, OfferCategory } from "../../enum";
 import { Exception } from "../../helper";
 import { Concept, FootlightPaths } from "../../constants/footlight-urls";
 
@@ -217,5 +217,44 @@ export class EventService {
     return eventEndDate === eventStartDate;
   }
 
+  async reloadEventImages(token: any, calendarId: string, source: string, footlightBaseUrl: string) {
+    const events = await this._fetchEventsFromArtsData(source);
+    const fetchedEventCount = events.length;
+    let syncCount = 0;
+    for (const event of events) {
+      syncCount++;
+      try {
+        const eventFormatted = await this._formatEventForImageReload(event);
+        const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
+        const addResponse = await SharedService.addEntityToFootlight(calendarId, token, url, eventFormatted);
+        const { status, response } = addResponse;
+        if (status === HttpStatus.CREATED) {
+          console.log(`\tAdded Entity (${response.id} : ${eventFormatted.uri}) to Footlight!`);
+          return response.id;
+        } else if (status === HttpStatus.CONFLICT) {
+          const existingEntityId = await response.error;
+          const url = footlightBaseUrl + /events/ + existingEntityId + "/reload-image";
+          await SharedService.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, { imageUrl: event.image?.url?.uri });
+        }
+        console.log(`(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
+      } catch (e) {
+        console.error(`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
+      }
+    }
+    console.log("Successfully synchronised Events and linked entities.");
+  }
 
+  private async _formatEventForImageReload(event: any) {
+    delete event?.image?.uri;
+    const { uri, name, startDate, startDateTime, endDate, endDateTime, image, sameAs } = event;
+    const formattedEvent = { name, image, startDate, startDateTime, endDate, endDateTime, sameAs, uri };
+
+    const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
+
+    if (isSingleDayEvent) {
+      delete formattedEvent.endDate;
+      delete formattedEvent.endDateTime;
+    }
+    return formattedEvent;
+  }
 }
