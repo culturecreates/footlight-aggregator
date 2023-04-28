@@ -13,7 +13,7 @@ import { TaxonomyService } from "../taxonomy";
 import { MultilingualString } from "../../model";
 import { OfferCategory } from "../../enum";
 import { Exception } from "../../helper";
-import { Concept, FootlightPaths } from "../../constants/footlight-urls";
+import { Concept, FacebookConstants, FootlightPaths, SameAsTypes } from "../../constants/footlight-urls";
 
 @Injectable()
 export class EventService {
@@ -64,7 +64,7 @@ export class EventService {
   async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string) {
     const {
       location: locations, performer, organizer, sponsor, alternateName, keywords, audience,
-      offerConfiguration, startDate, startDateTime, endDate, endDateTime
+      offerConfiguration, startDate, startDateTime, endDate, endDateTime, sameAs
     } = event;
     const location = locations?.[0];
     const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
@@ -97,6 +97,7 @@ export class EventService {
     eventToAdd.additionalType = this._findMatchingConcepts(formattedKeywords, this.eventTypeConceptMap);
     eventToAdd.audience = this._findMatchingConcepts(audience, this.audienceConceptMap);
     eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
+    eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if (isSingleDayEvent) {
       delete eventToAdd.endDate;
       delete eventToAdd.endDateTime;
@@ -218,4 +219,15 @@ export class EventService {
   }
 
 
+  private _formatSameAs(elements: { uri: string }[]) {
+    return elements.map(element => {
+      if (element.uri.startsWith(FacebookConstants.HTTPS) || element.uri.startsWith(FacebookConstants.HTTP)) {
+        return {
+          uri: element.uri,
+          type: SameAsTypes.FACEBOOK_LINK
+        };
+      }
+      return element;
+    });
+  }
 }
