@@ -158,8 +158,8 @@ export class EventService {
 
   private _findMatchingConcepts(keywords: string[], conceptMap: { id: string, name: MultilingualString }[]) {
     let matchingConcepts;
-    const keywordsFormatted = [];
     if (keywords) {
+      const keywordsFormatted = [];
       for (const keyword of keywords) {
         if (keyword.startsWith("[") && keyword.endsWith("]")) {
           keywordsFormatted.push(...JSON.parse(keyword));
@@ -167,18 +167,17 @@ export class EventService {
           keywordsFormatted.push(keyword);
         }
       }
-
       matchingConcepts = keywordsFormatted?.length ? conceptMap
         ?.filter(concept => keywordsFormatted?.includes(concept.name?.en) || keywordsFormatted?.includes(concept.name?.fr)) : [];
-      if (!matchingConcepts?.length) {
-        matchingConcepts = conceptMap
-          ?.filter(concept => Concept.NOT_SPECIFIED.en === concept.name?.en?.toLowerCase() ||
-            Concept.NOT_SPECIFIED.fr === concept.name?.fr?.toLowerCase());
-      }
-      return matchingConcepts?.map(concept => {
-        return { entityId: concept.id };
-      });
     }
+    if (!matchingConcepts?.length) {
+      matchingConcepts = conceptMap
+        ?.filter(concept => Concept.NOT_SPECIFIED.en === concept.name?.en?.toLowerCase() ||
+          Concept.NOT_SPECIFIED.fr === concept.name?.fr?.toLowerCase());
+    }
+    return matchingConcepts?.map(concept => {
+      return { entityId: concept.id };
+    });
   }
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string) {
