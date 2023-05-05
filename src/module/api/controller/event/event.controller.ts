@@ -78,4 +78,35 @@ export class EventController {
     await this._eventService.syncEventById(token, calendarId, id, source, footlightBaseUrl);
     return { status: ApiStatusCode.SUCCESS, message: "Re-syncing event completed.." };
   }
+
+  @Put("reload-images")
+  @ApiOperation({ summary: "Re-load images only." })
+  @ApiQuery({
+    name: "footlight-base-url",
+    description: "Select the environment",
+    required: true,
+    enum: Object.values(Environment)
+  })
+  @ApiQuery({
+    name: "calendar-id",
+    description: "**calendar-id (The calendar identifier)**",
+    required: true,
+    explode: true
+  })
+  @ApiQuery({
+    name: "source",
+    description: "**source (Website graphs used by Tout Culture)**",
+    required: true,
+    explode: true,
+    example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
+  })
+  async reloadEventImages(
+    @Req() request: Request,
+    @Query("footlight-base-url") footlightBaseUrl?: string,
+    @Query("calendar-id") calendarId?: string,
+    @Query("source") source?: string): Promise<ApiResponseEnum> {
+    const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
+    await this._eventService.reloadEventImages(token, calendarId, source, footlightBaseUrl);
+    return { status: ApiStatusCode.SUCCESS, message: "Re-syncing event completed.." };
+  }
 }

@@ -54,7 +54,7 @@ export class SharedService {
                                             eventId: string, dto: any) {
 
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
-    const updateResponse = await this._updateEntityInFootlight(calendarId, token, eventId, url, dto);
+    const updateResponse = await this.updateEntityInFootlight(calendarId, token, eventId, url, dto);
     if (updateResponse.status === HttpStatus.OK) {
       console.log(`\tThe event successfully synchronised.`);
       return { message: "The event successfully synchronised." };
@@ -64,7 +64,7 @@ export class SharedService {
   }
 
   public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any, currentUserId: string) {
-    const addResponse = await this._addEntityToFootlight(calendarId, token, url, body);
+    const addResponse = await this.addEntityToFootlight(calendarId, token, url, body);
     const { status, response } = addResponse;
     if (status === HttpStatus.CREATED) {
       console.log(`\tAdded Entity (${response.id} : ${body.uri}) to Footlight!`);
@@ -72,16 +72,16 @@ export class SharedService {
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
       const existingEntity = await this._getEntityFromFootlight(calendarId, token, existingEntityId, url);
-      if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
-        const updateResponse = await this._updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
+      // if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
+        const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
         if (updateResponse.status === HttpStatus.OK) {
           console.log(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
         } else {
           console.error("\tUpdating Entity failed!");
         }
-      } else {
-        console.log("\tEntity cannot be modified. Since this entity is updated latest by a different user.");
-      }
+      // } else {
+      //   console.log("\tEntity cannot be modified. Since this entity is updated latest by a different user.");
+      // }
 
       return existingEntityId;
     } else if (status === HttpStatus.UNAUTHORIZED) {
@@ -93,12 +93,12 @@ export class SharedService {
     }
   }
 
-  private static async _addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
+   static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
     console.log(`\tAdding ${url.split("/").slice(-1)}...`);
     return await this.callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
   }
 
-  private static async _updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
+   static async updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
                                                 url: string, body: any) {
     console.log(`\tUpdating ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
