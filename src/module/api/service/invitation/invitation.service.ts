@@ -20,16 +20,15 @@ export class InvitationService {
         console.log("results:", results);
         for (const result of results.data) {
           await this._sendInvitation(result.firstName, result.lastName, result.emailAddress,
-            result.role, calendarId, token, footlightUrl);
+            result.role, result.languagePreference?.toUpperCase(), calendarId, token, footlightUrl);
         }
       }
     });
 
   }
 
-  private async _sendInvitation(firstName: string, lastName: string,
-                                inviteEmailId: string, role: string, calendarId: string, token: string,
-                                footlightUrl: string) {
+  private async _sendInvitation(firstName: string, lastName: string, inviteEmailId: string, role: string,
+                                language: string, calendarId: string, token: string, footlightUrl: string) {
     const url = footlightUrl + FootlightPaths.INVITE;
     const body = {
       firstName: firstName,
@@ -40,7 +39,7 @@ export class InvitationService {
     const {
       status,
       response
-    } = await SharedService.callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
+    } = await SharedService.callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body, language);
     if (status === HttpStatus.UNAUTHORIZED) {
       Exception.unauthorized(response);
     }

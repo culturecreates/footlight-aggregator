@@ -23,8 +23,8 @@ export class SharedService {
   }
 
 
-  static async callFootlightAPI(method: string, calendarId: string, token: string, url: string, body) {
-    const headers = this.createHeaders(token, calendarId);
+  static async callFootlightAPI(method: string, calendarId: string, token: string, url: string, body, language?: string) {
+    const headers = this.createHeaders(token, calendarId, language);
     let responseData;
     let responseStatus;
     if (method === HttpMethodsEnum.POST) {
@@ -73,12 +73,12 @@ export class SharedService {
       const existingEntityId = await response.error;
       const existingEntity = await this._getEntityFromFootlight(calendarId, token, existingEntityId, url);
       // if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
-        const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
-        if (updateResponse.status === HttpStatus.OK) {
-          console.log(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
-        } else {
-          console.error("\tUpdating Entity failed!");
-        }
+      const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
+      if (updateResponse.status === HttpStatus.OK) {
+        console.log(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
+      } else {
+        console.error("\tUpdating Entity failed!");
+      }
       // } else {
       //   console.log("\tEntity cannot be modified. Since this entity is updated latest by a different user.");
       // }
@@ -93,13 +93,13 @@ export class SharedService {
     }
   }
 
-   static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
+  static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
     console.log(`\tAdding ${url.split("/").slice(-1)}...`);
     return await this.callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
   }
 
-   static async updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
-                                                url: string, body: any) {
+  static async updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
+                                       url: string, body: any) {
     console.log(`\tUpdating ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
     return await this.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
@@ -122,7 +122,7 @@ export class SharedService {
     return alternateNames.length ? alternateNames : undefined;
   }
 
-  static createHeaders(token: string, calendarId?: string) {
+  static createHeaders(token: string, calendarId: string, languagePreference?: string) {
     const headers = {
       Accept: "*/*",
       Authorization: `Bearer ${token}`,
@@ -130,6 +130,7 @@ export class SharedService {
     };
     if (calendarId) {
       headers["calendar-id"] = calendarId;
+      headers["language"] = languagePreference;
     }
     return headers;
   }
