@@ -20,7 +20,7 @@ export class InvitationService {
         console.log("results:", results);
         for (const result of results.data) {
           await this._sendInvitation(result.firstName, result.lastName, result.emailAddress,
-            result.role, result.languagePreference?.toUpperCase(), calendarId, token, footlightUrl);
+            result.role?.toUpperCase(), result.languagePreference?.toUpperCase(), calendarId, token, footlightUrl);
         }
       }
     });
