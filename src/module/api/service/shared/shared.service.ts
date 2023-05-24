@@ -72,16 +72,16 @@ export class SharedService {
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
       const existingEntity = await this._getEntityFromFootlight(calendarId, token, existingEntityId, url);
-      // if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
-      const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
-      if (updateResponse.status === HttpStatus.OK) {
-        console.log(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
+      if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
+        const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
+        if (updateResponse.status === HttpStatus.OK) {
+          console.log(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
+        } else {
+          console.error("\tUpdating Entity failed!");
+        }
       } else {
-        console.error("\tUpdating Entity failed!");
+        console.log("\tEntity cannot be modified. Since this entity is updated latest by a different user.");
       }
-      // } else {
-      //   console.log("\tEntity cannot be modified. Since this entity is updated latest by a different user.");
-      // }
 
       return existingEntityId;
     } else if (status === HttpStatus.UNAUTHORIZED) {
