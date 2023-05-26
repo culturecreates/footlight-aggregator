@@ -18,7 +18,7 @@ read destination_server_ip
 echo "\n \nPlease enter the destination mongo-db server port: "
 read destination_server_port
 
-read -p "\n \nAre you sure? Press Y to proceed" -n 1 -r
+read -p "Are you sure? Press Y to proceed" -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
