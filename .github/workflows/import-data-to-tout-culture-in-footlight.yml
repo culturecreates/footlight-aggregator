@@ -1,8 +1,9 @@
-name: Run Footlight Aggregator and Import data to Tout culture calendar 
+name: Run Footlight Aggregator and Import data to Tout culture calendar
 
 on:
-  schedule:
-    - cron: "0 1 * * *"
+  push:
+    branches:
+      - main
     
 jobs:
   run:
