@@ -1,0 +1,21 @@
+name: Run Footlight Aggregator and Import data to Tout culture calendar 
+
+on:
+  schedule:
+    - cron: "0 1 * * *"
+    
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+      - name: Run Footlight Aggregator
+        run: npm run start
+      - name: Call POST API
+        run: |
+          curl -X 'PUT' \
+            'http://127.0.0.1:3033/events/sync?footlight-base-url=https%3A%2F%2Fapi.cms.footlight.io&calendar-id=6308ef4a7f771f00431d939a&source=http%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Ffootlight%2Fgatineau-cloud' \
+            -H 'accept: */*' \
+            -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDgzOTQ4YTM3MWI4ZjAwNjQ5MTI3MGYiLCJpYXQiOjE2ODc3NzQwMDIsImV4cCI6MTY4Nzg2MDQwMn0.wlAwEHqcTG15MiUqlScX574iiDj5zL-5611cbttRhFE'
