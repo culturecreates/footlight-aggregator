@@ -212,8 +212,8 @@ export class EventService {
   }
 
   private _findIfSingleDayEvent(startDate: any, startDateTime: any, endDate: any, endDateTime: any) {
-    const eventStartDate = startDateTime ? startDateTime.trim().split("T")[0] : startDate.trim();
-    const eventEndDate = endDateTime ? endDateTime.trim().split("T")[0] : endDate.trim();
+    const eventStartDate = startDateTime ? startDateTime?.trim().split("T")[0] : startDate?.trim();
+    const eventEndDate = endDateTime ? endDateTime?.trim()?.split("T")[0] : endDate?.trim();
     return eventEndDate === eventStartDate;
   }
 
