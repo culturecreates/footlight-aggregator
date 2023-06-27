@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-    
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -17,9 +17,10 @@ jobs:
       - name: Import entities to footlight
         env:
           EMAIL: ${{ secrets.AGGREGATOR_USER_TOUT_CULTURE}}
-          PASSWORD: ${{ secrets.AGGREGATOR_PASSWORD_TOUT_CULTURE  }}
-          SOURCE: ${{ secrets.TOUT_CULTURE_SOURCE_URL  }}
-          FOOTLIGHT_BASE_URL: ${{ secrets.FOOTLIGHT_BASE_URL  }}
-          CALENDAR: ${{ secrets.CALENDAR  }}
+          PASSWORD: ${{secrets.AGGREGATOR_PASSWORD_TOUT_CULTURE}}
+          SOURCE: ${{ secrets.TOUT_CULTURE_SOURCE_URL}}
+          FOOTLIGHT_BASE_URL: ${{ secrets.FOOTLIGHT_BASE_URL}}
+          CALENDAR: ${{ secrets.CALENDAR}}
         run: |
-          node ./dist/main.js import:entities -u ${EMAIL} -p ${PASSWORD} -s ${SOURCE} -i ${FOOTLIGHT_BASE_URL} -c ${CALENDAR}
+          echo "${{secrets.AGGREGATOR_USER_TOUT_CULTURE}} -- ${{secrets.AGGREGATOR_PASSWORD_TOUT_CULTURE}} -- ${{secrets.TOUT_CULTURE_SOURCE_URL}} -- ${{secrets.FOOTLIGHT_BASE_URL}} -- ${{secrets.CALENDAR}}"
+          node ./dist/main.js import:entities -u ${{secrets.AGGREGATOR_USER_TOUT_CULTURE}} -p ${{secrets.AGGREGATOR_PASSWORD_TOUT_CULTURE}} -s ${{secrets.TOUT_CULTURE_SOURCE_URL}} -i  ${{secrets.FOOTLIGHT_BASE_URL}} -c ${{secrets.CALENDAR}}
