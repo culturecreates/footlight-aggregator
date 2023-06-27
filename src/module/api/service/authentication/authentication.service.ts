@@ -7,7 +7,7 @@ import { Environment } from "../../enum/environments.enum";
 @Injectable()
 export class AuthenticationService {
 
-  async login(userLoginDTO: UserLoginDTO, footlightUrl: Environment) {
+  async login(userLoginDTO: UserLoginDTO, footlightUrl: Environment|string) {
     const url = footlightUrl + "/login";
     const data = { "email": userLoginDTO.email, "password": userLoginDTO.password };
     const loginResponse = await axios.post(url, data,
