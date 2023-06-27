@@ -1,5 +1,5 @@
 import { Command, CommandRunner, Option } from "nest-commander";
-import { AuthenticationService, EventService, ShutdownService } from "../service";
+import { AuthenticationService, EventService } from "../service";
 import { forwardRef, Inject } from "@nestjs/common";
 
 interface BasicCommandOptions {
@@ -16,9 +16,7 @@ export class ImportEntities extends CommandRunner {
     @Inject(forwardRef(() => AuthenticationService))
     private readonly _authService: AuthenticationService,
     @Inject(forwardRef(() => EventService))
-    private readonly _eventService: EventService,
-    @Inject(forwardRef(() => ShutdownService))
-    private readonly _shutDownService: ShutdownService
+    private readonly _eventService: EventService
   ) {
     super();
   }
@@ -27,19 +25,17 @@ export class ImportEntities extends CommandRunner {
     passedParam: string[],
     options?: BasicCommandOptions
   ): Promise<void> {
-    console.log(`username:${options.userName}, password:${options.password}, source:${options.source},url:${options.footlightBaseUrl}`);
+    console.log(`\nusername:${options.userName}, password:${options.password}, source:${options.source},url:${options.footlightBaseUrl}`);
     const authenticationResponse = await this._authService.login({
       email: options.userName,
       password: options.password
     }, options.footlightBaseUrl);
     if (authenticationResponse?.accessToken) {
-      console.log("Authentication successful");
-      console.log(`authToken:${authenticationResponse?.accessToken}`);
+      console.log("\nAuthentication successful");
       await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl);
     } else {
-      console.error("Authentication failed");
+      console.error("\nAuthentication failed");
     }
-    await this._shutDownService.shutdown();
   }
 
   @Option({

@@ -12,11 +12,14 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: npm install
-      - name: Run Footlight Aggregator
-        run: npm run start
-      - name: Call POST API
+      - name: Build Footlight Aggregator
+        run: npm run build
+      - name: Import entities to footlight
+        env:
+          EMAIL: ${{ secrets.AGGREGATOR_USER_TOUT_CULTURE}}
+          PASSWORD: ${{ secrets.AGGREGATOR_PASSWORD_TOUT_CULTURE  }}
+          SOURCE: ${{ secrets.TOUT_CULTURE_SOURCE_URL  }}
+          FOOTLIGHT_BASE_URL: ${{ secrets.FOOTLIGHT_BASE_URL  }}
+          CALENDAR: ${{ secrets.CALENDAR  }}
         run: |
-          curl -X 'PUT' \
-            'http://127.0.0.1:3033/events/sync?footlight-base-url=https%3A%2F%2Fapi.cms.footlight.io&calendar-id=6308ef4a7f771f00431d939a&source=http%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Ffootlight%2Fgatineau-cloud' \
-            -H 'accept: */*' \
-            -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDgzOTQ4YTM3MWI4ZjAwNjQ5MTI3MGYiLCJpYXQiOjE2ODc3NzQwMDIsImV4cCI6MTY4Nzg2MDQwMn0.wlAwEHqcTG15MiUqlScX574iiDj5zL-5611cbttRhFE'
+          node ./dist/main.js import:entities -u ${EMAIL} -p ${PASSWORD} -s ${SOURCE} -i ${FOOTLIGHT_BASE_URL} -c ${CALENDAR}
