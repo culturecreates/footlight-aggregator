@@ -20,7 +20,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
-  await CommandFactory.run(AppModule, ["warn", "error", "debug", "log"]);
+  // await CommandFactory.run(AppModule, ["warn", "error", "debug", "log"]);
   await app.init();
 
   http.createServer(server).listen(APPLICATION.PORT);
