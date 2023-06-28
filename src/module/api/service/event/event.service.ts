@@ -14,6 +14,7 @@ import { MultilingualString } from "../../model";
 import { HttpMethodsEnum, OfferCategory } from "../../enum";
 import { Exception } from "../../helper";
 import { Concept, FacebookConstants, FootlightPaths, SameAsTypes } from "../../constants/footlight-urls";
+import * as moment from "moment-timezone";
 
 @Injectable()
 export class EventService {
@@ -40,7 +41,8 @@ export class EventService {
 
   private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
-    const events = await this._fetchEventsFromArtsData(source);
+    let events = await this._fetchEventsFromArtsData(source);
+    events = events?.filter(event => event.subEvent);
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const fetchedEventCount = events.length;
     let syncCount = 0;
@@ -64,8 +66,21 @@ export class EventService {
   async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string) {
     const {
       location: locations, performer, organizer, sponsor, alternateName, keywords, audience,
-      offerConfiguration, startDate, startDateTime, endDate, endDateTime, sameAs
+      offerConfiguration, startDate, startDateTime, endDate, endDateTime, sameAs, subEvent
     } = event;
+    if (subEvent) {
+      const dates = subEvent.map(event => event.startDateTime);
+      const customDates = [];
+      const timezone = "Canada/Eastern";
+      dates.forEach(date => {
+        const momentFormatted = moment.tz(date, timezone);
+        const startDate = momentFormatted.format("YYYY-MM-DD");
+        const time = momentFormatted.format("HH:mm");
+        customDates.push({ startDate, customTimes: [{ startTime: time }] });
+      });
+      event.recurringEvent ={ customDates, frequency:"CUSTOM"};
+      console.log(event.recurringEvent);
+    }
     const location = locations?.[0];
     const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
       footlightBaseUrl, location, currentUserId) : undefined;
