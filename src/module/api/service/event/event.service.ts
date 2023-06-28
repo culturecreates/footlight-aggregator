@@ -42,7 +42,6 @@ export class EventService {
   private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     let events = await this._fetchEventsFromArtsData(source);
-    events = events?.filter(event => event.subEvent);
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const fetchedEventCount = events.length;
     let syncCount = 0;
