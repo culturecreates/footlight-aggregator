@@ -5,7 +5,6 @@ import * as express from "express";
 import * as http from "http";
 import { AppModule } from "./app.module";
 import { APPLICATION } from "./module/api/config";
-import { CommandFactory } from "nest-commander";
 
 async function bootstrap() {
 
@@ -20,7 +19,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
-  // await CommandFactory.run(AppModule, ["warn", "error", "debug", "log"]);
   await app.init();
 
   http.createServer(server).listen(APPLICATION.PORT);

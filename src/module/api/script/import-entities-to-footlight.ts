@@ -25,7 +25,6 @@ export class ImportEntities extends CommandRunner {
     passedParam: string[],
     options?: BasicCommandOptions
   ): Promise<void> {
-    console.log(`\nusername:${options.userName}, password:${options.password}, source:${options.source},url:${options.footlightBaseUrl}`);
     const authenticationResponse = await this._authService.login({
       email: options.userName,
       password: options.password
