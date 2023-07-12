@@ -8,9 +8,9 @@ import { forwardRef, Inject, Injectable } from "@nestjs/common";
 export class PersonOrganizationService {
 
   constructor(
-    @Inject(forwardRef(() =>PersonService))
+    @Inject(forwardRef(() => PersonService))
     private readonly _personService: PersonService,
-    @Inject(forwardRef(() =>OrganizationService))
+    @Inject(forwardRef(() => OrganizationService))
     private readonly _organizationService: OrganizationService,
     @Inject(forwardRef(() => PlaceService))
     private readonly _placeService: PlaceService) {
@@ -22,11 +22,11 @@ export class PersonOrganizationService {
     for (const uri of entityUris) {
       const id = uri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
       const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_ORGANIZATION_BY_ID);
-      const { alternateName } = entityFetched;
-      entityFetched.alternateName = alternateName?.length
-        ? SharedService.formatAlternateNames(alternateName) : undefined;
 
       if (entityFetched) {
+        const { alternateName } = entityFetched;
+        entityFetched.alternateName = alternateName?.length
+          ? SharedService.formatAlternateNames(alternateName) : undefined;
         const { type } = entityFetched;
         let entityId: string;
         if (type === PersonOrganizationType.PERSON) {
@@ -39,9 +39,9 @@ export class PersonOrganizationService {
               footlightUrl, place, currentUserId);
             entityFetched.place = { entityId: placeId };
           }
-          if(entityFetched.logo){
+          if (entityFetched.logo) {
             const logoUrl = entityFetched.logo.url;
-            if(logoUrl instanceof Array){
+            if (logoUrl instanceof Array) {
               entityFetched.logo.url = logoUrl?.[0];
             }
           }
@@ -50,6 +50,8 @@ export class PersonOrganizationService {
             entityFetched, currentUserId);
         }
         personOrganizations.push({ entityId, type });
+      } else {
+        console.log(`\n\nCould not fetch data for id: ${id}`);
       }
     }
     return personOrganizations;
