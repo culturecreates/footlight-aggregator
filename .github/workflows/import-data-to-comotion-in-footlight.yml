@@ -1,0 +1,20 @@
+name: Run Footlight Aggregator and Import data to Comotion
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+      - name: Build Footlight Aggregator
+        run: npm run build
+      - name: Import entities to footlight
+        run: |
+          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_COMOTION}} -p ${{secrets.AGGREGATOR_PASSWORD_COMOTION}} -s http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca -i https://staging.api.cms.footlight.io -c 63457978637093005071a053
+
