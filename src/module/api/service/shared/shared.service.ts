@@ -143,7 +143,9 @@ export class SharedService {
       const userResponse = await SharedService.fetchUrl(url, headers);
       return userResponse.data;
     } catch (e) {
+      console.log('Authorisation failed. Please check your credentials and access to the calendar')
       Exception.unauthorized("Something went wrong.");
+
     }
   }
 }

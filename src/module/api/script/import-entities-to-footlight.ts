@@ -8,6 +8,7 @@ interface BasicCommandOptions {
   source: string;
   calendar: string;
   footlightBaseUrl: string;
+  batchSize: number;
 }
 
 @Command({ name: "import:entities", description: "Import entities to footlight-calendar" })
@@ -31,7 +32,7 @@ export class ImportEntities extends CommandRunner {
     }, options.footlightBaseUrl);
     if (authenticationResponse?.accessToken) {
       console.log("\nAuthentication successful");
-      await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl);
+      await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl, options?.batchSize);
     } else {
       console.error("\nAuthentication failed");
     }
@@ -80,6 +81,15 @@ export class ImportEntities extends CommandRunner {
   })
   parseFootlightBaseUrl(val: string): string {
     return val;
+  }
+
+  @Option({
+    flags: "-b, --batch-size [number]",
+    description: "Batch size",
+    required: true
+  })
+  parseBatchSize(val: string): number {
+    return Number.parseInt(val);
   }
 
 }

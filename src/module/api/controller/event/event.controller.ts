@@ -1,4 +1,4 @@
-import { Controller, Inject, Param, Put, Query, Req } from "@nestjs/common";
+import { Controller, Inject, Param, ParseIntPipe, Put, Query, Req } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { ApiResponseEnum, ApiStatusCode } from "../../enum";
 import { EventService } from "../../service";
@@ -40,9 +40,10 @@ export class EventController {
     @Req() request: Request,
     @Query("footlight-base-url") footlightBaseUrl?: string,
     @Query("calendar-id") calendarId?: string,
-    @Query("source") source?: string): Promise<ApiResponseEnum> {
+    @Query("source") source?: string,
+    @Query("batch-size", ParseIntPipe) batchSize?: number): Promise<ApiResponseEnum> {
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-    await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl);
+    await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl, batchSize);
     return { status: ApiStatusCode.SUCCESS, message: "Syncing Events and related entities completed." };
   }
 
