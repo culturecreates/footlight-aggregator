@@ -9,7 +9,7 @@ var logger = winston.createLogger({
 logger.add(
   new DatadogWinston({
     apiKey: DATA_DOG.clientToken,
-    hostname: 'localhost',
+    hostname: 'Aggregator Service',  //Change to host address
     service: 'aggregator',
     forwardErrorsToLogs: DATA_DOG.forwardErrorsToLogs,
     ddsource: 'aggregator-api',
