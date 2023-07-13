@@ -1,9 +1,11 @@
 name: Run Footlight Aggregator and Import data to SalleOdyssee
 
+#on:
+#  schedule:
+#    - cron: "0 6 * * 4" # Run at 12:00 PM every Thursday in Indian time
 on:
-  schedule:
-    - cron: "0 6 * * 4" # Run at 12:00 PM every Thursday in Indian time
-
+  push:
+    branches: ['main']
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -11,6 +13,13 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install dependencies
         run: npm install
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
+          envkey_ENABLING_LOG_TO_DATA_DOG: true
+          file_name: .env
+          fail_on_empty: false
       - name: Build Footlight Aggregator
         run: npm run build
       - name: Import entities to footlight
