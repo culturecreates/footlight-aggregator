@@ -5,7 +5,7 @@ import { FootlightPaths } from "../../constants/footlight-urls";
 import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { PlaceService } from "../place";
 import { PersonOrganizationService } from "../person-organization";
-const {log, error} = require("../../config");
+import { DataDogLoggerService } from "..";
 
 @Injectable()
 export class OrganizationService {
@@ -15,8 +15,9 @@ export class OrganizationService {
     @Inject(forwardRef(() => PlaceService))
     private readonly _placeService: PlaceService,
     @Inject(forwardRef(() => PersonOrganizationService))
-    private readonly _personOrganizationService: PersonOrganizationService
-  ) {
+    private readonly _personOrganizationService: PersonOrganizationService,
+    @Inject(forwardRef (()=> DataDogLoggerService))
+    private readonly _datadogLoggerService:DataDogLoggerService ) {
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string,
@@ -45,15 +46,15 @@ export class OrganizationService {
         entityFetched.alternateName = alternateName?.length
           ? SharedService.formatAlternateNames(alternateName) : undefined;
         await this._pushOrganizationToFootlight(footlightBaseUrl,calendarId, token, entityFetched, currentUser.id);
-        log(OrganizationService.name, 'info',`(${syncCount}/${fetchedOrganizationCount}) Synchronised event with id: ${JSON.stringify(fetchedOrganizationCount.sameAs)}`);
+        this._datadogLoggerService.infoLogs(OrganizationService.name, 'info',`(${syncCount}/${fetchedOrganizationCount}) Synchronised event with id: ${JSON.stringify(fetchedOrganizationCount.sameAs)}`);
       } catch (e) {
-        error(OrganizationService.name, 'error',`(${syncCount}/${fetchedOrganizationCount}) Error while adding Event ${organization.url}` + e);
+        this._datadogLoggerService.errorLogs(OrganizationService.name, 'error',`(${syncCount}/${fetchedOrganizationCount}) Error while adding Event ${organization.url}` + e);
       }
     }
   }
 
   private async _fetchOrganizationsFromArtsData(source: string) {
-    log(OrganizationService.name, 'info',`Fetching organizations from Artsdata. Source: ${source}`);
+    this._datadogLoggerService.infoLogs(OrganizationService.name, 'info',`Fetching organizations from Artsdata. Source: ${source}`);
     const query = encodeURI(ArtsDataConstants.SPARQL_QUERY_FOR_ORGANIZATION.replace("GRAPH_NAME", source));
     const url = ArtsDataUrls.ARTSDATA_SPARQL_ENDPOINT;
     const artsDataResponse = await SharedService.postUrl(url, "query=" + query, {});

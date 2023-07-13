@@ -3,7 +3,8 @@ import { PlaceDTO } from "../../dto";
 import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
-const {log, error} = require("../../config");
+import { DataDogLoggerService } from "../logger";
+
 
 @Injectable()
 export class PlaceService {
@@ -11,7 +12,9 @@ export class PlaceService {
     @Inject(forwardRef(() => PostalAddressService))
     private readonly _postalAddressService: PostalAddressService,
     @Inject(forwardRef(() => SharedService))
-    private readonly _sharedService: SharedService) {
+    private readonly _sharedService: SharedService,
+    @Inject(forwardRef(()=> DataDogLoggerService))
+    private readonly _datadogLoggerService: DataDogLoggerService) {
   }
 
   async getPlaceDetailsFromArtsData(calendarId: string, footlightBaseUrl: string, token: string, artsDataId: string,
@@ -49,15 +52,15 @@ export class PlaceService {
         const placeFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PLACE_BY_ID);
         const placeFormatted = await this._formatPlaceFetched(calendarId, token, footlightBaseUrl, currentUser.id, placeFetched);
         await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeFormatted, currentUser.id);
-        log(PlaceService.name, 'info',`(${syncCount}/${fetchedPlacesCount}) Synchronised place with id: ${JSON.stringify(placeFormatted.sameAs)}`);
+        this._datadogLoggerService.infoLogs(PlaceService.name, 'info',`(${syncCount}/${fetchedPlacesCount}) Synchronised place with id: ${JSON.stringify(placeFormatted.sameAs)}`);
       } catch (e) {
-        error(PlaceService.name, 'error',`(${syncCount}/${fetchedPlacesCount}) Error while adding Place ${place.url}` + e);
+        this._datadogLoggerService.errorLogs(PlaceService.name, 'error',`(${syncCount}/${fetchedPlacesCount}) Error while adding Place ${place.url}` + e);
       }
     }
   }
 
   private async _fetchPlacesFromArtsData(source: string) {
-    log(PlaceService.name, 'info',`Fetching places from Arts data. Source: ${source}`);
+    this._datadogLoggerService.infoLogs(PlaceService.name, 'info',`Fetching places from Arts data. Source: ${source}`);
     const query = encodeURI(ArtsDataConstants.SPARQL_QUERY_FOR_PLACES.replace("GRAPH_NAME", source));
     const url = ArtsDataUrls.ARTSDATA_SPARQL_ENDPOINT;
     const artsDataResponse = await SharedService.postUrl(url, "query=" + query, {});

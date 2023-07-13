@@ -1,10 +1,14 @@
 import { SharedService } from "../shared";
-import { Injectable } from "@nestjs/common";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
-const {log, error} = require("../../config"); 
+import { DataDogLoggerService } from "..";
 
 @Injectable()
 export class TaxonomyService {
+  constructor(
+    @Inject(forwardRef(()=> DataDogLoggerService))
+    private readonly _datadogLoggerService: DataDogLoggerService){
+    }
 
   async getTaxonomy(calendarId: string, token: string, footlightBaseUrl: string, className: string) {
     try {
@@ -17,7 +21,7 @@ export class TaxonomyService {
       }
       return taxonomies;
     } catch (e) {
-      error(TaxonomyService.name, " error", "Error while fetching taxonomies");
+      this._datadogLoggerService.errorLogs(TaxonomyService.name, " error", "Error while fetching taxonomies");
     }
   }
 

@@ -1,29 +1,17 @@
 import { DATA_DOG } from "."
 var winston = require('winston')
 var DatadogWinston = require('datadog-winston')
- 
-var logger = winston.createLogger({
+
+export const datadogLogger = winston.createLogger({
  
 })
  
-logger.add(
+datadogLogger.add(
   new DatadogWinston({
-    apiKey: DATA_DOG.clientToken,
+    apiKey: DATA_DOG.CLIENT_TOKEN,
     hostname: 'Aggregator Service',  //Change to host address
     service: 'aggregator',
-    forwardErrorsToLogs: DATA_DOG.forwardErrorsToLogs,
+    forwardErrorsToLogs: DATA_DOG.LOG_TO_DATA_DOG,
     ddsource: 'aggregator-api',
   })
 )
-
-function log(...args){
-  DATA_DOG.forwardErrorsToLogs === true ? logger.info(args) : null ;
-  console.log(args);
-}
-
-function error (...args){
-  DATA_DOG.forwardErrorsToLogs === true ? logger.info(args) : null ;
-  console.error(args);
-}
-
-module.exports =  {log :log, error:error};

@@ -1,13 +1,17 @@
 import { ArtsDataConstants } from "../../constants";
 import { Exception } from "../../helper";
-import { HttpStatus, Injectable } from "@nestjs/common";
+import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import axios from "axios";
 import { HttpMethodsEnum } from "../../enum";
 import { FootlightPaths } from "../../constants/footlight-urls";
-const {log, error} = require("../../config");
+import { DataDogLoggerService } from "..";
 
 @Injectable()
 export class SharedService {
+  constructor(
+    @Inject(forwardRef(()=> DataDogLoggerService))
+    private readonly _datadogLoggerService: DataDogLoggerService){
+  }
 
   public static async fetchFromArtsDataById(id: string, baseUrl: string) {
     const url = baseUrl.replace(ArtsDataConstants.ARTS_DATA_ID.toString(), id);
@@ -57,7 +61,7 @@ export class SharedService {
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
     const updateResponse = await this.updateEntityInFootlight(calendarId, token, eventId, url, dto);
     if (updateResponse.status === HttpStatus.OK) {
-      log(SharedService.name, 'info', `\tThe event successfully synchronised.`);
+     console.log(SharedService.name, 'info', `\tThe event successfully synchronised.`);
       return { message: "The event successfully synchronised." };
     } else {
       Exception.badRequest("Updating Entity failed!");
@@ -68,7 +72,7 @@ export class SharedService {
     const addResponse = await this.addEntityToFootlight(calendarId, token, url, body);
     const { status, response } = addResponse;
     if (status === HttpStatus.CREATED) {
-      log(SharedService.name, 'info',`\tAdded Entity (${response.id} : ${body.uri}) to Footlight!`);
+      console.log(SharedService.name, 'info',`\tAdded Entity (${response.id} : ${body.uri}) to Footlight!`);
       return response.id;
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
@@ -76,38 +80,38 @@ export class SharedService {
       if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
         const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
         if (updateResponse.status === HttpStatus.OK) {
-          log(SharedService.name, 'info',`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
+          console.log(SharedService.name, 'info',`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
         } else {
-          error(SharedService.name, 'error',"\tUpdating Entity failed!");
+          console.error(SharedService.name, 'error',"\tUpdating Entity failed!");
         }
       } else {
-        log(SharedService.name, 'info',"\tEntity cannot be modified. Since this entity is updated latest by a different user.");
+        console.log(SharedService.name, 'info',"\tEntity cannot be modified. Since this entity is updated latest by a different user.");
       }
 
       return existingEntityId;
     } else if (status === HttpStatus.UNAUTHORIZED) {
-      error(SharedService.name, 'error',"\tUnauthorized!");
+      (SharedService.name, 'error',"\tUnauthorized!");
       Exception.unauthorized(response.message);
     } else {
-      error(SharedService.name, 'error',`\tSome thing went wrong.${JSON.stringify(body)} `);
+      console.error(SharedService.name, 'error',`\tSome thing went wrong.${JSON.stringify(body)} `);
       Exception.internalServerError("Some thing went wrong");
     }
   }
 
   static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
-    log(SharedService.name, 'info',`\tAdding ${url.split("/").slice(-1)}...`);
+    console.log(SharedService.name, 'info',`\tAdding ${url.split("/").slice(-1)}...`);
     return await this.callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
   }
 
   static async updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
                                        url: string, body: any) {
-    log(SharedService.name, 'info',`\tUpdating ${url.split("/").slice(-1)}...`);
+    console.log(SharedService.name, 'info',`\tUpdating ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
     return await this.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
   }
 
   private static async _getEntityFromFootlight(calendarId: string, token: string, existingEntityId: any, url: string) {
-    log(SharedService.name, 'info',`\tFetching entity ${url.split("/").slice(-1)}...`);
+    console.log(SharedService.name, 'info',`\tFetching entity ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
 
     const headers = this.createHeaders(token, calendarId);
@@ -137,14 +141,14 @@ export class SharedService {
   }
 
   async fetchCurrentUser(footlightBaseUrl: string, token: string, calendarId: string) {
-    log(SharedService.name, 'info',`Fetching current user info`);
+    this._datadogLoggerService.infoLogs(SharedService.name, 'info',`Fetching current user info`);
     const url = footlightBaseUrl + FootlightPaths.GET_CURRENT_USER;
     const headers = SharedService.createHeaders(token, calendarId);
     try {
       const userResponse = await SharedService.fetchUrl(url, headers);
       return userResponse.data;
     } catch (e) {
-      log(SharedService.name, 'info','Authorisation failed. Please check your credentials and access to the calendar')
+      this._datadogLoggerService.errorLogs(SharedService.name, 'info','Authorisation failed. Please check your credentials and access to the calendar')
       Exception.unauthorized("Something went wrong.");
 
     }

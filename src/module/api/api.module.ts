@@ -15,12 +15,13 @@ import { InvitationService } from "./service/invitation";
 import { InvitationController } from "./controller/invitation";
 import { OrganizationController } from "./controller/organization";
 import { PlaceController } from "./controller/place";
+import { DataDogLoggerService } from "./service";
 
 @Module({
   imports: [],
   controllers: [AuthenticationController, EventController, PlaceController, OrganizationController, InvitationController],
   providers: [PersonOrganizationService, EventService, PostalAddressService, PersonService, PlaceService,
-    OrganizationService, AuthenticationService, TaxonomyService, InvitationService, SharedService]
+    OrganizationService, AuthenticationService, TaxonomyService, InvitationService, SharedService, DataDogLoggerService]
 })
 export class ApiModule {
 }
