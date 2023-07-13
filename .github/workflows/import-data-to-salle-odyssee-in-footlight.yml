@@ -1,11 +1,9 @@
 name: Run Footlight Aggregator and Import data to SalleOdyssee
 
-#on:
-#  schedule:
-#    - cron: "0 6 * * 4" # Run at 12:00 PM every Thursday in Indian time
 on:
-  push:
-    branches: ['main']
+  schedule:
+    - cron: "0 6 * * 4" # Run at 2:00 AM ET every Thursday
+
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -25,4 +23,3 @@ jobs:
       - name: Import entities to footlight
         run: |
           node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_SALLE_ODYSSEE}} -p ${{secrets.AGGREGATOR_PASSWORD_SALLE_ODYSSEE}} -s http://kg.artsdata.ca/culture-creates/footlight/maisondelaculture-ca -i https://api.cms.footlight.io -c 6308ef4a7f771f00431d939a -b 30
-
