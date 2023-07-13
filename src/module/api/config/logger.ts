@@ -9,8 +9,8 @@ var logger = winston.createLogger({
 logger.add(
   new DatadogWinston({
     apiKey: DATA_DOG.clientToken,
-    hostname: 'Aggregator Service',  //Change to host address
-    service: 'aggregator',
+    hostname: 'Footlight Aggregator',
+    service: 'footlight-aggregator',
     forwardErrorsToLogs: DATA_DOG.forwardErrorsToLogs,
     ddsource: 'aggregator-api',
   })
