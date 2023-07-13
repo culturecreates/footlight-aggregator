@@ -133,6 +133,7 @@ export class EventService {
     log(EventService.name, "info",`Fetching events from Artsdata. Source: ${source}`);
     const limit = batchSize ? batchSize : 300;
     const url = ArtsDataUrls.EVENTS + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
+    log(`Fetch Events From ArtsData: ${url}.`);
     const artsDataResponse = await SharedService.fetchUrl(url);
     return artsDataResponse.data.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
   }
