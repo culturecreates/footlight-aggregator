@@ -5,6 +5,7 @@ import { FootlightPaths } from "../../constants/footlight-urls";
 import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { PlaceService } from "../place";
 import { PersonOrganizationService } from "../person-organization";
+const {log, error} = require("../../config");
 
 @Injectable()
 export class OrganizationService {
@@ -44,15 +45,15 @@ export class OrganizationService {
         entityFetched.alternateName = alternateName?.length
           ? SharedService.formatAlternateNames(alternateName) : undefined;
         await this._pushOrganizationToFootlight(footlightBaseUrl,calendarId, token, entityFetched, currentUser.id);
-        console.log(`(${syncCount}/${fetchedOrganizationCount}) Synchronised event with id: ${JSON.stringify(fetchedOrganizationCount.sameAs)}`);
+        log(OrganizationService.name, 'info',`(${syncCount}/${fetchedOrganizationCount}) Synchronised event with id: ${JSON.stringify(fetchedOrganizationCount.sameAs)}`);
       } catch (e) {
-        console.error(`(${syncCount}/${fetchedOrganizationCount}) Error while adding Event ${organization.url}` + e);
+        error(OrganizationService.name, 'error',`(${syncCount}/${fetchedOrganizationCount}) Error while adding Event ${organization.url}` + e);
       }
     }
   }
 
   private async _fetchOrganizationsFromArtsData(source: string) {
-    console.log(`Fetching organizations from Artsdata. Source: ${source}`);
+    log(OrganizationService.name, 'info',`Fetching organizations from Artsdata. Source: ${source}`);
     const query = encodeURI(ArtsDataConstants.SPARQL_QUERY_FOR_ORGANIZATION.replace("GRAPH_NAME", source));
     const url = ArtsDataUrls.ARTSDATA_SPARQL_ENDPOINT;
     const artsDataResponse = await SharedService.postUrl(url, "query=" + query, {});

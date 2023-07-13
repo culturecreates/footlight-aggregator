@@ -1,6 +1,7 @@
 import { SharedService } from "../shared";
 import { Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
+const {log, error} = require("../../config"); 
 
 @Injectable()
 export class TaxonomyService {
@@ -16,7 +17,7 @@ export class TaxonomyService {
       }
       return taxonomies;
     } catch (e) {
-      console.error("Error while fetching taxonomies");
+      error(TaxonomyService.name, " error", "Error while fetching taxonomies");
     }
   }
 

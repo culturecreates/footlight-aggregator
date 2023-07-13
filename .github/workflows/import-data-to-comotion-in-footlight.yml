@@ -1,9 +1,8 @@
 name: Run Footlight Aggregator and Import data to Comotion
 
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: "0 5 * * 4"  # Run at 11:00 AM every Thursday in Indian time
 
 jobs:
   run:
@@ -16,5 +15,5 @@ jobs:
         run: npm run build
       - name: Import entities to footlight
         run: |
-          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_COMOTION}} -p ${{secrets.AGGREGATOR_PASSWORD_COMOTION}} -s http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca -i https://staging.api.cms.footlight.io -c 63457978637093005071a053 -b 30
+          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_COMOTION}} -p ${{secrets.AGGREGATOR_PASSWORD_COMOTION}} -s http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca -i https://api.cms.footlight.io -c 63457978637093005071a053 -b 30
 

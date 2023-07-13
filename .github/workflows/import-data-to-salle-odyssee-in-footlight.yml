@@ -1,9 +1,8 @@
-name: Run Footlight Aggregator and Import data to Salle Odysse
+name: Run Footlight Aggregator and Import data to SalleOdyssee
 
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: "0 6 * * 4" # Run at 12:00 PM every Thursday in Indian time
 
 jobs:
   run:

@@ -3,6 +3,7 @@ import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { PersonOrganizationType } from "../../enum";
 import { OrganizationService, PersonService, PlaceService } from "../../service";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
+const {log, error} = require("../../config");
 
 @Injectable()
 export class PersonOrganizationService {
@@ -51,7 +52,7 @@ export class PersonOrganizationService {
         }
         personOrganizations.push({ entityId, type });
       } else {
-        console.log(`\n\nCould not fetch data for id: ${id}`);
+        log(PersonOrganizationService.name, 'info',`\n\nCould not fetch data for id: ${id}`);
       }
     }
     return personOrganizations;

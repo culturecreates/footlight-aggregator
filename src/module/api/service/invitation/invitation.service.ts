@@ -5,6 +5,7 @@ import { SharedService } from "../shared";
 import { HttpMethodsEnum } from "../../enum";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { Exception } from "../../helper";
+const {log, error} = require("../../config");
 
 @Injectable()
 export class InvitationService {
@@ -17,7 +18,7 @@ export class InvitationService {
       header: true,
       skipEmptyLines: true,
       complete: async (results) => {
-        console.log("results:", results);
+        log(InvitationService.name,"info","results:", results);
         for (const result of results.data) {
           await this._sendInvitation(result.firstName, result.lastName, result.emailAddress,
             result.role?.toUpperCase(), result.languagePreference?.toUpperCase(), calendarId, token, footlightUrl);
@@ -43,6 +44,6 @@ export class InvitationService {
     if (status === HttpStatus.UNAUTHORIZED) {
       Exception.unauthorized(response);
     }
-    console.log(response);
+    log(InvitationService.name,"info",response);
   }
 }
