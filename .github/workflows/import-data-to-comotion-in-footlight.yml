@@ -26,5 +26,5 @@ jobs:
         run: npm run build
       - name: Import entities to footlight
         run: |
-          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_COMOTION}} -p ${{secrets.AGGREGATOR_PASSWORD_COMOTION}} -s http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca -i https://api.cms.footlight.io -c 63457978637093005071a053 -b 30
+          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_COMOTION}} -p ${{secrets.AGGREGATOR_PASSWORD_COMOTION}} -s http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca -i https://api.cms.footlight.io -c 63457978637093005071a053 -b 10
 
