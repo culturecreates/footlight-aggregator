@@ -3,6 +3,7 @@ import { PlaceDTO } from "../../dto";
 import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
+const {log, error} = require("../../config");
 
 @Injectable()
 export class PlaceService {
@@ -48,15 +49,15 @@ export class PlaceService {
         const placeFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PLACE_BY_ID);
         const placeFormatted = await this._formatPlaceFetched(calendarId, token, footlightBaseUrl, currentUser.id, placeFetched);
         await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeFormatted, currentUser.id);
-        console.log(`(${syncCount}/${fetchedPlacesCount}) Synchronised place with id: ${JSON.stringify(placeFormatted.sameAs)}`);
+        log(PlaceService.name, 'info',`(${syncCount}/${fetchedPlacesCount}) Synchronised place with id: ${JSON.stringify(placeFormatted.sameAs)}`);
       } catch (e) {
-        console.error(`(${syncCount}/${fetchedPlacesCount}) Error while adding Place ${place.url}` + e);
+        error(PlaceService.name, 'error',`(${syncCount}/${fetchedPlacesCount}) Error while adding Place ${place.url}` + e);
       }
     }
   }
 
   private async _fetchPlacesFromArtsData(source: string) {
-    console.log(`Fetching places from Arts data. Source: ${source}`);
+    log(PlaceService.name, 'info',`Fetching places from Arts data. Source: ${source}`);
     const query = encodeURI(ArtsDataConstants.SPARQL_QUERY_FOR_PLACES.replace("GRAPH_NAME", source));
     const url = ArtsDataUrls.ARTSDATA_SPARQL_ENDPOINT;
     const artsDataResponse = await SharedService.postUrl(url, "query=" + query, {});

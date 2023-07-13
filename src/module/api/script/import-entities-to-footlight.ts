@@ -1,6 +1,7 @@
 import { Command, CommandRunner, Option } from "nest-commander";
 import { AuthenticationService, EventService } from "../service";
 import { forwardRef, Inject } from "@nestjs/common";
+const {log, error} = require("../config");
 
 interface BasicCommandOptions {
   userName: string;
@@ -31,10 +32,10 @@ export class ImportEntities extends CommandRunner {
       password: options.password
     }, options.footlightBaseUrl);
     if (authenticationResponse?.accessToken) {
-      console.log("\nAuthentication successful");
+      log(ImportEntities.name, "info", "\nAuthentication successful");
       await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl, options?.batchSize);
     } else {
-      console.error("\nAuthentication failed");
+      error(ImportEntities.name, "error","\nAuthentication failed");
     }
   }
 
