@@ -1,4 +1,4 @@
-name: Run Footlight Aggregator and Import data to SalleOdyssee
+name: Run Salle Odyssee Aggregator
 
 on:
   schedule:

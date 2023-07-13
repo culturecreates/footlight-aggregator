@@ -1,4 +1,4 @@
-name: Run Footlight Aggregator and Import data to Ville De Gatineau
+name: Run Ville de Gatineau Aggregator
 
 on:
   schedule:
