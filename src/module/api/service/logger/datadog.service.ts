@@ -7,13 +7,10 @@ import { DATA_DOG } from "../../config";
 export class DataDogLoggerService{
 
     async infoLogs(...args){
-        DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.info(args) : null;
-        console.log(DATA_DOG.LOG_TO_DATA_DOG);
-        console.log(args);
+        DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.info(args) : console.log(args);
     }
 
     async errorLogs(...args){
-        DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.info(args) : null;
-        console.error(args);
+        DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.error(args) : console.error(args);
     }
 }

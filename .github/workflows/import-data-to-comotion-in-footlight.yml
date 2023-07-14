@@ -1,8 +1,8 @@
-name: Run Footlight Aggregator and Import data to Comotion
+name: Run Co-motion Aggregator
 
 on:
   schedule:
-    - cron: "0 5 * * 4"  # Run at 11:00 AM every Thursday in Indian time
+    - cron: "0 5 * * 5"  # Run at 1:00 AM ET every Thursday
 
 jobs:
   run:
@@ -14,15 +14,12 @@ jobs:
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
         with:
-          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_KEY }}
-          envkey_APP_PORT: 3033
+          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
           envkey_ENABLING_LOG_TO_DATA_DOG: true
-          directory: aggregator-api
           file_name: .env
           fail_on_empty: false
       - name: Build Footlight Aggregator
         run: npm run build
       - name: Import entities to footlight
         run: |
-          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_COMOTION}} -p ${{secrets.AGGREGATOR_PASSWORD_COMOTION}} -s http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca -i https://api.cms.footlight.io -c 63457978637093005071a053 -b 30
-
+          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_COMOTION}} -p ${{secrets.AGGREGATOR_PASSWORD_COMOTION}} -s http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca -i https://api.cms.footlight.io -c 63457978637093005071a053 -b 10

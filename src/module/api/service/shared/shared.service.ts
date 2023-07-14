@@ -52,6 +52,7 @@ export class SharedService {
       });
       return { status: responseStatus, response: responseData };
     }
+    this._loggerService(`Method unsupported`);
     Exception.internalServerError("Method unsupported");
   }
 
@@ -61,9 +62,10 @@ export class SharedService {
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
     const updateResponse = await this.updateEntityInFootlight(calendarId, token, eventId, url, dto);
     if (updateResponse.status === HttpStatus.OK) {
-     console.log(SharedService.name, 'info', `\tThe event successfully synchronised.`);
+      this._loggerService(SharedService.name, 'info', `The event successfully synchronised.`);
       return { message: "The event successfully synchronised." };
     } else {
+      this._loggerService(`Updating Entity failed!`);
       Exception.badRequest("Updating Entity failed!");
     }
   }
@@ -72,7 +74,7 @@ export class SharedService {
     const addResponse = await this.addEntityToFootlight(calendarId, token, url, body);
     const { status, response } = addResponse;
     if (status === HttpStatus.CREATED) {
-      console.log(SharedService.name, 'info',`\tAdded Entity (${response.id} : ${body.uri}) to Footlight!`);
+      this._loggerService(SharedService.name, 'info',`Added Entity (${response.id} : ${body.uri}) to Footlight!`);
       return response.id;
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
@@ -80,38 +82,38 @@ export class SharedService {
       if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
         const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
         if (updateResponse.status === HttpStatus.OK) {
-          console.log(SharedService.name, 'info',`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
+          this._loggerService(SharedService.name, 'info', `Updated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
         } else {
-          console.error(SharedService.name, 'error',"\tUpdating Entity failed!");
+          this._loggerService(SharedService.name, 'error', `Updating Entity failed! `);
         }
       } else {
-        console.log(SharedService.name, 'info',"\tEntity cannot be modified. Since this entity is updated latest by a different user.");
+        this._loggerService(SharedService.name, 'info', `Entity cannot be modified. Since this entity is updated latest by a different user.`);
       }
 
       return existingEntityId;
     } else if (status === HttpStatus.UNAUTHORIZED) {
-      (SharedService.name, 'error',"\tUnauthorized!");
+      (SharedService.name, 'error',"Unauthorized!");
       Exception.unauthorized(response.message);
     } else {
-      console.error(SharedService.name, 'error',`\tSome thing went wrong.${JSON.stringify(body)} `);
+      this._loggerService(SharedService.name, 'error', `Some thing went wrong.${JSON.stringify(body)} `);
       Exception.internalServerError("Some thing went wrong");
     }
   }
 
   static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
-    console.log(SharedService.name, 'info',`\tAdding ${url.split("/").slice(-1)}...`);
+    this._loggerService(SharedService.name, 'info',`Adding ${url.split("/").slice(-1)}...`)
     return await this.callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
   }
 
   static async updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
                                        url: string, body: any) {
-    console.log(SharedService.name, 'info',`\tUpdating ${url.split("/").slice(-1)}...`);
+    this._loggerService(SharedService.name, 'info', `Updating ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
     return await this.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
   }
 
   private static async _getEntityFromFootlight(calendarId: string, token: string, existingEntityId: any, url: string) {
-    console.log(SharedService.name, 'info',`\tFetching entity ${url.split("/").slice(-1)}...`);
+    this._loggerService(SharedService.name, 'info',`Fetching entity ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
 
     const headers = this.createHeaders(token, calendarId);
@@ -152,5 +154,10 @@ export class SharedService {
       Exception.unauthorized("Something went wrong.");
 
     }
+  }
+
+  static _loggerService(...args){
+    const _datadogLoggerService = DataDogLoggerService.prototype;
+    _datadogLoggerService.infoLogs(args);
   }
 }
