@@ -15,7 +15,7 @@ import { HttpMethodsEnum, OfferCategory } from "../../enum";
 import { Exception } from "../../helper";
 import { Concept, FacebookConstants, FootlightPaths, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
-import { DataDogLoggerService } from "../logger";
+import { LoggerService } from "../logger";
 
 @Injectable()
 export class EventService {
@@ -34,8 +34,8 @@ export class EventService {
     private readonly _taxonomyService: TaxonomyService,
     @Inject(forwardRef(() => SharedService))
     private readonly _sharedService: SharedService,
-    @Inject (forwardRef(()=> DataDogLoggerService))
-    private readonly _datadogLoggerService: DataDogLoggerService) {
+    @Inject (forwardRef(()=> LoggerService))
+    private readonly _loggerService: LoggerService) {
   }
 
   private taxonomies;
@@ -59,15 +59,15 @@ export class EventService {
         try {
           const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id);
           await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
-          this._datadogLoggerService.infoLogs(EventService.name, "info",`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
+          this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
         } catch (e) {
-          this._datadogLoggerService.errorLogs(EventService.name, "error",`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
+          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
         }
       }
       offset = offset + batchSize;
       batch = batch + 1;
     } while (hasNext);
-    this._datadogLoggerService.infoLogs(EventService.name, "info",`Successfully synchronised ${totalCount} Events and linked entities.`);
+    this._loggerService.infoLogs(`Successfully synchronised ${totalCount} Events and linked entities.`);
   }
 
   async syncEntities(token: string, calendarId: string, source: string, footlightBaseUrl: string, batchSize: number) {
@@ -90,7 +90,7 @@ export class EventService {
         customDates.push({ startDate, customTimes: [{ startTime: time }] });
       });
       event.recurringEvent = { customDates, frequency: "CUSTOM" };
-      this._datadogLoggerService.infoLogs(EventService.name, "info",event.recurringEvent);
+      this._loggerService.infoLogs(event.recurringEvent);
     }
     const location = locations?.[0];
     const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
@@ -132,10 +132,10 @@ export class EventService {
   }
 
   private async _fetchEventsFromArtsData(source: string, batchSize: number, offset: number) {
-    this._datadogLoggerService.infoLogs(EventService.name, "info",`Fetching events from Artsdata. Source: ${source}`);
+    this._loggerService.infoLogs(`Fetching events from Artsdata. Source: ${source}`);
     const limit = batchSize ? batchSize : 300;
     const url = ArtsDataUrls.EVENTS + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
-    this._datadogLoggerService.infoLogs(`Fetch Events From ArtsData: ${url}.`);
+    this._loggerService.infoLogs(`Fetch Events From ArtsData: ${url}.`);
     const artsDataResponse = await SharedService.fetchUrl(url);
     return artsDataResponse.data.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
   }
@@ -225,14 +225,14 @@ export class EventService {
       const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id);
       return await SharedService.patchEventInFootlight(calendarId, token, footlightBaseUrl, eventId, eventFormatted);
     } else {
-      this._datadogLoggerService.infoLogs(EventService.name, "info","\tEntity cannot be modified. Since this entity is updated latest by a different user.");
+      this._loggerService.infoLogs("Entity cannot be modified. Since this entity is updated latest by a different user.");
     }
 
 
   }
 
   private async _fetchTaxonomies(calendarId: string, token: string, footlightBaseUrl: string, className: string) {
-    this._datadogLoggerService.infoLogs(EventService.name, "info","Fetching taxonomies");
+    this._loggerService.infoLogs("Fetching taxonomies");
     this.taxonomies = await this._taxonomyService.getTaxonomy(calendarId, token, footlightBaseUrl, className);
     if (this.taxonomies) {
       this._extractEventTypeAndAudienceType(this.taxonomies);
@@ -258,19 +258,19 @@ export class EventService {
         const addResponse = await SharedService.addEntityToFootlight(calendarId, token, url, eventFormatted);
         const { status, response } = addResponse;
         if (status === HttpStatus.CREATED) {
-          this._datadogLoggerService.infoLogs(EventService.name, "info",`\tAdded Entity (${response.id} : ${eventFormatted.uri}) to Footlight!`);
+          this._loggerService.infoLogs(`Added Entity (${response.id} : ${eventFormatted.uri}) to Footlight!`);
           return response.id;
         } else if (status === HttpStatus.CONFLICT) {
           const existingEntityId = await response.error;
           const url = footlightBaseUrl + /events/ + existingEntityId + "/reload-image";
           await SharedService.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, { imageUrl: event.image?.url?.uri });
         }
-        this._datadogLoggerService.infoLogs(EventService.name, "info",`(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
+        this._loggerService.infoLogs(`(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
       } catch (e) {
-        this._datadogLoggerService.errorLogs(EventService.name, "error",`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
+        this._loggerService.errorLogs(`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
       }
     }
-    this._datadogLoggerService.infoLogs(EventService.name, "info","Successfully synchronised Events and linked entities.");
+    this._loggerService.infoLogs("Successfully synchronised Events and linked entities.");
   }
 
   private _formatSameAs(elements: { uri: string }[]) {

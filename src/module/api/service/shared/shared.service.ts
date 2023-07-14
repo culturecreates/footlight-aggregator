@@ -4,13 +4,13 @@ import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import axios from "axios";
 import { HttpMethodsEnum } from "../../enum";
 import { FootlightPaths } from "../../constants/footlight-urls";
-import { DataDogLoggerService } from "..";
+import { LoggerService } from "..";
 
 @Injectable()
 export class SharedService {
   constructor(
-    @Inject(forwardRef(()=> DataDogLoggerService))
-    private readonly _datadogLoggerService: DataDogLoggerService){
+    @Inject(forwardRef(()=> LoggerService))
+    private readonly _loggerService: LoggerService){
   }
 
   public static async fetchFromArtsDataById(id: string, baseUrl: string) {
@@ -62,7 +62,7 @@ export class SharedService {
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
     const updateResponse = await this.updateEntityInFootlight(calendarId, token, eventId, url, dto);
     if (updateResponse.status === HttpStatus.OK) {
-      this._loggerService(SharedService.name, 'info', `The event successfully synchronised.`);
+      this._loggerService(`The event successfully synchronised.`);
       return { message: "The event successfully synchronised." };
     } else {
       this._loggerService(`Updating Entity failed!`);
@@ -74,7 +74,7 @@ export class SharedService {
     const addResponse = await this.addEntityToFootlight(calendarId, token, url, body);
     const { status, response } = addResponse;
     if (status === HttpStatus.CREATED) {
-      this._loggerService(SharedService.name, 'info',`Added Entity (${response.id} : ${body.uri}) to Footlight!`);
+      this._loggerService(`Added Entity (${response.id} : ${body.uri}) to Footlight!`);
       return response.id;
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
@@ -82,12 +82,12 @@ export class SharedService {
       if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
         const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
         if (updateResponse.status === HttpStatus.OK) {
-          this._loggerService(SharedService.name, 'info', `Updated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
+          this._loggerService(`Updated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
         } else {
-          this._loggerService(SharedService.name, 'error', `Updating Entity failed! `);
+          this._loggerService(`Updating Entity failed! `);
         }
       } else {
-        this._loggerService(SharedService.name, 'info', `Entity cannot be modified. Since this entity is updated latest by a different user.`);
+        this._loggerService(`Entity cannot be modified. Since this entity is updated latest by a different user.`);
       }
 
       return existingEntityId;
@@ -95,25 +95,25 @@ export class SharedService {
       (SharedService.name, 'error',"Unauthorized!");
       Exception.unauthorized(response.message);
     } else {
-      this._loggerService(SharedService.name, 'error', `Some thing went wrong.${JSON.stringify(body)} `);
+      this._loggerService(`Some thing went wrong.${JSON.stringify(body)} `);
       Exception.internalServerError("Some thing went wrong");
     }
   }
 
   static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
-    this._loggerService(SharedService.name, 'info',`Adding ${url.split("/").slice(-1)}...`)
+    this._loggerService(`Adding ${url.split("/").slice(-1)}...`)
     return await this.callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
   }
 
   static async updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
                                        url: string, body: any) {
-    this._loggerService(SharedService.name, 'info', `Updating ${url.split("/").slice(-1)}...`);
+    this._loggerService(`Updating ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
     return await this.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
   }
 
   private static async _getEntityFromFootlight(calendarId: string, token: string, existingEntityId: any, url: string) {
-    this._loggerService(SharedService.name, 'info',`Fetching entity ${url.split("/").slice(-1)}...`);
+    this._loggerService(`Fetching entity ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
 
     const headers = this.createHeaders(token, calendarId);
@@ -143,21 +143,21 @@ export class SharedService {
   }
 
   async fetchCurrentUser(footlightBaseUrl: string, token: string, calendarId: string) {
-    this._datadogLoggerService.infoLogs(SharedService.name, 'info',`Fetching current user info`);
+    this._loggerService.infoLogs(`Fetching current user info`);
     const url = footlightBaseUrl + FootlightPaths.GET_CURRENT_USER;
     const headers = SharedService.createHeaders(token, calendarId);
     try {
       const userResponse = await SharedService.fetchUrl(url, headers);
       return userResponse.data;
     } catch (e) {
-      this._datadogLoggerService.errorLogs(SharedService.name, 'info','Authorisation failed. Please check your credentials and access to the calendar')
+      this._loggerService.errorLogs('Authorisation failed. Please check your credentials and access to the calendar')
       Exception.unauthorized("Something went wrong.");
 
     }
   }
 
   static _loggerService(...args){
-    const _datadogLoggerService = DataDogLoggerService.prototype;
-    _datadogLoggerService.infoLogs(args);
+    const _loggerService = LoggerService.prototype;
+    _loggerService.infoLogs(args);
   }
 }

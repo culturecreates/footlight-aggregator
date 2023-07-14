@@ -4,7 +4,7 @@ import { DATA_DOG } from "../../config";
 
 
 @Injectable()
-export class DataDogLoggerService{
+export class LoggerService{
 
     async infoLogs(...args){
         DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.info(args) : console.log(args);

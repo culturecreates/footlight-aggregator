@@ -1,1 +1,1 @@
-export * from './datadog.service';
+export * from './logger.service';

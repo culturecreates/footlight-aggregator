@@ -1,5 +1,5 @@
 import { Command, CommandRunner, Option } from "nest-commander";
-import { AuthenticationService, DataDogLoggerService, EventService } from "../service";
+import { AuthenticationService, LoggerService, EventService } from "../service";
 import { forwardRef, Inject } from "@nestjs/common";
 
 interface BasicCommandOptions {
@@ -18,8 +18,8 @@ export class ImportEntities extends CommandRunner {
     private readonly _authService: AuthenticationService,
     @Inject(forwardRef(() => EventService))
     private readonly _eventService: EventService,
-    @Inject(forwardRef(() => DataDogLoggerService))
-    private readonly _datadogLoggerService:DataDogLoggerService
+    @Inject(forwardRef(() => LoggerService))
+    private readonly _loggerService: LoggerService
   ) {
     super();
   }
@@ -33,10 +33,10 @@ export class ImportEntities extends CommandRunner {
       password: options.password
     }, options.footlightBaseUrl);
     if (authenticationResponse?.accessToken) {
-      this._datadogLoggerService.infoLogs(ImportEntities.name, "info", "\nAuthentication successful");
+      this._loggerService.infoLogs("Authentication successful");
       await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl, options?.batchSize);
     } else {
-      this._datadogLoggerService.errorLogs(ImportEntities.name, "error","\nAuthentication failed");
+      this._loggerService.errorLogs("Authentication failed");
     }
   }
 

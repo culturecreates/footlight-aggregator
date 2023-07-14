@@ -3,7 +3,7 @@ import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { PersonOrganizationType } from "../../enum";
 import { OrganizationService, PersonService, PlaceService } from "../../service";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
-import { DataDogLoggerService } from "../logger";
+import { LoggerService } from "../logger";
 
 
 @Injectable()
@@ -16,8 +16,8 @@ export class PersonOrganizationService {
     private readonly _organizationService: OrganizationService,
     @Inject(forwardRef(() => PlaceService))
     private readonly _placeService: PlaceService,
-    @Inject(forwardRef(()=> DataDogLoggerService))
-    private readonly _datadogLoggerService: DataDogLoggerService
+    @Inject(forwardRef(()=> LoggerService))
+    private readonly _loggerService: LoggerService
     ){
   }
 
@@ -56,7 +56,7 @@ export class PersonOrganizationService {
         }
         personOrganizations.push({ entityId, type });
       } else {
-        this._datadogLoggerService.infoLogs(PersonOrganizationService.name, 'info',`Could not fetch data for id: ${id}`);
+        this._loggerService.infoLogs(`Could not fetch data for id: ${id}`);
       }
     }
     return personOrganizations;

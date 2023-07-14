@@ -5,13 +5,13 @@ import { SharedService } from "../shared";
 import { HttpMethodsEnum } from "../../enum";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { Exception } from "../../helper";
-import { DataDogLoggerService } from "../logger";
+import { LoggerService } from "../logger";
 
 @Injectable()
 export class InvitationService {
   constructor(
-    @Inject(forwardRef(()=> DataDogLoggerService))
-    private readonly _datadogLoggerService: DataDogLoggerService){
+    @Inject(forwardRef(()=> LoggerService))
+    private readonly _loggerService: LoggerService){
 
   }
 
@@ -23,7 +23,7 @@ export class InvitationService {
       header: true,
       skipEmptyLines: true,
       complete: async (results) => {
-        this._datadogLoggerService.infoLogs(InvitationService.name,"info","results:", results);
+        this._loggerService.infoLogs("results:", results);
         for (const result of results.data) {
           await this._sendInvitation(result.firstName, result.lastName, result.emailAddress,
             result.role?.toUpperCase(), result.languagePreference?.toUpperCase(), calendarId, token, footlightUrl);
@@ -49,6 +49,6 @@ export class InvitationService {
     if (status === HttpStatus.UNAUTHORIZED) {
       Exception.unauthorized(response);
     }
-    this._datadogLoggerService.infoLogs(InvitationService.name,"info",response);
+    this._loggerService.infoLogs(response);
   }
 }
