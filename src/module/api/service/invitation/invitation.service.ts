@@ -23,7 +23,7 @@ export class InvitationService {
       header: true,
       skipEmptyLines: true,
       complete: async (results) => {
-        this._loggerService.infoLogs("results:", results);
+        this._loggerService.infoLogs(`"results:", ${results}`);
         for (const result of results.data) {
           await this._sendInvitation(result.firstName, result.lastName, result.emailAddress,
             result.role?.toUpperCase(), result.languagePreference?.toUpperCase(), calendarId, token, footlightUrl);

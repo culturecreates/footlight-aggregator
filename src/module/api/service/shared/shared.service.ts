@@ -156,7 +156,7 @@ export class SharedService {
     }
   }
 
-  static _loggerService(...args){
+  static _loggerService(args: string){
     const _loggerService = LoggerService.prototype;
     _loggerService.infoLogs(args);
   }
