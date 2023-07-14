@@ -8,7 +8,8 @@ import {
   PersonService,
   PlaceService,
   PostalAddressService,
-  SharedService
+  SharedService,
+  LoggerService
 } from "./module/api/service";
 import { TaxonomyService } from "./module/api/service/taxonomy";
 import { ImportEntities } from "./module/api/script/import-entities-to-footlight";
@@ -17,7 +18,7 @@ import { ImportEntities } from "./module/api/script/import-entities-to-footlight
   controllers: [],
   imports: [ApiModule],
   providers: [AuthenticationService, EventService, PostalAddressService, PersonService, PlaceService,
-    OrganizationService, TaxonomyService, PersonOrganizationService, SharedService, ImportEntities]
+    OrganizationService, TaxonomyService, PersonOrganizationService, SharedService, ImportEntities, LoggerService]
 })
 export class AppModule {
 }

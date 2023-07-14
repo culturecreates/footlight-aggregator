@@ -6,3 +6,4 @@ export * from "./authentication";
 export * from "./person-organization";
 export * from "./postal-address";
 export * from "./shared";
+export * from "./logger";

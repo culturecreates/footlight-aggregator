@@ -1,7 +1,6 @@
 import { Command, CommandRunner, Option } from "nest-commander";
-import { AuthenticationService, EventService } from "../service";
+import { AuthenticationService, LoggerService, EventService } from "../service";
 import { forwardRef, Inject } from "@nestjs/common";
-const {log, error} = require("../config");
 
 interface BasicCommandOptions {
   userName: string;
@@ -18,7 +17,9 @@ export class ImportEntities extends CommandRunner {
     @Inject(forwardRef(() => AuthenticationService))
     private readonly _authService: AuthenticationService,
     @Inject(forwardRef(() => EventService))
-    private readonly _eventService: EventService
+    private readonly _eventService: EventService,
+    @Inject(forwardRef(() => LoggerService))
+    private readonly _loggerService: LoggerService
   ) {
     super();
   }
@@ -32,10 +33,10 @@ export class ImportEntities extends CommandRunner {
       password: options.password
     }, options.footlightBaseUrl);
     if (authenticationResponse?.accessToken) {
-      log(ImportEntities.name, "info", "\nAuthentication successful");
+      this._loggerService.infoLogs("Authentication successful");
       await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl, options?.batchSize);
     } else {
-      error(ImportEntities.name, "error","\nAuthentication failed");
+      this._loggerService.errorLogs("Authentication failed");
     }
   }
 
