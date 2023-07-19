@@ -5,6 +5,7 @@ import { EventService } from "../../service";
 import { AuthHeaderExtractor } from "../../helper";
 import { Request } from "express";
 import { Environment } from "../../enum/environments.enum";
+import { Sources } from "../../enum/sources.enum";
 
 @Controller("events")
 @ApiTags("Event APIs")
@@ -31,10 +32,9 @@ export class EventController {
   })
   @ApiQuery({
     name: "source",
-    description: "**source (Graph)**",
+    description: "Select the source",
     required: true,
-    explode: true,
-    example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
+    enum: Object.values(Sources)
   })
   async syncEvents(
     @Req() request: Request,

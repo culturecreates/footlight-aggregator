@@ -6,12 +6,12 @@ import {
   SharedService
 } from "../../service";
 import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
-import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
+import { ArtsDataConstants, ArtsDataUrls, VILLE_DE_GATINEAU_MAPPING } from "../../constants";
 import { EventDTO } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
 import { MultilingualString } from "../../model";
-import { HttpMethodsEnum, OfferCategory } from "../../enum";
+import { EventProperty, HttpMethodsEnum, OfferCategory } from "../../enum";
 import { Exception } from "../../helper";
 import { Concept, FacebookConstants, FootlightPaths, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
@@ -102,14 +102,6 @@ export class EventService {
     const collaborators = sponsor?.length ? await this._personOrganizationService
       .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId) : undefined;
     delete event?.image?.uri;
-    const formattedKeywords = [];
-    keywords?.forEach(keyword => {
-      if (keyword.startsWith("[")) {
-        formattedKeywords.push(...JSON.parse(keyword));
-      } else {
-        formattedKeywords.push(keyword);
-      }
-    });
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
 
     const eventToAdd = event;
@@ -118,10 +110,10 @@ export class EventService {
     eventToAdd.performers = performers;
     eventToAdd.organizers = organizers;
     eventToAdd.collaborators = collaborators;
-    eventToAdd.keywords = formattedKeywords;
+    eventToAdd.keywords = this._formattedValues(keywords);
     eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
-    eventToAdd.additionalType = this._findMatchingConcepts(formattedKeywords, this.eventTypeConceptMap);
-    eventToAdd.audience = this._findMatchingConcepts(audience, this.audienceConceptMap);
+    eventToAdd.additionalType = this._findMatchingConcepts(event, EventProperty.ADDITIONAL_TYPE );
+    eventToAdd.audience = this._findMatchingConcepts(event,EventProperty.AUDIENCE);
     eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if (isSingleDayEvent) {
@@ -184,7 +176,7 @@ export class EventService {
     };
   }
 
-  private _findMatchingConcepts(keywords: string[], conceptMap: { id: string, name: MultilingualString }[]) {
+  private _findMatchingConcept(keywords: string[], conceptMap: { id: string, name: MultilingualString }[]) {
     let matchingConcepts;
     if (keywords) {
       const keywordsFormatted = [];
@@ -206,6 +198,27 @@ export class EventService {
     return matchingConcepts?.map(concept => {
       return { entityId: concept.id };
     });
+  }
+
+  private _findMatchingConceptProperties(inputProperty:  string[], event: any){
+    const eventPropertyValues = inputProperty?.length > 1 ? inputProperty.map(property => event[property]).flat(): [];
+    return this._formattedValues(eventPropertyValues);
+  }
+
+  private _findMatchingConcepts(event: any, fieldName: string) {
+    let conceptMapping = VILLE_DE_GATINEAU_MAPPING.find(concept => concept.fieldName === fieldName);
+    let entityId: string[] = [];
+    if(conceptMapping){
+      const eventPropertyValues = this._findMatchingConceptProperties(conceptMapping.inputProperty, event);
+      if(eventPropertyValues.length > 0){
+        for(const conceptMappingKey in conceptMapping.mapping){
+          if(eventPropertyValues.includes(conceptMappingKey)){
+            entityId.push(conceptMapping.mapping[conceptMappingKey]) 
+          }
+        }
+      }
+    }
+    return entityId;
   }
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string) {
@@ -298,4 +311,17 @@ export class EventService {
     }
     return formattedEvent;
   }
+
+  private _formattedValues(values: any){
+    const formattedValues = [];
+    values?.forEach(value => {
+      if (value.startsWith("[")) {
+        formattedValues.push(...JSON.parse(value));
+      } else {
+        formattedValues.push(value);
+      }
+    });
+    return formattedValues;
+  }
+
 }

@@ -13,3 +13,8 @@ export enum OfferCategory {
     FREE = 'FREE',
     PAYING = 'PAYING'
 }
+
+export enum EventProperty {
+    ADDITIONAL_TYPE = 'additionalType',
+    AUDIENCE = 'audience'
+}
