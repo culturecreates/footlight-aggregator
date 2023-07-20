@@ -6,7 +6,7 @@ import {
   SharedService
 } from "../../service";
 import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
-import { ArtsDataConstants, ArtsDataUrls, VILLE_DE_GATINEAU_MAPPING } from "../../constants";
+import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { EventDTO } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
@@ -42,7 +42,7 @@ export class EventService {
   private eventTypeConceptMap;
   private audienceConceptMap;
 
-  private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string, batchSize: number) {
+  private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string, batchSize: number, mappingUrl: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     let offset = 0, hasNext = true, batch = 1, totalCount = 0;
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
@@ -57,7 +57,7 @@ export class EventService {
         syncCount++;
         totalCount++;
         try {
-          const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id);
+          const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id, mappingUrl);
           await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
           this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
         } catch (e) {
@@ -70,11 +70,11 @@ export class EventService {
     this._loggerService.infoLogs(`Successfully synchronised ${totalCount} Events and linked entities.`);
   }
 
-  async syncEntities(token: string, calendarId: string, source: string, footlightBaseUrl: string, batchSize: number) {
-    await this._syncEvents(calendarId, token, source, footlightBaseUrl, batchSize);
+  async syncEntities(token: string, calendarId: string, source: string, footlightBaseUrl: string, batchSize: number, mappingUrl: string) {
+    await this._syncEvents(calendarId, token, source, footlightBaseUrl, batchSize, mappingUrl);
   }
 
-  async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string) {
+  async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string, mappingUrl:string) {
     const {
       location: locations, performer, organizer, sponsor, alternateName, keywords, audience,
       offerConfiguration, startDate, startDateTime, endDate, endDateTime, sameAs, subEvent
@@ -112,8 +112,8 @@ export class EventService {
     eventToAdd.collaborators = collaborators;
     eventToAdd.keywords = this._formattedValues(keywords);
     eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
-    eventToAdd.additionalType = this._findMatchingConcepts(event, EventProperty.ADDITIONAL_TYPE );
-    eventToAdd.audience = this._findMatchingConcepts(event,EventProperty.AUDIENCE);
+    eventToAdd.additionalType = await this._findMatchingConcepts(event, EventProperty.ADDITIONAL_TYPE, mappingUrl);
+    eventToAdd.audience = await this._findMatchingConcepts(event,EventProperty.AUDIENCE, mappingUrl);
     eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if (isSingleDayEvent) {
@@ -205,15 +205,20 @@ export class EventService {
     return this._formattedValues(eventPropertyValues);
   }
 
-  private _findMatchingConcepts(event: any, fieldName: string) {
-    let conceptMapping = VILLE_DE_GATINEAU_MAPPING.find(concept => concept.fieldName === fieldName);
+  private async _findMatchingConcepts(event: any, fieldName: string, mappingUrl: string) {
+    const mappingUrlResponse = await SharedService.fetchJsonFromUrl(mappingUrl);
+    if(mappingUrlResponse == null) {
+      return [];
+    }
+    let conceptMapping = mappingUrlResponse.data.find(concept => concept.fieldName === fieldName);
     let entityId: string[] = [];
     if(conceptMapping){
       const eventPropertyValues = this._findMatchingConceptProperties(conceptMapping.inputProperty, event);
       if(eventPropertyValues.length > 0){
         for(const conceptMappingKey in conceptMapping.mapping){
-          if(eventPropertyValues.includes(conceptMappingKey)){
-            entityId.push(conceptMapping.mapping[conceptMappingKey]) 
+          const baseConceptMappingKey = conceptMappingKey.replace(/(s|ier|es|)$/, '');
+          if(eventPropertyValues.includes(baseConceptMappingKey)) {
+            entityId.push(conceptMapping.mapping[conceptMappingKey]); 
           }
         }
       }
@@ -221,7 +226,7 @@ export class EventService {
     return entityId;
   }
 
-  async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string) {
+  async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string, mappingUrl:string ) {
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const existingEvent = await this._fetchEventFromFootlight(token, calendarId, eventId, footlightBaseUrl);
@@ -235,7 +240,7 @@ export class EventService {
       const eventsFromArtsData = await this._fetchEventsFromArtsData(source, 300, 0);
       const eventMatching = eventsFromArtsData.find(event => event.uri === artsDataUrl);
       const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
-      const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id);
+      const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id, mappingUrl);
       return await SharedService.patchEventInFootlight(calendarId, token, footlightBaseUrl, eventId, eventFormatted);
     } else {
       this._loggerService.infoLogs("Entity cannot be modified. Since this entity is updated latest by a different user.");

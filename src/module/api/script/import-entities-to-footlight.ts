@@ -9,6 +9,7 @@ interface BasicCommandOptions {
   calendar: string;
   footlightBaseUrl: string;
   batchSize: number;
+  mappingUrl:string;
 }
 
 @Command({ name: "import:entities", description: "Import entities to footlight-calendar" })
@@ -34,7 +35,7 @@ export class ImportEntities extends CommandRunner {
     }, options.footlightBaseUrl);
     if (authenticationResponse?.accessToken) {
       this._loggerService.infoLogs("Authentication successful");
-      await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl, options?.batchSize);
+      await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl, options?.batchSize, options?.mappingUrl);
     } else {
       this._loggerService.errorLogs("Authentication failed");
     }

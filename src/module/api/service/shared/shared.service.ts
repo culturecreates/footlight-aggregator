@@ -160,4 +160,15 @@ export class SharedService {
     const _loggerService = LoggerService.prototype;
     _loggerService.infoLogs(args);
   }
+
+  public static async fetchJsonFromUrl(url: string) {
+    try{
+      const response = await axios.get(url);
+      return response;
+    } catch (error){
+      this._loggerService(`Error fetching JSON from URL: ${url}, Error message: ${error.message}`);
+      return null;
+    }
+  }
+  
 }

@@ -20,19 +20,19 @@ export const VILLE_DE_GATINEAU_MAPPING = [
             "audience"
         ],
         "mapping": {
-            "General public": [
+            "Grand public": [
                 "63a09b1a1c6b6c005aad2dba"
             ],
-            "Adult (18+)": [
+            "Adulte (18+)": [
                 "63a09b1a1c6b6c005aad2dbc"
             ],
-            "Children": [
+            "Jeunesse": [
                 "63a09b1a1c6b6c005aad2dbe"
             ],
-            "Teens (12-18)": [
+            "Adolescent·e (12-17)": [
                 "63a09b1a1c6b6c005aad2dc2"
             ],
-            "Not specified": [
+            "Indéterminé": [
                 "63ceb9c4230627006f5670c3"
             ]
         }   
