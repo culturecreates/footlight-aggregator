@@ -6,11 +6,197 @@
       "type"
     ],
     "mapping": {
-      "Atelier": [
-        "63c01b741c6b6c005aad86be"
+      "Performance": [
+        "6418c27d5e4d4e0066a2e9fd"
+      ],
+      "Spectacle": [
+        "6418c27d5e4d4e0066a2e9fd"
+      ],
+      "Street Arts": [
+        "64ac4da33c19fa0064e68c5d"
+      ],
+      "Arts de la rue": [
+        "64ac4da33c19fa0064e68c5d"
+      ],
+      "Chanson": [
+        "6418c4b85e4d4e0066a2ecdb"
+      ],
+      "Chanson": [
+        "6418c4b85e4d4e0066a2ecdb"
+      ],
+      "Cirque": [
+        "6418c4b85e4d4e0066a2ecdd"
+      ],
+      "Circus": [
+        "6418c4b85e4d4e0066a2ecdd"
+      ],
+      "Concert": [
+        "6418ca425e4d4e0066a2eead"
+      ],
+      "Danse": [
+        "63977c83ca21d5004e7f5429"
+      ],
+      "Dance": [
+        "63977c83ca21d5004e7f5429"
+      ],
+      "Humour": [
+        "63977c83ca21d5004e7f542b"
+      ],
+      "Comedy": [
+        "63977c83ca21d5004e7f542b"
+      ],
+      "Music": [
+        "63977c83ca21d5004e7f542d"
+      ],
+      "Musique": [
+        "63977c83ca21d5004e7f542d"
+      ],
+      "Opera": [
+        "6418ca425e4d4e0066a2eeb2"
+      ],
+      "Opéra": [
+        "6418ca425e4d4e0066a2eeb2"
+      ],
+      "Souper et spectacle": [
+        "6418ca425e4d4e0066a2eeb4"
+      ],
+      "Dinner & Show": [
+        "6418ca425e4d4e0066a2eeb4"
+      ],
+      "Théâtre": [
+        "63977c83ca21d5004e7f542f"
       ],
       "Theatre": [
         "63977c83ca21d5004e7f542f"
+      ],
+      "Variétés": [
+        "6418c4b85e4d4e0066a2ecdf"
+      ],
+      "Variety": [
+        "6418c4b85e4d4e0066a2ecdf"
+      ],
+      "Exposition": [
+        "6418bbc65e4d4e0066a2e5ee"
+      ],
+      "Exhibition": [
+        "6418bbc65e4d4e0066a2e5ee"
+      ],
+      "Arts médiatiques": [
+        "6418c7fd5e4d4e0066a2ee00"
+      ],
+      "Media Arts": [
+        "6418c7fd5e4d4e0066a2ee00"
+      ],
+      "Arts numériques": [
+        "6418c7fd5e4d4e0066a2ee02"
+      ],
+      "Digital Art": [
+        "6418c7fd5e4d4e0066a2ee02"
+      ],
+      "Arts visuels": [
+        "6418bbc65e4d4e0066a2e5f2"
+      ],
+      "Visual Arts": [
+        "6418bbc65e4d4e0066a2e5f2"
+      ],
+      "Métiers d'art": [
+        "6452a018e19f7200646d5c54"
+      ],
+      "Art & Craft": [
+        "6452a018e19f7200646d5c54"
+      ],
+      "Patrimoine": [
+        "6452a018e19f7200646d5c56"
+      ],
+      "Performance Art": [
+        "6418ca425e4d4e0066a2eebb"
+      ],
+      "Performance (arts)": [
+        "6418ca425e4d4e0066a2eebb"
+      ],
+      "Atelier": [
+        "64776b93fbeda20064d2332f"
+      ],
+      "Ateliers": [
+        "64776b93fbeda20064d2332f"
+      ],
+      "Workshop": [
+        "64776b93fbeda20064d2332f"
+      ],
+      "Visual Art": [
+        "647e34d48b11c40064879263"
+      ],
+      "Écriture": [
+        "64a5b5853c19fa0064e63c8a"
+      ],
+      "Writing": [
+        "64a5b5853c19fa0064e63c8a"
+      ],
+      "Art opening": [
+        "6418bbc65e4d4e0066a2e5f0"
+      ],
+      "Vernissage": [
+        "6418bbc65e4d4e0066a2e5f0"
+      ],
+      "Festival": [
+        "6418ca425e4d4e0066a2ee9f"
+      ],
+      "Screening": [
+        "6418ca425e4d4e0066a2eea5"
+      ],
+      "Projection": [
+        "6418ca425e4d4e0066a2eea5"
+      ],
+      "Literary event": [
+        "6418c7fd5e4d4e0066a2edf7"
+      ],
+      "Événement littéraire": [
+        "6418c7fd5e4d4e0066a2edf7"
+      ],
+      "Open Mic": [
+        "6418ca425e4d4e0066a2eea7"
+      ],
+      "Micro ouvert": [
+        "6418ca425e4d4e0066a2eea7"
+      ],
+      "Lecture": [
+        "6418ca425e4d4e0066a2eea9"
+      ],
+      "Conference": [
+        "6418ca425e4d4e0066a2ee9d"
+      ],
+      "Conférence": [
+        "6418ca425e4d4e0066a2ee9d"
+      ],
+      "Fundraising event": [
+        "6418ca425e4d4e0066a2eea1"
+      ],
+      "Activité-bénéfice": [
+        "6418ca425e4d4e0066a2eea1"
+      ],
+      "Guided Tour": [
+        "6418ca425e4d4e0066a2eea3"
+      ],
+      "Visite guidée": [
+        "6418ca425e4d4e0066a2eea3"
+      ],
+      "Heritage": [
+        "64a5ba0a3c19fa0064e64053"
+      ],
+      "Patrimoine": [
+        "64a5ba0a3c19fa0064e64053"
+      ],
+      "Cours": [
+        "64776b93fbeda20064d23331"
+      ],
+      "Course": [
+        "64776b93fbeda20064d23331"
+      ],
+      "Not specified": [
+        "641db9322831190064570718"
+      ],
+      "Indéterminé": [
+        "641db9322831190064570718"
       ]
     }
   },
@@ -20,17 +206,32 @@
       "audience"
     ],
     "mapping": {
+      "Grand public": [
+        "63a09b1a1c6b6c005aad2dba"
+      ],
       "General public": [
         "63a09b1a1c6b6c005aad2dba"
       ],
       "Adult (18+)": [
         "63a09b1a1c6b6c005aad2dbc"
       ],
+      "Adulte (18+)": [
+        "63a09b1a1c6b6c005aad2dbc"
+      ],
       "Children": [
         "63a09b1a1c6b6c005aad2dbe"
       ],
-      "Teens (12-18)": [
+      "Jeunesse": [
+        "63a09b1a1c6b6c005aad2dbe"
+      ],
+      "Teens (12-17)": [
         "63a09b1a1c6b6c005aad2dc2"
+      ],
+      "Adolescent·e (12-17)": [
+        "63a09b1a1c6b6c005aad2dc2"
+      ],
+      "Indéterminé": [
+        "63ceb9c4230627006f5670c3"
       ],
       "Not specified": [
         "63ceb9c4230627006f5670c3"
