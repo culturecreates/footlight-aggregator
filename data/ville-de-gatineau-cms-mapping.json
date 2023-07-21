@@ -6,11 +6,113 @@
       "type"
     ],
     "mapping": {
+      "Performance": [
+        "6418c27d5e4d4e0066a2e9fd"
+      ],
+      "Spectacle": [
+        "6418c27d5e4d4e0066a2e9fd"
+      ],
+      "Exposition": [
+        "6418bbc65e4d4e0066a2e5ee"
+      ],
+      "Expositions": [
+        "6418bbc65e4d4e0066a2e5ee"
+      ],
+      "Exhibition": [
+        "6418bbc65e4d4e0066a2e5ee"
+      ],
       "Atelier": [
-        "63c01b741c6b6c005aad86be"
+        "64776b93fbeda20064d2332f"
+      ],
+      "Ateliers": [
+        "64776b93fbeda20064d2332f"
+      ],
+      "Workshop": [
+        "64776b93fbeda20064d2332f"
+      ],
+      "Vernissage": [
+        "6418bbc65e4d4e0066a2e5f0"
+      ],
+      "Art opening": [
+        "6418bbc65e4d4e0066a2e5f0"
+      ],
+      "Animation": [
+        "64b97f333c19fa0064e8f234"
+      ],
+      "Festival": [
+        "6418ca425e4d4e0066a2ee9f"
+      ],
+      "Projection": [
+        "6418ca425e4d4e0066a2eea5"
+      ],
+      "Screening": [
+        "6418ca425e4d4e0066a2eea5"
+      ],
+      "Événement littéraire": [
+        "6418c7fd5e4d4e0066a2edf7"
+      ],
+      "Literary event": [
+        "6418c7fd5e4d4e0066a2edf7"
+      ],
+      "Micro ouvert": [
+        "6418ca425e4d4e0066a2eea7"
+      ],
+      "Open Mic": [
+        "6418ca425e4d4e0066a2eea7"
+      ],
+      "Lecture publique": [
+        "6418ca425e4d4e0066a2eea9"
+      ],
+      "Lecture": [
+        "6418ca425e4d4e0066a2eea9"
+      ],
+      "Conférence": [
+        "6418ca425e4d4e0066a2ee9d"
+      ],
+      "Conference": [
+        "6418ca425e4d4e0066a2ee9d"
+      ],
+      "Activité-bénéfice": [
+        "6418ca425e4d4e0066a2eea1"
+      ],
+      "Activités-bénéfices": [
+        "6418ca425e4d4e0066a2eea1"
+      ],
+      "Fundraising event": [
+        "6418ca425e4d4e0066a2eea1"
+      ],
+      "Visite guidée": [
+        "6418ca425e4d4e0066a2eea3"
+      ],
+      "Visites guidées": [
+        "6418ca425e4d4e0066a2eea3"
+      ],
+      "Guided Tour": [
+        "6418ca425e4d4e0066a2eea3"
+      ],
+      "Patrimoine": [
+        "64a5ba0a3c19fa0064e64053"
+      ],
+      "Heritage": [
+        "64a5ba0a3c19fa0064e64053"
+      ],
+      "Cours": [
+        "64776b93fbeda20064d23331"
+      ],
+      "Course": [
+        "64776b93fbeda20064d23331"
+      ],
+      "Théâtre": [
+        "63977c83ca21d5004e7f542f"
       ],
       "Theatre": [
         "63977c83ca21d5004e7f542f"
+      ],
+      "Pièces de théâtre": [
+        "63977c83ca21d5004e7f542f"
+      ],
+      "Default": [
+        "641db9322831190064570718"
       ]
     }
   },
@@ -20,19 +122,31 @@
       "audience"
     ],
     "mapping": {
+      "Grand public": [
+        "63a09b1a1c6b6c005aad2dba"
+      ],
       "General public": [
         "63a09b1a1c6b6c005aad2dba"
       ],
       "Adult (18+)": [
         "63a09b1a1c6b6c005aad2dbc"
       ],
+      "Adulte (18+)": [
+        "63a09b1a1c6b6c005aad2dbc"
+      ],
       "Children": [
         "63a09b1a1c6b6c005aad2dbe"
       ],
-      "Teens (12-18)": [
+      "Jeunesse": [
+        "63a09b1a1c6b6c005aad2dbe"
+      ],
+      "Teens (12-17)": [
         "63a09b1a1c6b6c005aad2dc2"
       ],
-      "Not specified": [
+      "Adolescent·e (12-17)": [
+        "63a09b1a1c6b6c005aad2dc2"
+      ],
+      "Default": [
         "63ceb9c4230627006f5670c3"
       ]
     }
