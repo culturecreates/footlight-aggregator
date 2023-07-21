@@ -48,11 +48,8 @@ export class EventService {
     let offset = 0, hasNext = true, batch = 1, totalCount = 0;
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
-    // TODO;
-    // const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, 'additionalType', this.eventTypeConceptMap)
-    // const existingAudienceConceptIDs = this._validateConceptIds(patternToConceptIdMapping, 'audience', this.audienceConceptMap)
-    // Validate concept mapping vs concepts IDS
-    //
+    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
+    const existingAudienceConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.AUDIENCE, this.audienceConceptMap);
 
     do {
       let events = await this._fetchEventsFromArtsData(source, batchSize, offset);
@@ -66,7 +63,7 @@ export class EventService {
         totalCount++;
         try {
           const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
-            patternToConceptIdMapping);
+            patternToConceptIdMapping, existingEventTypeConceptIDs, existingAudienceConceptIDs);
           await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
           this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) 
           Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
@@ -87,7 +84,7 @@ export class EventService {
   }
 
   async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string,
-                    patternToConceptIdMapping) {
+                    patternToConceptIdMapping: any, existingEventTypeConceptIDs: any, existingAudienceConceptIDs: any) {
     const {
       location: locations, performer, organizer, sponsor, alternateName, keywords,
       offerConfiguration, startDate, startDateTime, endDate, endDateTime, sameAs, subEvent
@@ -126,8 +123,9 @@ export class EventService {
     eventToAdd.keywords = this._formattedValues(keywords);
     eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
     eventToAdd.additionalType = await this._findMatchingConcepts(event, EventProperty.ADDITIONAL_TYPE,
-      patternToConceptIdMapping);
-    eventToAdd.audience = await this._findMatchingConcepts(event, EventProperty.AUDIENCE, patternToConceptIdMapping);
+      patternToConceptIdMapping,existingEventTypeConceptIDs);
+    eventToAdd.audience = await this._findMatchingConcepts(event, EventProperty.AUDIENCE, 
+      patternToConceptIdMapping, existingAudienceConceptIDs);
     eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if (isSingleDayEvent) {
@@ -234,7 +232,7 @@ export class EventService {
     return this._formattedValues(eventPropertyValues, true);
   }
 
-  private async _findMatchingConcepts(event: any, fieldName: string, patternToConceptIdMapping: any) {
+  private async _findMatchingConcepts(event: any, fieldName: string, patternToConceptIdMapping: any, existingConceptIDs: any) {
     if (!patternToConceptIdMapping) {
       return [];
     }
@@ -247,19 +245,19 @@ export class EventService {
       if (eventPropertyValues.length > 0) {
         for (const pattern in patternToConceptIdMappingForTheField.mapping) {
           if (eventPropertyValues.includes(pattern.toLowerCase())) {
-            entityId.push(patternToConceptIdMappingForTheField.mapping[pattern][0]);
+            existingConceptIDs.includes(patternToConceptIdMappingForTheField.mapping[pattern][0]) ? 
+                          entityId.push(patternToConceptIdMappingForTheField.mapping[pattern][0]) : [];
             entityId = Array.from(new Set(entityId));
           }
         }
       }
       defaultEntityId = patternToConceptIdMappingForTheField.mapping[defaultEntityKey]
-        ? patternToConceptIdMappingForTheField.mapping[defaultEntityKey][0] : [];
+        ? patternToConceptIdMappingForTheField.mapping[defaultEntityKey] : [];
     }
-    const entityIds = await this._filterEventTypeAndAudienceType(fieldName, entityId);
-    if (entityIds.length < 1) {
-      entityIds.push(defaultEntityId);
+    if (entityId.length < 1) {
+      entityId.push(defaultEntityId);
     }
-    return entityIds;
+    return entityId;
   }
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string,
@@ -267,18 +265,20 @@ export class EventService {
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const existingEvent = await this._fetchEventFromFootlight(token, calendarId, eventId, footlightBaseUrl);
+    const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
+    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
+    const existingAudienceConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.AUDIENCE, this.audienceConceptMap);
     if (!existingEvent.modifiedByUserId || existingEvent.modifiedByUserId === currentUser.id) {
       const sameAs = existingEvent.sameAs;
       const artsDataUrl = sameAs.find(sameAs => sameAs?.uri?.includes(ArtsDataConstants.RESOURCE_URI_PREFIX))?.uri;
       if (!artsDataUrl) {
         Exception.badRequest("The event is not linked to Artsdata.");
       }
-      //TODO
       const eventsFromArtsData = await this._fetchEventsFromArtsData(source, 300, 0);
       const eventMatching = eventsFromArtsData.find(event => event.uri === artsDataUrl);
       const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
       const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id,
-        mappingUrl);
+        patternToConceptIdMapping, existingEventTypeConceptIDs, existingAudienceConceptIDs);
       return await SharedService.patchEventInFootlight(calendarId, token, footlightBaseUrl, eventId, eventFormatted);
     } else {
       this._loggerService.infoLogs("Entity cannot be modified. Since this entity is updated latest by a different user.");
@@ -370,9 +370,21 @@ export class EventService {
     return formattedValues;
   }
 
-  // private _validateConceptIds(patternToConceptIdMapping, propertyName ){
-  //
-  //   //return a list of validated UUIDs only
-  // }
+  private _validateConceptIds(patternToConceptIdMapping: any, propertyName: string, conceptMap: string[]){
+    let patternToConceptIdMappingForTheField = patternToConceptIdMapping.find(concept => concept.fieldName === propertyName).mapping;
+    patternToConceptIdMapping = Object.values(patternToConceptIdMappingForTheField).flat();
+    const conceptMapIds = this._fetchConceptMapIds(conceptMap);
+    return patternToConceptIdMapping.filter((entityId) => {
+      const id = conceptMapIds.some((conceptId) => conceptId.includes(entityId));
+      if (!id) {
+        this._loggerService.infoLogs(`Entity Id ${entityId} is not present in concepts ids in the CMS`);
+      }
+      return id;
+    });
+  }
+
+  private _fetchConceptMapIds(conceptMapIds: any){
+    return conceptMapIds.map((ids) => ids.id);
+  }
 
 }
