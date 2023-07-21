@@ -200,9 +200,23 @@ export class EventService {
     });
   }
 
+  private async _filterEventTypeAndAudienceType(fieldName: string, entityIds: string[]){
+    if(entityIds.length < 1){
+      return [];
+    }
+    const conceptMap = fieldName === "additionalType" ? this.eventTypeConceptMap : this.audienceConceptMap;
+    return entityIds.filter((entityId) => {
+      const id = conceptMap.some((mapObject) => mapObject.id.toString() === entityId);
+      if(!id){
+        this._loggerService.infoLogs(`Entity Id ${entityId} is not present in concepts ids in the CMS`);
+      }
+      return id;
+    })
+  }
+
   private _findMatchingConceptProperties(inputProperty:  string[], event: any){
     const eventPropertyValues = inputProperty?.length > 1 ? inputProperty.map(property => event[property]).flat(): [];
-    return this._formattedValues(eventPropertyValues);
+    return this._formattedValues(eventPropertyValues, true);
   }
 
   private async _findMatchingConcepts(event: any, fieldName: string, mappingUrl: string) {
@@ -212,18 +226,25 @@ export class EventService {
     }
     let conceptMapping = mappingUrlResponse.data.find(concept => concept.fieldName === fieldName);
     let entityId: string[] = [];
+    let defaultEntityId : string;
+    let defaultEntityKey = "DEFAULT";
     if(conceptMapping){
       const eventPropertyValues = this._findMatchingConceptProperties(conceptMapping.inputProperty, event);
       if(eventPropertyValues.length > 0){
         for(const conceptMappingKey in conceptMapping.mapping){
-          const baseConceptMappingKey = conceptMappingKey.replace(/(s|ier|es|)$/, '');
-          if(eventPropertyValues.includes(baseConceptMappingKey)) {
-            entityId.push(conceptMapping.mapping[conceptMappingKey]); 
+          if(eventPropertyValues.includes(conceptMappingKey.toLowerCase())) {
+            entityId.push(conceptMapping.mapping[conceptMappingKey][0]); 
+            entityId = Array.from(new Set(entityId));
           }
         }
       }
+      defaultEntityId = conceptMapping.mapping[defaultEntityKey] ? conceptMapping.mapping[defaultEntityKey][0] : [];
     }
-    return entityId;
+    const entityIds = await this._filterEventTypeAndAudienceType(fieldName, entityId);
+    if(entityIds.length < 1){
+      entityIds.push(defaultEntityId);
+    }
+    return entityIds;
   }
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string, mappingUrl:string ) {
@@ -317,9 +338,10 @@ export class EventService {
     return formattedEvent;
   }
 
-  private _formattedValues(values: any){
+  private _formattedValues(values: any, convertToLowerCase? : Boolean){
     const formattedValues = [];
     values?.forEach(value => {
+      value = convertToLowerCase? value.toLowerCase() : value;
       if (value.startsWith("[")) {
         formattedValues.push(...JSON.parse(value));
       } else {
