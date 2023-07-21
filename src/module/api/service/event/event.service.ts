@@ -34,7 +34,7 @@ export class EventService {
     private readonly _taxonomyService: TaxonomyService,
     @Inject(forwardRef(() => SharedService))
     private readonly _sharedService: SharedService,
-    @Inject (forwardRef(()=> LoggerService))
+    @Inject(forwardRef(() => LoggerService))
     private readonly _loggerService: LoggerService) {
   }
 
@@ -42,10 +42,18 @@ export class EventService {
   private eventTypeConceptMap;
   private audienceConceptMap;
 
-  private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string, batchSize: number, mappingUrl: string) {
+  private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string,
+                            batchSize: number, mappingUrl: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     let offset = 0, hasNext = true, batch = 1, totalCount = 0;
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
+    const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
+    // TODO;
+    // const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, 'additionalType', this.eventTypeConceptMap)
+    // const existingAudienceConceptIDs = this._validateConceptIds(patternToConceptIdMapping, 'audience', this.audienceConceptMap)
+    // Validate concept mapping vs concepts IDS
+    //
+
     do {
       let events = await this._fetchEventsFromArtsData(source, batchSize, offset);
       if (events?.length !== batchSize) {
@@ -57,11 +65,14 @@ export class EventService {
         syncCount++;
         totalCount++;
         try {
-          const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id, mappingUrl);
+          const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
+            patternToConceptIdMapping);
           await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
-          this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
+          this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) 
+          Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
         } catch (e) {
-          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
+          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) 
+          Error while adding Event ${event.url}` + e);
         }
       }
       offset = offset + batchSize;
@@ -70,13 +81,15 @@ export class EventService {
     this._loggerService.infoLogs(`Successfully synchronised ${totalCount} Events and linked entities.`);
   }
 
-  async syncEntities(token: string, calendarId: string, source: string, footlightBaseUrl: string, batchSize: number, mappingUrl: string) {
+  async syncEntities(token: string, calendarId: string, source: string, footlightBaseUrl: string, batchSize: number,
+                     mappingUrl: string) {
     await this._syncEvents(calendarId, token, source, footlightBaseUrl, batchSize, mappingUrl);
   }
 
-  async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string, mappingUrl:string) {
+  async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string,
+                    patternToConceptIdMapping) {
     const {
-      location: locations, performer, organizer, sponsor, alternateName, keywords, audience,
+      location: locations, performer, organizer, sponsor, alternateName, keywords,
       offerConfiguration, startDate, startDateTime, endDate, endDateTime, sameAs, subEvent
     } = event;
     if (subEvent) {
@@ -112,8 +125,9 @@ export class EventService {
     eventToAdd.collaborators = collaborators;
     eventToAdd.keywords = this._formattedValues(keywords);
     eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
-    eventToAdd.additionalType = await this._findMatchingConcepts(event, EventProperty.ADDITIONAL_TYPE, mappingUrl);
-    eventToAdd.audience = await this._findMatchingConcepts(event,EventProperty.AUDIENCE, mappingUrl);
+    eventToAdd.additionalType = await this._findMatchingConcepts(event, EventProperty.ADDITIONAL_TYPE,
+      patternToConceptIdMapping);
+    eventToAdd.audience = await this._findMatchingConcepts(event, EventProperty.AUDIENCE, patternToConceptIdMapping);
     eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if (isSingleDayEvent) {
@@ -188,7 +202,8 @@ export class EventService {
         }
       }
       matchingConcepts = keywordsFormatted?.length ? conceptMap
-        ?.filter(concept => keywordsFormatted?.includes(concept.name?.en) || keywordsFormatted?.includes(concept.name?.fr)) : [];
+        ?.filter(concept =>
+          keywordsFormatted?.includes(concept.name?.en) || keywordsFormatted?.includes(concept.name?.fr)) : [];
     }
     if (!matchingConcepts?.length) {
       matchingConcepts = conceptMap
@@ -200,54 +215,55 @@ export class EventService {
     });
   }
 
-  private async _filterEventTypeAndAudienceType(fieldName: string, entityIds: string[]){
-    if(entityIds.length < 1){
-      return [];
-    }
-    const conceptMap = fieldName === "additionalType" ? this.eventTypeConceptMap : this.audienceConceptMap;
-    return entityIds.filter((entityId) => {
-      const id = conceptMap.some((mapObject) => mapObject.id.toString() === entityId);
-      if(!id){
-        this._loggerService.infoLogs(`Entity Id ${entityId} is not present in concepts ids in the CMS`);
-      }
-      return id;
-    })
-  }
+  // private async _filterEventTypeAndAudienceType(fieldName: string, entityIds: string[]) {
+  //   if (entityIds.length < 1) {
+  //     return [];
+  //   }
+  //   const conceptMap = fieldName === "additionalType" ? this.eventTypeConceptMap : this.audienceConceptMap;
+  //   return entityIds.filter((entityId) => {
+  //     const id = conceptMap.some((mapObject) => mapObject.id.toString() === entityId);
+  //     if (!id) {
+  //       this._loggerService.infoLogs(`Entity Id ${entityId} is not present in concepts ids in the CMS`);
+  //     }
+  //     return id;
+  //   });
+  // }
 
-  private _findMatchingConceptProperties(inputProperty:  string[], event: any){
-    const eventPropertyValues = inputProperty?.length > 1 ? inputProperty.map(property => event[property]).flat(): [];
+  private _findMatchingConceptProperties(lookupPropertyNames: string[], event: any) {
+    const eventPropertyValues = lookupPropertyNames?.length > 1 ? lookupPropertyNames.map(property => event[property]).flat() : [];
     return this._formattedValues(eventPropertyValues, true);
   }
 
-  private async _findMatchingConcepts(event: any, fieldName: string, mappingUrl: string) {
-    const mappingUrlResponse = await SharedService.fetchJsonFromUrl(mappingUrl);
-    if(mappingUrlResponse == null) {
+  private async _findMatchingConcepts(event: any, fieldName: string, patternToConceptIdMapping: any) {
+    if (!patternToConceptIdMapping) {
       return [];
     }
-    let conceptMapping = mappingUrlResponse.data.find(concept => concept.fieldName === fieldName);
+    let patternToConceptIdMappingForTheField = patternToConceptIdMapping.find(concept => concept.fieldName === fieldName);
     let entityId: string[] = [];
-    let defaultEntityId : string;
+    let defaultEntityId: string;
     let defaultEntityKey = "DEFAULT";
-    if(conceptMapping){
-      const eventPropertyValues = this._findMatchingConceptProperties(conceptMapping.inputProperty, event);
-      if(eventPropertyValues.length > 0){
-        for(const conceptMappingKey in conceptMapping.mapping){
-          if(eventPropertyValues.includes(conceptMappingKey.toLowerCase())) {
-            entityId.push(conceptMapping.mapping[conceptMappingKey][0]); 
+    if (patternToConceptIdMappingForTheField) {
+      const eventPropertyValues = this._findMatchingConceptProperties(patternToConceptIdMappingForTheField.inputProperty, event);
+      if (eventPropertyValues.length > 0) {
+        for (const pattern in patternToConceptIdMappingForTheField.mapping) {
+          if (eventPropertyValues.includes(pattern.toLowerCase())) {
+            entityId.push(patternToConceptIdMappingForTheField.mapping[pattern][0]);
             entityId = Array.from(new Set(entityId));
           }
         }
       }
-      defaultEntityId = conceptMapping.mapping[defaultEntityKey] ? conceptMapping.mapping[defaultEntityKey][0] : [];
+      defaultEntityId = patternToConceptIdMappingForTheField.mapping[defaultEntityKey]
+        ? patternToConceptIdMappingForTheField.mapping[defaultEntityKey][0] : [];
     }
     const entityIds = await this._filterEventTypeAndAudienceType(fieldName, entityId);
-    if(entityIds.length < 1){
+    if (entityIds.length < 1) {
       entityIds.push(defaultEntityId);
     }
     return entityIds;
   }
 
-  async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string, mappingUrl:string ) {
+  async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string,
+                      mappingUrl: string) {
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const existingEvent = await this._fetchEventFromFootlight(token, calendarId, eventId, footlightBaseUrl);
@@ -261,7 +277,8 @@ export class EventService {
       const eventsFromArtsData = await this._fetchEventsFromArtsData(source, 300, 0);
       const eventMatching = eventsFromArtsData.find(event => event.uri === artsDataUrl);
       const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
-      const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id, mappingUrl);
+      const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id,
+        mappingUrl);
       return await SharedService.patchEventInFootlight(calendarId, token, footlightBaseUrl, eventId, eventFormatted);
     } else {
       this._loggerService.infoLogs("Entity cannot be modified. Since this entity is updated latest by a different user.");
@@ -302,9 +319,11 @@ export class EventService {
         } else if (status === HttpStatus.CONFLICT) {
           const existingEntityId = await response.error;
           const url = footlightBaseUrl + /events/ + existingEntityId + "/reload-image";
-          await SharedService.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, { imageUrl: event.image?.url?.uri });
+          await SharedService.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url,
+            { imageUrl: event.image?.url?.uri });
         }
-        this._loggerService.infoLogs(`(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}`);
+        this._loggerService.infoLogs(`(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
+        ${JSON.stringify(eventFormatted.sameAs)}`);
       } catch (e) {
         this._loggerService.errorLogs(`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
       }
@@ -338,10 +357,10 @@ export class EventService {
     return formattedEvent;
   }
 
-  private _formattedValues(values: any, convertToLowerCase? : Boolean){
+  private _formattedValues(values: any, convertToLowerCase?: Boolean) {
     const formattedValues = [];
     values?.forEach(value => {
-      value = convertToLowerCase? value.toLowerCase() : value;
+      value = convertToLowerCase ? value.toLowerCase() : value;
       if (value.startsWith("[")) {
         formattedValues.push(...JSON.parse(value));
       } else {
@@ -350,5 +369,10 @@ export class EventService {
     });
     return formattedValues;
   }
+
+  // private _validateConceptIds(patternToConceptIdMapping, propertyName ){
+  //
+  //   //return a list of validated UUIDs only
+  // }
 
 }
