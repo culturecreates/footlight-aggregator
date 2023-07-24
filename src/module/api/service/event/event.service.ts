@@ -230,10 +230,10 @@ export class EventService {
     if (patternToConceptIdMappingForTheField) {
       const eventPropertyValues = this._getPropertyValues(patternToConceptIdMappingForTheField.inputProperty, event);
       if (eventPropertyValues?.length > 0) {
-        for (const eventPropertyValue of eventPropertyValues ) {
-          const regex = new RegExp(`\\b\\w*${eventPropertyValue}\\w*\\b`, 'gi')
-          for(const pattern in patternToConceptIdMappingForTheField.mapping){
-            if (regex.test(pattern)) {
+        for (const pattern in patternToConceptIdMappingForTheField.mapping ) {
+          const regexPattern = new RegExp(`^${pattern}[s|z]?$`, 'gi')
+          for(const eventPropertyValue of eventPropertyValues){
+            if (regexPattern.test(eventPropertyValue)) {
               existingConceptIDs.includes(patternToConceptIdMappingForTheField.mapping[pattern][0])
               ? entityId.push(patternToConceptIdMappingForTheField.mapping[pattern][0]) : [];
             entityId = Array.from(new Set(entityId));
