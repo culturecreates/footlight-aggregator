@@ -229,25 +229,26 @@ export class EventService {
     const defaultEntityKey = "DEFAULT";
     if (patternToConceptIdMappingForTheField) {
       const eventPropertyValues = this._getPropertyValues(patternToConceptIdMappingForTheField.inputProperty, event);
-      if (eventPropertyValues?.length > 0) {
-        for (const pattern in patternToConceptIdMappingForTheField.mapping ) {
-          const regexPattern = new RegExp(`^${pattern}[s|z]?$`, 'gi')
-          for(const eventPropertyValue of eventPropertyValues){
-            if (regexPattern.test(eventPropertyValue)) {
-              existingConceptIDs.includes(patternToConceptIdMappingForTheField.mapping[pattern][0])
-              ? entityId.push(patternToConceptIdMappingForTheField.mapping[pattern][0]) : [];
-            entityId = Array.from(new Set(entityId));
+      if (eventPropertyValues?.length) {
+        for (const pattern in patternToConceptIdMappingForTheField.mapping) {
+          const regexPattern = new RegExp(`^${pattern}$`, "gi");
+          if (eventPropertyValues.some(eventPropertyValue => eventPropertyValue.toLowerCase() === pattern
+            || regexPattern.test(eventPropertyValue))) {
+            const mappedUUIDs: string[] = patternToConceptIdMappingForTheField.mapping[pattern];
+            const conceptIdToAdd = mappedUUIDs.filter(id => existingConceptIDs.includes(id));
+            if (conceptIdToAdd?.length) {
+              entityId.push(...conceptIdToAdd);
             }
           }
         }
       }
     }
-    if (entityId.length < 1) {
+    if (!entityId.length) {
       defaultEntityId = patternToConceptIdMappingForTheField.mapping[defaultEntityKey]
         ? patternToConceptIdMappingForTheField.mapping[defaultEntityKey] : [];
       entityId.push(...defaultEntityId);
     }
-    return entityId;
+    return Array.from(new Set(entityId));
   }
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string,
