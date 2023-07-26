@@ -9,8 +9,8 @@ import { LoggerService } from "..";
 @Injectable()
 export class SharedService {
   constructor(
-    @Inject(forwardRef(()=> LoggerService))
-    private readonly _loggerService: LoggerService){
+    @Inject(forwardRef(() => LoggerService))
+    private readonly _loggerService: LoggerService) {
   }
 
   public static async fetchFromArtsDataById(id: string, baseUrl: string) {
@@ -70,11 +70,12 @@ export class SharedService {
     }
   }
 
-  public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any, currentUserId: string) {
+  public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any,
+                                              currentUserId: string) {
     const addResponse = await this.addEntityToFootlight(calendarId, token, url, body);
     const { status, response } = addResponse;
     if (status === HttpStatus.CREATED) {
-      this._loggerService(`Added Entity (${response.id} : ${body.uri}) to Footlight!`);
+      this._loggerService(`\tAdded Entity (${response.id} : ${body.uri}) to Footlight!`);
       return response.id;
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
@@ -82,17 +83,17 @@ export class SharedService {
       if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
         const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
         if (updateResponse.status === HttpStatus.OK) {
-          this._loggerService(`Updated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
+          this._loggerService(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
         } else {
-          this._loggerService(`Updating Entity failed! `);
+          this._loggerService(`\tUpdating Entity (${existingEntityId}) failed!`);
         }
       } else {
-        this._loggerService(`Entity cannot be modified. Since this entity is updated latest by a different user.`);
+        this._loggerService(`\tEntity cannot be modified. Since this entity is updated latest by a different user.`);
       }
 
       return existingEntityId;
     } else if (status === HttpStatus.UNAUTHORIZED) {
-      (SharedService.name, 'error',"Unauthorized!");
+      this._loggerService("Unauthorized Exception!");
       Exception.unauthorized(response.message);
     } else {
       this._loggerService(`Some thing went wrong.${JSON.stringify(body)} `);
@@ -101,19 +102,19 @@ export class SharedService {
   }
 
   static async addEntityToFootlight(calendarId: string, token: string, url: string, body: any) {
-    this._loggerService(`Adding ${url.split("/").slice(-1)}...`)
+    this._loggerService(`\tAdding ${url.split("/").slice(-1)}...`);
     return await this.callFootlightAPI(HttpMethodsEnum.POST, calendarId, token, url, body);
   }
 
   static async updateEntityInFootlight(calendarId: string, token: string, existingEntityId: string,
                                        url: string, body: any) {
-    this._loggerService(`Updating ${url.split("/").slice(-1)}...`);
+    this._loggerService(`\tUpdating ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
     return await this.callFootlightAPI(HttpMethodsEnum.PATCH, calendarId, token, url, body);
   }
 
   private static async _getEntityFromFootlight(calendarId: string, token: string, existingEntityId: any, url: string) {
-    this._loggerService(`Fetching entity ${url.split("/").slice(-1)}...`);
+    this._loggerService(`\tFetching entity ${url.split("/").slice(-1)}...`);
     url = url + "/" + existingEntityId;
 
     const headers = this.createHeaders(token, calendarId);
@@ -150,14 +151,24 @@ export class SharedService {
       const userResponse = await SharedService.fetchUrl(url, headers);
       return userResponse.data;
     } catch (e) {
-      this._loggerService.errorLogs('Authorisation failed. Please check your credentials and access to the calendar')
+      this._loggerService.errorLogs("Authorisation failed. Please check your credentials and access to the calendar");
       Exception.unauthorized("Something went wrong.");
-
     }
   }
 
-  static _loggerService(args: string){
+  static _loggerService(args: string) {
     const _loggerService = LoggerService.prototype;
     _loggerService.infoLogs(args);
   }
+
+  public static async fetchJsonFromUrl(url: string) {
+    try {
+      const response = await axios.get(url);
+      return response;
+    } catch (error) {
+      this._loggerService(`Error fetching JSON from URL: ${url}, Error message: ${error.message}`);
+      return null;
+    }
+  }
+
 }

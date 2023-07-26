@@ -5,6 +5,7 @@ import { EventService } from "../../service";
 import { AuthHeaderExtractor } from "../../helper";
 import { Request } from "express";
 import { Environment } from "../../enum/environments.enum";
+import { Sources } from "../../enum/sources.enum";
 
 @Controller("events")
 @ApiTags("Event APIs")
@@ -30,20 +31,25 @@ export class EventController {
     explode: true
   })
   @ApiQuery({
+    name: "mapping-url",
+    description: "**URL to fetch data for mapping keywords to event type taxonomy**",
+    example: "https://culturecreates.github.io/footlight-aggregator/data/ville-de-gatineau-cms-mapping.json"
+  })
+  @ApiQuery({
     name: "source",
-    description: "**source (Graph)**",
+    description: "Select the source",
     required: true,
-    explode: true,
-    example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
+    enum: Object.values(Sources)
   })
   async syncEvents(
     @Req() request: Request,
     @Query("footlight-base-url") footlightBaseUrl?: string,
     @Query("calendar-id") calendarId?: string,
     @Query("source") source?: string,
-    @Query("batch-size", ParseIntPipe) batchSize?: number): Promise<ApiResponseEnum> {
+    @Query("batch-size", ParseIntPipe) batchSize?: number,
+    @Query("mapping-url") mappingUrl?: string): Promise<ApiResponseEnum> {
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-    await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl, batchSize);
+    await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl, batchSize, mappingUrl);
     return { status: ApiStatusCode.SUCCESS, message: "Syncing Events and related entities completed." };
   }
 
@@ -63,6 +69,11 @@ export class EventController {
     explode: true
   })
   @ApiQuery({
+    name: "mapping-url",
+    description: "**URL to fetch data for mapping keywords to event type taxonomy**",
+    example: "https://culturecreates.github.io/footlight-aggregator/data/ville-de-gatineau-cms-mapping.json"
+  })
+  @ApiQuery({
     name: "source",
     description: "**source (Website graphs used by Tout Culture)**",
     required: true,
@@ -74,9 +85,10 @@ export class EventController {
     @Param("id") id: string,
     @Query("footlight-base-url") footlightBaseUrl?: string,
     @Query("calendar-id") calendarId?: string,
+    @Query("mapping-url") mappingUrl?: string,
     @Query("source") source?: string): Promise<ApiResponseEnum> {
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-    await this._eventService.syncEventById(token, calendarId, id, source, footlightBaseUrl);
+    await this._eventService.syncEventById(token, calendarId, id, source, footlightBaseUrl, mappingUrl);
     return { status: ApiStatusCode.SUCCESS, message: "Re-syncing event completed.." };
   }
 
