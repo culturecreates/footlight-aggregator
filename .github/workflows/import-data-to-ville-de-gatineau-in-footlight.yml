@@ -22,4 +22,4 @@ jobs:
         run: npm run build
       - name: Import entities to footlight
         run: |
-          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_GATINEAU}} -p ${{secrets.AGGREGATOR_PASSWORD_GATINEAU}} -s http://kg.artsdata.ca/culture-creates/footlight/gatineau-cloud -i https://api.cms.footlight.io -c 6308ef4a7f771f00431d939a -b 50
+          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_GATINEAU}} -p ${{secrets.AGGREGATOR_PASSWORD_GATINEAU}} -s http://kg.artsdata.ca/culture-creates/footlight/gatineau-cloud -i https://api.cms.footlight.io -c 6308ef4a7f771f00431d939a -b 50 -m https://culturecreates.github.io/footlight-aggregator/data/ville-de-gatineau-cms-mapping.json
