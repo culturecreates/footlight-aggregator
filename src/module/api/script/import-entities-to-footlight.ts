@@ -95,4 +95,13 @@ export class ImportEntities extends CommandRunner {
     return Number.parseInt(val);
   }
 
+  @Option({
+    flags: "-m, --mapping-url [string]",
+    description: "Mapping Url",
+    required: true
+  })
+  parseMappingUrl(val: string): string {
+    return val;
+  }
+
 }
