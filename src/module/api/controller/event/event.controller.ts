@@ -36,11 +36,12 @@ export class EventController {
     example: "https://culturecreates.github.io/footlight-aggregator/data/ville-de-gatineau-cms-mapping.json"
   })
   @ApiQuery({
-    name: "source",
-    description: "Select the source",
-    required: true,
-    enum: Object.values(Sources)
-  })
+    name: "source",
+    description: "**source (Graph)**",
+    required: true,
+    explode: true,
+    example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
+  })
   async syncEvents(
     @Req() request: Request,
     @Query("footlight-base-url") footlightBaseUrl?: string,
