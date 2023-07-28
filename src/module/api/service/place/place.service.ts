@@ -13,9 +13,11 @@ export class PlaceService {
     private readonly _postalAddressService: PostalAddressService,
     @Inject(forwardRef(() => SharedService))
     private readonly _sharedService: SharedService,
-    @Inject(forwardRef(()=> LoggerService))
+    @Inject(forwardRef(() => LoggerService))
     private readonly _loggerService: LoggerService) {
   }
+
+  private synchronisedPlaceMap = new Map();
 
   async getPlaceDetailsFromArtsData(calendarId: string, footlightBaseUrl: string, token: string, artsDataId: string,
                                     currentUserId: string) {
@@ -34,9 +36,18 @@ export class PlaceService {
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string, currentUserId: string) {
     const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
+    const placeIdFromMap = this.synchronisedPlaceMap.get(artsDataId);
+    if (placeIdFromMap) {
+      this._loggerService.infoLogs(`\tThe Place with Artsdata id :${artsDataId} is already synced during this process.`);
+      return placeIdFromMap;
+    }
     const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token, artsDataId, currentUserId);
-    return placeDetails ? await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId)
-      : undefined;
+    if (placeDetails) {
+      const placeId = await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId);
+      this.synchronisedPlaceMap.set(artsDataId, placeId);
+      return placeId;
+    }
+    return undefined;
   }
 
   async syncPlaces(token: any, calendarId: string, source: string, footlightBaseUrl: string) {

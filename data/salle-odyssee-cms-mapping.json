@@ -1,75 +1,132 @@
 [
-    {
-      "fieldName": "additionalType",
-      "inputProperty": [
-        "keywords"
+  {
+    "fieldName": "additionalType",
+    "inputProperty": [
+      "keywords"
+    ],
+    "mapping": {
+      "Performance": [
+        "6418c27d5e4d4e0066a2e9fd"
       ],
-      "mapping": {
-        "Arts visuels": [
-          "63bc57dd1c6b6c005aad5778"
-        ],
-        "Art numérique": [
-          "63c01a771c6b6c005aad85c0"
-        ],
-        "Cinéma": [
-          "63c01a771c6b6c005aad85b8"
-        ],
-        "Cirque": [
-          "63c01a771c6b6c005aad85ba"
-        ],
-        "Culture scientifique": [
-          "63c01a771c6b6c005aad85c6"
-        ],
-        "Danse": [
-          "63c01a771c6b6c005aad85bc"
-        ],
-        "Design": [
-          "643eb7866f70e40064e0e7a0"
-        ],
-        "Histoire et patrimoine": [
-          "63c01a771c6b6c005aad85c4"
-        ],
-        "Humour": [
-          "63bf00421c6b6c005aad80a2"
-        ],
-        "Littérature": [
-          "63c01e911c6b6c005aad89a6"
-        ],
-        "Métiers d'art": [
-          "63c01a771c6b6c005aad85c2"
-        ],
-        "Musique": [
-          "63bc57dd1c6b6c005aad577c"
-        ],
-        "Théâtre": [
-          "63bc57dd1c6b6c005aad577a"
-        ],
-        "Variété": [
-          "643eb7866f70e40064e0e7a7"
-        ],
-        "DEFAULT": [
-          "63c84d71230627006f5655d0"
-        ]
-      }
-    },
-    {
-      "fieldName": "audience",
-      "inputProperty": [
-        "audience"
+      "Spectacle": [
+        "6418c27d5e4d4e0066a2e9fd"
       ],
-      "mapping": {
-        "Adulte": [
-          "63bc55b31c6b6c005aad56c2"
-        ],
-        "Adolescent": [
-          "63bc55b31c6b6c005aad56c0"
-        ],
-        "Jeune public": [
-          "63bc55b31c6b6c005aad56be"
-        ],
-        "Pour tous": [
-          "64413a0d7a2993006450baa6"
-        ]
-      }
+      "Exposition": [
+        "6418bbc65e4d4e0066a2e5ee"
+      ],
+      "Exhibition": [
+        "6418bbc65e4d4e0066a2e5ee"
+      ],
+      "Atelier": [
+        "64776b93fbeda20064d2332f"
+      ],
+      "Workshop": [
+        "64776b93fbeda20064d2332f"
+      ],
+      "Activité-bénéfice": [
+        "6418ca425e4d4e0066a2eea1"
+      ],
+      "Fundraising event": [
+        "6418ca425e4d4e0066a2eea1"
+      ],
+      "Animation": [
+        "64b97f333c19fa0064e8f234"
+      ],
+      "Conference": [
+        "6418ca425e4d4e0066a2ee9d"
+      ],
+      "Conférence": [
+        "6418ca425e4d4e0066a2ee9d"
+      ],
+      "Course": [
+        "64776b93fbeda20064d23331"
+      ],
+      "Cours": [
+        "64776b93fbeda20064d23331"
+      ],
+      "Literary event": [
+        "6418c7fd5e4d4e0066a2edf7"
+      ],
+      "Événement littéraire": [
+        "6418c7fd5e4d4e0066a2edf7"
+      ],
+      "Festival": [
+        "6418ca425e4d4e0066a2ee9f"
+      ],
+      "Lecture": [
+        "6418ca425e4d4e0066a2eea9"
+      ],
+      "Lecture publique": [
+        "6418ca425e4d4e0066a2eea9"
+      ],
+      "Open Mic": [
+        "6418ca425e4d4e0066a2eea7"
+      ],
+      "Micro ouvert": [
+        "6418ca425e4d4e0066a2eea7"
+      ],
+      "Heritage": [
+        "64a5ba0a3c19fa0064e64053"
+      ],
+      "Patrimoine": [
+        "64a5ba0a3c19fa0064e64053"
+      ],
+      "Screening": [
+        "6418ca425e4d4e0066a2eea5"
+      ],
+      "Projection": [
+        "6418ca425e4d4e0066a2eea5"
+      ],
+      "Art opening": [
+        "6418bbc65e4d4e0066a2e5f0"
+      ],
+      "Vernissage": [
+        "6418bbc65e4d4e0066a2e5f0"
+      ],
+      "Guided Tour": [
+        "6418ca425e4d4e0066a2eea3"
+      ],
+      "Visite guidée": [
+        "6418ca425e4d4e0066a2eea3"
+      ],
+      "DEFAULT": [
+        "641db9322831190064570718"
+      ]
     }
-  ]
+  },
+  {
+    "fieldName": "audience",
+    "inputProperty": [
+      "audience"
+    ],
+    "mapping": {
+      "Grand public": [
+        "63a09b1a1c6b6c005aad2dba"
+      ],
+      "General public": [
+        "63a09b1a1c6b6c005aad2dba"
+      ],
+      "Adult (18+)": [
+        "63a09b1a1c6b6c005aad2dbc"
+      ],
+      "Adulte (18+)": [
+        "63a09b1a1c6b6c005aad2dbc"
+      ],
+      "Children": [
+        "63a09b1a1c6b6c005aad2dbe"
+      ],
+      "Jeunesse": [
+        "63a09b1a1c6b6c005aad2dbe"
+      ],
+      "Teens (12-17)": [
+        "63a09b1a1c6b6c005aad2dc2"
+      ],
+      "Adolescent·e (12-17)": [
+        "63a09b1a1c6b6c005aad2dc2"
+      ],
+      "DEFAULT": [
+        "63ceb9c4230627006f5670c3"
+      ]
+    }
+  }
+]

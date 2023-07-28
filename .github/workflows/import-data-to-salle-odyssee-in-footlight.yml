@@ -2,7 +2,7 @@ name: Run Salle Odyssee Aggregator
 
 on:
   schedule:
-    - cron: "0 6 * * 4" # Run at 2:00 AM ET every Thursday
+    - cron: "0 6 * * 1" # Run at 2:00 AM ET every Thursday
 
 jobs:
   run:
@@ -22,5 +22,5 @@ jobs:
         run: npm run build
       - name: Import entities to footlight
         run: |
-          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_SALLE_ODYSSEE}} -p ${{secrets.AGGREGATOR_PASSWORD_SALLE_ODYSSEE}} -s http://kg.artsdata.ca/culture-creates/footlight/maisondelaculture-ca -i https://api.cms.footlight.io -c 6308ef4a7f771f00431d939a -b 30 -m https://culturecreates.github.io/footlight-aggregator/data/salle-odyssee-cms-mapping.json
+          node ./dist/main-commander.js import:entities -u ${{secrets.AGGREGATOR_USER_SALLE_ODYSSEE}} -p ${{secrets.AGGREGATOR_PASSWORD_SALLE_ODYSSEE}} -s http://kg.artsdata.ca/culture-creates/footlight/maisondelaculture-ca -i https://api.cms.footlight.io -c 6308ef4a7f771f00431d939a -b 10 -m https://culturecreates.github.io/footlight-aggregator/data/salle-odyssee-cms-mapping.json
 

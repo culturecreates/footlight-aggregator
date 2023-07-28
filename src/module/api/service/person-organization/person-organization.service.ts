@@ -8,6 +8,7 @@ import { LoggerService } from "../logger";
 
 @Injectable()
 export class PersonOrganizationService {
+  private synchronisedPersonOrganizationMap = new Map();
 
   constructor(
     @Inject(forwardRef(() => PersonService))
@@ -16,9 +17,9 @@ export class PersonOrganizationService {
     private readonly _organizationService: OrganizationService,
     @Inject(forwardRef(() => PlaceService))
     private readonly _placeService: PlaceService,
-    @Inject(forwardRef(()=> LoggerService))
+    @Inject(forwardRef(() => LoggerService))
     private readonly _loggerService: LoggerService
-    ){
+  ) {
   }
 
   async fetchPersonOrganizationFromFootlight(calendarId: string, token: string, footlightUrl: string,
@@ -27,7 +28,12 @@ export class PersonOrganizationService {
     for (const uri of entityUris) {
       const id = uri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
       const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_ORGANIZATION_BY_ID);
-
+      const synchronisedPersonOrOrganization = this.synchronisedPersonOrganizationMap.get(id);
+      if (synchronisedPersonOrOrganization) {
+        this._loggerService.infoLogs(`\tThe Person/Organization with Artsdata id :${id} is already synced during this process.`);
+        personOrganizations.push(synchronisedPersonOrOrganization);
+        continue;
+      }
       if (entityFetched) {
         const { alternateName } = entityFetched;
         entityFetched.alternateName = alternateName?.length
@@ -50,11 +56,12 @@ export class PersonOrganizationService {
               entityFetched.logo.url = logoUrl?.[0];
             }
           }
-
           entityId = await this._organizationService.getFootlightIdentifier(calendarId, token, footlightUrl,
             entityFetched, currentUserId);
         }
-        personOrganizations.push({ entityId, type });
+        const personOrOrganization = { entityId, type };
+        this.synchronisedPersonOrganizationMap.set(id, personOrOrganization);
+        personOrganizations.push(personOrOrganization);
       } else {
         this._loggerService.infoLogs(`Could not fetch data for id: ${id}`);
       }
