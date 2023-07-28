@@ -2,8 +2,7 @@
   {
     "fieldName": "additionalType",
     "inputProperty": [
-      "keywords",
-      "type"
+      "keywords"
     ],
     "mapping": {
       "Performance": [
