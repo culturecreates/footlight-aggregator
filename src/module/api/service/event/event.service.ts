@@ -64,6 +64,7 @@ export class EventService {
         break;
       }
       if (events?.length !== batchSize) {
+      if (!events?.length) {
         hasNext = false;
       }
       tries = 0;
