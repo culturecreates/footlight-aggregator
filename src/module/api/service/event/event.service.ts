@@ -53,7 +53,7 @@ export class EventService {
 
     do {
       let events = await this._fetchEventsFromArtsData(source, batchSize, offset);
-      if (events?.length !== batchSize) {
+      if (!events?.length) {
         hasNext = false;
       }
       const fetchedEventCount = events.length;
