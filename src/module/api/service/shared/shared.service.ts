@@ -20,7 +20,13 @@ export class SharedService {
   }
 
   public static async fetchUrl(url: string, headers?: any) {
-    return await axios.get(url, { headers });
+    try{
+      let result = await axios.get(url, { headers });
+      return result;
+    } catch(e){
+      this._loggerService(`Unable to fetch URL ${url} Error ::, ${e}`);
+      return e.response;
+    }
   }
 
   public static async postUrl(url: string, body?: any, headers?: any) {
