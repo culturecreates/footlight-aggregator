@@ -53,17 +53,19 @@ export class EventService {
 
     do {
       let events = await this._fetchEventsFromArtsData(source, batchSize, offset);
-      if(events === null && tries !== maxTry){
-        this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
-        tries++;
-        offset = offset + batchSize;
-        batch = batch + 1;
-        continue;
-      } else if(events === null && tries === maxTry){
-        this._loggerService.errorLogs(`Reached Maximum tries fetching Events from Arts Data`);
-        break;
-      }
-      if (events?.length !== batchSize) {
+      if(events === null){
+        if(tries !== maxTry){
+          this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
+          tries++;
+          offset = offset + batchSize;
+          batch = batch + 1;
+          continue;
+        } 
+        if(tries === maxTry) {
+          this._loggerService.errorLogs(`Reached Maximum tries fetching Events from Arts Data`);
+          break;
+        } 
+      } 
       if (!events?.length) {
         hasNext = false;
       }
