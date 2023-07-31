@@ -45,7 +45,7 @@ export class EventService {
   private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string,
                             batchSize: number, mappingUrl: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
-    let offset = 0, hasNext = true, batch = 1, totalCount = 0;
+    let offset = 0, hasNext = true, batch = 1, totalCount = 0, tries=0, maxTry = 3;
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
     const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
@@ -53,9 +53,21 @@ export class EventService {
 
     do {
       let events = await this._fetchEventsFromArtsData(source, batchSize, offset);
+      if(events === null && tries !== maxTry){
+        this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
+        tries++;
+        offset = offset + batchSize;
+        batch = batch + 1;
+        continue;
+      } else if(events === null && tries === maxTry){
+        this._loggerService.errorLogs(`Reached Maximum tries fetching Events from Arts Data`);
+        break;
+      }
+      if (events?.length !== batchSize) {
       if (!events?.length) {
         hasNext = false;
       }
+      tries = 0;
       const fetchedEventCount = events.length;
       let syncCount = 0;
       for (const event of events) {
@@ -140,6 +152,9 @@ export class EventService {
     const url = ArtsDataUrls.EVENTS + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
     this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
+    if(artsDataResponse.status !== HttpStatus.OK){
+      return null;
+    }
     return artsDataResponse.data.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
   }
 
