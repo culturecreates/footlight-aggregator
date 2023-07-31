@@ -224,7 +224,7 @@ export class EventService {
       return [];
     }
     const patternToConceptIdMappingForTheField = patternToConceptIdMapping.find(concept => concept.fieldName === fieldName);
-    let entityId: string[] = [];
+    let entityId = [];
     let defaultEntityId: string;
     const defaultEntityKey = "DEFAULT";
     if (patternToConceptIdMappingForTheField) {
@@ -248,7 +248,10 @@ export class EventService {
         ? patternToConceptIdMappingForTheField.mapping[defaultEntityKey] : [];
       entityId.push(...defaultEntityId);
     }
-    return Array.from(new Set(entityId));
+    const uniqueIds = Array.from(new Set(entityId));
+    return uniqueIds.map(id => {
+      return { entityId: id };
+    });
   }
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string,
