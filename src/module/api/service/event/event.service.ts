@@ -398,5 +398,4 @@ export class EventService {
   private _getAllConceptIds(conceptMapIds: any) {
     return conceptMapIds.map((ids) => ids.id);
   }
-
 }
