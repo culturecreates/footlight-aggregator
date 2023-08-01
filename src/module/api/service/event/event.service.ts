@@ -227,7 +227,7 @@ export class EventService {
   }
 
   private _getPropertyValues(lookupPropertyNames: string[], event: any) {
-    const eventPropertyValues = lookupPropertyNames?.length > 1
+    const eventPropertyValues = lookupPropertyNames?.length 
       ? lookupPropertyNames.map(property => event[property]).flat() : [];
     return this._formattedValues(eventPropertyValues, true);
   }
