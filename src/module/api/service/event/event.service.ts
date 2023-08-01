@@ -45,7 +45,7 @@ export class EventService {
   private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string,
                             batchSize: number, mappingUrl: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
-    let offset = 0, hasNext = true, batch = 1, totalCount = 0, tries=0, maxTry = 3;
+    let offset = 0, hasNext = true, batch = 1, totalCount = 0, tries = 0, maxTry = 3;
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
     const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
@@ -82,13 +82,12 @@ export class EventService {
           await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
           this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}\n`);
         } catch (e) {
-          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) 
-          Error while adding Event ${event.url}` + e);
+          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). Error while adding Event ${event.url}` + e);
+          }
         }
-      }
-      offset = offset + batchSize;
-      batch = batch + 1;
-    } while (hasNext);
+        offset = offset + batchSize;
+        batch = batch + 1;
+    } while (hasNext) ;
     this._loggerService.infoLogs(`Successfully synchronised ${totalCount} Events and linked entities.`);
   }
 
@@ -154,7 +153,7 @@ export class EventService {
     const url = ArtsDataUrls.EVENTS + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
     this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
-    if(artsDataResponse.status !== HttpStatus.OK){
+    if (artsDataResponse.status !== HttpStatus.OK) {
       return null;
     }
     return artsDataResponse.data.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
@@ -230,8 +229,8 @@ export class EventService {
   }
 
   private _getPropertyValues(lookupPropertyNames: string[], event: any) {
-    const eventPropertyValues = lookupPropertyNames?.length > 1
-      ? lookupPropertyNames.map(property => event[property]).flat() : [];
+    const eventPropertyValues = lookupPropertyNames?.length 
+      ? lookupPropertyNames.map(property => event[property]?.length ? event[property] : []).flat() : [];
     return this._formattedValues(eventPropertyValues, true);
   }
 
