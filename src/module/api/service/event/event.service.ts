@@ -53,34 +53,36 @@ export class EventService {
 
     do {
       let events = await this._fetchEventsFromArtsData(source, batchSize, offset);
-      if (events === null && tries !== maxTry) {
-        this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
-        tries++;
-        offset = offset + batchSize;
-        batch = batch + 1;
-        continue;
-      } else if (events === null && tries === maxTry) {
-        this._loggerService.errorLogs(`Reached Maximum tries fetching Events from Arts Data`);
-        break;
+      if(events === null){
+        if(tries !== maxTry){
+          this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
+          tries++;
+          offset = offset + batchSize;
+          batch = batch + 1;
+          continue;
+        } 
+        if(tries === maxTry) {
+          this._loggerService.errorLogs(`Reached Maximum tries fetching Events from Arts Data`);
+          break;
+        } 
+      } 
+      if (!events?.length) {
+        hasNext = false;
       }
-        if (!events?.length) {
-          hasNext = false;
-        }
-        tries = 0;
-        const fetchedEventCount = events.length;
-        let syncCount = 0;
-        for (const event of events) {
-          syncCount++;
-          totalCount++;
-          try {
-            this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount})`);
-            const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
-              patternToConceptIdMapping, existingEventTypeConceptIDs, existingAudienceConceptIDs);
-            await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
-            this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}\n`);
-          } catch (e) {
-            this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}) 
-          Error while adding Event ${event.url}` + e);
+      tries = 0;
+      const fetchedEventCount = events.length;
+      let syncCount = 0;
+      for (const event of events) {
+        syncCount++;
+        totalCount++;
+        try {
+          this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount})`);
+          const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
+            patternToConceptIdMapping, existingEventTypeConceptIDs, existingAudienceConceptIDs);
+          await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
+          this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}\n`);
+        } catch (e) {
+          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). Error while adding Event ${event.url}` + e);
           }
         }
         offset = offset + batchSize;
