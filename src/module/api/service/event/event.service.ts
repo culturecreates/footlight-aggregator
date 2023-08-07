@@ -10,10 +10,9 @@ import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { EventDTO } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
-import { MultilingualString } from "../../model";
 import { EventProperty, HttpMethodsEnum, OfferCategory } from "../../enum";
 import { Exception } from "../../helper";
-import { Concept, FacebookConstants, FootlightPaths, SameAsTypes } from "../../constants/footlight-urls";
+import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
 import { LoggerService } from "../logger";
 
@@ -53,25 +52,26 @@ export class EventService {
 
     do {
       let events = await this._fetchEventsFromArtsData(source, batchSize, offset);
-      if(events === null){
-        if(tries !== maxTry){
+      if (events === null) {
+        if (tries !== maxTry) {
           this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
           tries++;
           offset = offset + batchSize;
           batch = batch + 1;
           continue;
-        } 
-        if(tries === maxTry) {
+        }
+        if (tries === maxTry) {
           this._loggerService.errorLogs(`Reached Maximum tries fetching Events from Arts Data`);
           break;
-        } 
-      } 
+        }
+      }
       if (!events?.length) {
         hasNext = false;
       }
       tries = 0;
       const fetchedEventCount = events.length;
       let syncCount = 0;
+      events = events.filter(event => event.offers);
       for (const event of events) {
         syncCount++;
         totalCount++;
@@ -83,10 +83,10 @@ export class EventService {
           this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}\n`);
         } catch (e) {
           this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). Error while adding Event ${event.url}` + e);
-          }
         }
-        offset = offset + batchSize;
-        batch = batch + 1;
+      }
+      offset = offset + batchSize;
+      batch = batch + 1;
     } while (hasNext) ;
     this._loggerService.infoLogs(`Successfully synchronised ${totalCount} Events and linked entities.`);
   }
@@ -99,8 +99,8 @@ export class EventService {
   async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string,
                     patternToConceptIdMapping: any, existingEventTypeConceptIDs: any, existingAudienceConceptIDs: any) {
     const {
-      location: locations, performer, organizer, sponsor, alternateName, keywords,
-      offerConfiguration, startDate, startDateTime, endDate, endDateTime, sameAs, subEvent
+      location: locations, performer, organizer, sponsor, alternateName, keywords, startDate, startDateTime, endDate,
+      endDateTime, sameAs, subEvent, offers
     } = event;
     if (subEvent) {
       const dates = subEvent.map(event => event.startDateTime);
@@ -115,6 +115,7 @@ export class EventService {
       event.recurringEvent = { customDates, frequency: "CUSTOM" };
       this._loggerService.infoLogs(event.recurringEvent);
     }
+
     const location = locations?.[0];
     const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
       footlightBaseUrl, location, currentUserId) : undefined;
@@ -139,7 +140,7 @@ export class EventService {
       patternToConceptIdMapping, existingEventTypeConceptIDs);
     eventToAdd.audience = await this._findMatchingConcepts(event, EventProperty.AUDIENCE,
       patternToConceptIdMapping, existingAudienceConceptIDs);
-    eventToAdd.offerConfiguration = offerConfiguration ? this._formatOfferConfiguration(offerConfiguration) : undefined;
+    eventToAdd.offerConfiguration = offers ? this._formatOffers(offers) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if (isSingleDayEvent) {
       delete eventToAdd.endDate;
@@ -189,47 +190,8 @@ export class EventService {
     });
   }
 
-  private _formatOfferConfiguration(offerConfiguration) {
-    const { url, price, type } = offerConfiguration;
-    let name;
-    if (price !== "0") {
-      name = { en: price, fr: price };
-    }
-    return {
-      url: { uri: url },
-      category: price === "0" ? OfferCategory.FREE : OfferCategory.PAYING,
-      name: price !== "0" ? name : undefined,
-      type
-    };
-  }
-
-  private _findMatchingConcept(keywords: string[], conceptMap: { id: string, name: MultilingualString }[]) {
-    let matchingConcepts;
-    if (keywords) {
-      const keywordsFormatted = [];
-      for (const keyword of keywords) {
-        if (keyword.startsWith("[") && keyword.endsWith("]")) {
-          keywordsFormatted.push(...JSON.parse(keyword));
-        } else {
-          keywordsFormatted.push(keyword);
-        }
-      }
-      matchingConcepts = keywordsFormatted?.length ? conceptMap
-        ?.filter(concept =>
-          keywordsFormatted?.includes(concept.name?.en) || keywordsFormatted?.includes(concept.name?.fr)) : [];
-    }
-    if (!matchingConcepts?.length) {
-      matchingConcepts = conceptMap
-        ?.filter(concept => Concept.NOT_SPECIFIED.en === concept.name?.en?.toLowerCase() ||
-          Concept.NOT_SPECIFIED.fr === concept.name?.fr?.toLowerCase());
-    }
-    return matchingConcepts?.map(concept => {
-      return { entityId: concept.id };
-    });
-  }
-
   private _getPropertyValues(lookupPropertyNames: string[], event: any) {
-    const eventPropertyValues = lookupPropertyNames?.length 
+    const eventPropertyValues = lookupPropertyNames?.length
       ? lookupPropertyNames.map(property => event[property]?.length ? event[property] : []).flat() : [];
     return this._formattedValues(eventPropertyValues, true);
   }
@@ -398,4 +360,34 @@ export class EventService {
   private _getAllConceptIds(conceptMapIds: any) {
     return conceptMapIds.map((ids) => ids.id);
   }
+
+  private _formatOffers(offers: any) {
+
+    const aggregateOffer = offers.find(offer => offer.type === OfferConstants.AGGREGATE_OFFER);
+    const offerConfiguration = {
+      name: aggregateOffer?.name,
+      description: aggregateOffer?.description,
+      url: aggregateOffer?.url,
+      category: OfferCategory.FREE,
+      priceCurrency: OfferConstants.CURRENCY_CAD,
+      prices: undefined
+    };
+    const offersWithPrice = offers.filter(offer => offer.type === OfferConstants.OFFER);
+    const prices = [];
+    offersWithPrice?.forEach(offer => {
+      prices.push({
+        name: offer.name,
+        price: offer.price,
+        url: offer.url ? { uri: offer.url } : undefined
+      });
+    });
+
+    if (prices?.length) {
+      offerConfiguration.category = OfferCategory.PAYING;
+      offerConfiguration.prices = prices;
+    }
+
+    return offerConfiguration;
+  }
+
 }
