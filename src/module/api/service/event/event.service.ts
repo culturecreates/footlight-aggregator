@@ -71,7 +71,6 @@ export class EventService {
       tries = 0;
       const fetchedEventCount = events.length;
       let syncCount = 0;
-      events = events.filter(event => event.offers);
       for (const event of events) {
         syncCount++;
         totalCount++;
