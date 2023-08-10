@@ -2,7 +2,7 @@ name: Run Co-motion Aggregator
 
 on:
   schedule:
-    - cron: "0 5 * * 1"  # Run at 1:00 AM ET every Thursday
+    - cron: "0 5 * * 4"  # Run at 1:00 AM ET every Thursday
 
 jobs:
   run:
