@@ -139,7 +139,7 @@ export class EventService {
       patternToConceptIdMapping, existingEventTypeConceptIDs);
     eventToAdd.audience = await this._findMatchingConcepts(event, EventProperty.AUDIENCE,
       patternToConceptIdMapping, existingAudienceConceptIDs);
-    eventToAdd.offerConfiguration = offers ? this._formatOffers(offers) : undefined;
+    eventToAdd.offerConfiguration = offers.length ? this._formatOffers(offers) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if (isSingleDayEvent) {
       delete eventToAdd.endDate;
