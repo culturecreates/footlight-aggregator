@@ -6,23 +6,27 @@ usage() {
                 -s <source_server_ip_address> : source database server IP address.
                 -d <dump_file_location>: PEM file location including the complete path in the source server.
                 -l <pem_file_path>: dump file location including the complete path.
-                -a <destination_ip_address> : source database server IP address.
-                -p <destination_port> : source database server port number."
+                -a <destination_ip_address> : destination database server IP address.q1
+                -p <destination_port> : destination database server port number.
+                -u <destination_user_name>: destination database user name.
+                -c <destination_password>: destination database password"
   exit 1
 }
 
-while getopts s:d:l:a:p: flag; do
+while getopts s:d:l:a:p:u:c: flag; do
   case "${flag}" in
   s) SOURCE_IP=${OPTARG} ;;
   d) DUMP_FILE=${OPTARG} ;;
   l) PEM_FILE=${OPTARG} ;;
   a) DESTINATION_IP=${OPTARG} ;;
   p) DESTINATION_PORT=${OPTARG} ;;
+  u) DATABASE_USER_NAME=${OPTARG} ;;
+  c) DATABASE_PASSWORD=${OPTARG} ;;
   *) usage ;;
   esac
 done
 
-if [ -z "$SOURCE_IP" ] || [ -z "$DUMP_FILE" ] || [ -z "$PEM_FILE" ] || [ -z "$DESTINATION_IP" ]|| [ -z "$DESTINATION_IP" ]; then
+if [ -z "$SOURCE_IP" ] || [ -z "$DUMP_FILE" ] || [ -z "$PEM_FILE" ] || [ -z "$DESTINATION_IP" ]|| [ -z "$DATABASE_USER_NAME" ]|| [ -z "$DATABASE_PASSWORD" ]; then
   usage
 fi
 
@@ -42,7 +46,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
   scp -r -i "$PEM_FILE" ubuntu@"$SOURCE_IP":"$DUMP_FILE" ./database-backup
 
   echo "\nRestoring Database"
-  mongorestore --host "$DESTINATION_IP" --drop --port "$DESTINATION_PORT" ./database-backup
+  mongorestore --host "$DESTINATION_IP" --port "$DESTINATION_PORT" --username "$DATABASE_USER_NAME" --password "$DATABASE_PASSWORD" --db footlight-calendar ./database-backup/footlight-calendar --drop
 
   echo "\nMongo dump restoration completed!"
 
