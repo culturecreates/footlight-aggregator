@@ -35,7 +35,7 @@ export class PersonOrganizationService {
         continue;
       }
       if (entityFetched) {
-        const { alternateName } = entityFetched;
+        const { alternateName, contactPoint } = entityFetched;
         entityFetched.alternateName = alternateName?.length
           ? SharedService.formatAlternateNames(alternateName) : undefined;
         const { type } = entityFetched;
@@ -55,6 +55,9 @@ export class PersonOrganizationService {
             if (logoUrl instanceof Array) {
               entityFetched.logo.url = logoUrl?.[0];
             }
+          }
+          if(contactPoint){
+            entityFetched.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint
           }
           entityId = await this._organizationService.getFootlightIdentifier(calendarId, token, footlightUrl,
             entityFetched, currentUserId);

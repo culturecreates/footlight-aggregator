@@ -99,7 +99,7 @@ export class EventService {
                     patternToConceptIdMapping: any, existingEventTypeConceptIDs: any, existingAudienceConceptIDs: any) {
     const {
       location: locations, performer, organizer, sponsor, alternateName, keywords, startDate, startDateTime, endDate,
-      endDateTime, sameAs, subEvent, offers
+      endDateTime, sameAs, subEvent, offers, contactPoint
     } = event;
     if (subEvent) {
       const dates = subEvent.map(event => event.startDateTime);
@@ -141,6 +141,9 @@ export class EventService {
       patternToConceptIdMapping, existingAudienceConceptIDs);
     eventToAdd.offerConfiguration = offers?.length ? this._formatOffers(offers) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
+    if(contactPoint){
+      eventToAdd.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint
+    }
     if (isSingleDayEvent) {
       delete eventToAdd.endDate;
       delete eventToAdd.endDateTime;
