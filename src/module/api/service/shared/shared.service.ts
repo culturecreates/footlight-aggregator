@@ -102,7 +102,7 @@ export class SharedService {
       this._loggerService("Unauthorized Exception!");
       Exception.unauthorized(response.message);
     } else {
-      this._loggerService(`Some thing went wrong.${JSON.stringify(body)} `);
+      this._loggerService(`Some thing went wrong.${JSON.stringify(body)} response: ${response}`);
       Exception.internalServerError("Some thing went wrong");
     }
   }
