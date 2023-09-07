@@ -116,8 +116,8 @@ export class EventService {
     }
 
 
-    const location = locations?.[0];
-    const virtualLocation = locations?.[1];
+    const location = locations?.Place;
+    const virtualLocation = locations?.VirtualLocation;
     const virtualLocationName = virtualLocation? virtualLocation.name:null
     const virtualLocationDescription = virtualLocation? virtualLocation.description:null
     const virtualLocationUrl = virtualLocation? virtualLocation.url:null
@@ -138,14 +138,12 @@ export class EventService {
     eventToAdd.locationId = locationId ? { place: { entityId: locationId } } : locationId;
     eventToAdd.locationId.virtualLocation = {}
 
-    if (virtualLocationName) {
-      eventToAdd.locationId.virtualLocation.name = virtualLocationName;
-    }
-    if (virtualLocationDescription) {
-      eventToAdd.locationId.virtualLocation.description = virtualLocationDescription;
-    }
-    if (virtualLocationUrl) {
-      eventToAdd.locationId.virtualLocation.url = virtualLocationUrl;
+    if (virtualLocation) {
+      eventToAdd.locationId.virtualLocation = {
+        name: virtualLocationName,
+        description: virtualLocationDescription,
+        url: virtualLocationUrl,
+      };
     }
 
     eventToAdd.performers = performers;
