@@ -38,6 +38,11 @@ export class PersonOrganizationService {
         const { alternateName, contactPoint } = entityFetched;
         entityFetched.alternateName = alternateName?.length
           ? SharedService.formatAlternateNames(alternateName) : undefined;
+
+        entityFetched.type = entityFetched.type.includes(PersonOrganizationType.PERSON) ? PersonOrganizationType.PERSON 
+        : entityFetched.type.includes(PersonOrganizationType.ORGANIZATION) ? PersonOrganizationType.ORGANIZATION 
+        : entityFetched.type;
+
         const { type } = entityFetched;
         let entityId: string;
         if (type === PersonOrganizationType.PERSON) {

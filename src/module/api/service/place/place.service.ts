@@ -35,6 +35,7 @@ export class PlaceService {
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string, currentUserId: string) {
+    artsDataUri = typeof(artsDataUri) != 'string'? artsDataUri[0]:artsDataUri
     const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
     const placeIdFromMap = this.synchronisedPlaceMap.get(artsDataId);
     if (placeIdFromMap) {
