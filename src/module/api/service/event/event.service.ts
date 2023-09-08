@@ -266,8 +266,27 @@ export class EventService {
       if (!artsDataUrl) {
         Exception.badRequest("The event is not linked to Artsdata.");
       }
-      const eventsFromArtsData = await this._fetchEventsFromArtsData(source, 300, 0);
-      const eventMatching = eventsFromArtsData.find(event => event.uri === artsDataUrl);
+      const limit = 10
+      let offset = 0
+      let eventMatching = {}
+      while(true){
+        const eventsFromArtsData = await this._fetchEventsFromArtsData(source, limit, offset);
+        if(!eventsFromArtsData){
+          Exception.badRequest("The event is not found in Artsdata");
+        }
+        eventMatching = eventsFromArtsData.find(event => event.uri === artsDataUrl);
+        offset += 10
+        if(eventMatching) {
+          console.log("Event found");
+          break
+        }
+      }
+
+      if(!Object.keys(eventMatching).length){
+        Exception.badRequest("The event is not found in Artsdata");
+      }
+
+
       const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
       const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id,
         patternToConceptIdMapping, existingEventTypeConceptIDs, existingAudienceConceptIDs);
