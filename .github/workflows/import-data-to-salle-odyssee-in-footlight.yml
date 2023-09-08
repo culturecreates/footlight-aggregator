@@ -1,6 +1,7 @@
 name: Run Salle Odyssee Aggregator
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 6 * * 4" # Run at 2:00 AM ET every Thursday
 
