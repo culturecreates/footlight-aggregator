@@ -136,8 +136,6 @@ export class EventService {
     const eventToAdd = event;
     delete eventToAdd.location;
     eventToAdd.locationId = locationId ? { place: { entityId: locationId } } : locationId;
-    eventToAdd.locationId.virtualLocation = {}
-
     if (virtualLocation) {
       eventToAdd.locationId.virtualLocation = {
         name: virtualLocationName,
