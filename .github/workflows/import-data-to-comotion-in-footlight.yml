@@ -1,9 +1,9 @@
 name: Run Co-motion Aggregator
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 5 * * 4"  # Run at 1:00 AM ET every Thursday
-
 jobs:
   run:
     runs-on: ubuntu-latest
