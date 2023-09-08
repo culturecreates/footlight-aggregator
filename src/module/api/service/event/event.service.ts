@@ -115,7 +115,13 @@ export class EventService {
       this._loggerService.infoLogs(event.recurringEvent);
     }
 
-    const location = locations?.[0];
+
+    const location = locations?.Place;
+    const virtualLocation = locations?.VirtualLocation;
+    const virtualLocationName = virtualLocation? virtualLocation.name:null
+    const virtualLocationDescription = virtualLocation? virtualLocation.description:null
+    const virtualLocationUrl = virtualLocation? virtualLocation.url:null
+
     const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
       footlightBaseUrl, location, currentUserId) : undefined;
     const performers = performer?.length ? await this._personOrganizationService
@@ -130,6 +136,16 @@ export class EventService {
     const eventToAdd = event;
     delete eventToAdd.location;
     eventToAdd.locationId = locationId ? { place: { entityId: locationId } } : locationId;
+    eventToAdd.locationId.virtualLocation = {}
+
+    if (virtualLocation) {
+      eventToAdd.locationId.virtualLocation = {
+        name: virtualLocationName,
+        description: virtualLocationDescription,
+        url: virtualLocationUrl,
+      };
+    }
+
     eventToAdd.performers = performers;
     eventToAdd.organizers = organizers;
     eventToAdd.collaborators = collaborators;
