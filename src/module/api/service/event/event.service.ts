@@ -140,7 +140,9 @@ export class EventService {
       eventToAdd.locationId.virtualLocation = {
         name: virtualLocationName,
         description: virtualLocationDescription,
-        url: virtualLocationUrl,
+        url: {
+          uri: virtualLocationUrl
+        }
       };
     }
 
