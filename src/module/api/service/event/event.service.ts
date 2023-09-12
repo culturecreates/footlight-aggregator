@@ -10,7 +10,7 @@ import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { EventDTO } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
-import { EventProperty, HttpMethodsEnum, OfferCategory } from "../../enum";
+import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory } from "../../enum";
 import { Exception } from "../../helper";
 import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
@@ -419,12 +419,30 @@ export class EventService {
       });
     });
 
-    if (aggregateOffer.additionalType[0].endsWith("Paid")) {
-      offerConfiguration.category = OfferCategory.PAYING;
-      offerConfiguration.prices = prices;
+    if(aggregateOffer?.additionalType){
+      if (aggregateOffer?.additionalType[0] == AggregateOfferType.PAID) {
+        offerConfiguration.category = OfferCategory.PAYING;
+        offerConfiguration.prices = prices;
+      }
+      else if (aggregateOffer?.additionalType[0] == AggregateOfferType.FREE) {
+        offerConfiguration.category = OfferCategory.FREE;
+      }
+      else if (aggregateOffer?.additionalType[0] == AggregateOfferType.REGISTER) {
+        offerConfiguration.category = OfferCategory.REGISTRATION;
+      }
     }
-    if (aggregateOffer.additionalType[0].endsWith("Free")) {
-      offerConfiguration.category = OfferCategory.FREE;
+    else {
+      const priceExists = () => {
+        return prices.some(price => price.price > 0);
+      };
+
+      if(priceExists){
+        offerConfiguration.category = OfferCategory.PAYING;
+        offerConfiguration.prices = prices;
+      }
+      else{
+        offerConfiguration.category = OfferCategory.FREE;
+      }
     }
 
     return offerConfiguration;
