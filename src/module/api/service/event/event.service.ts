@@ -405,7 +405,7 @@ export class EventService {
       name: aggregateOffer?.name,
       description: aggregateOffer?.description,
       url: aggregateOffer?.url,
-      category: OfferCategory.FREE,
+      category: undefined,
       priceCurrency: OfferConstants.CURRENCY_CAD,
       prices: undefined
     };
@@ -419,9 +419,12 @@ export class EventService {
       });
     });
 
-    if (prices?.length) {
+    if (aggregateOffer.additionalType[0].endsWith("Paid")) {
       offerConfiguration.category = OfferCategory.PAYING;
       offerConfiguration.prices = prices;
+    }
+    if (aggregateOffer.additionalType[0].endsWith("Free")) {
+      offerConfiguration.category = OfferCategory.FREE;
     }
 
     return offerConfiguration;
