@@ -11,7 +11,8 @@ export enum PersonOrganizationType {
 
 export enum OfferCategory {
     FREE = 'FREE',
-    PAYING = 'PAYING'
+    PAYING = 'PAYING',
+    REGISTRATION = "REGISTRATION",
 }
 
 export enum EventProperty {
