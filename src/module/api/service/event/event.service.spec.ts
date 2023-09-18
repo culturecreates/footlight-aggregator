@@ -68,9 +68,7 @@ describe("Testing formatOffers", () => {
                 "offers": {
                   "uri": "http://kg.footlight.io/resource/gatineau-cloud_33145#AggregateOffer",
                   "type": "AggregateOffer",
-                  "additionalType": [
-                    "http://kg.footlight.io/resource/Free"
-                  ]
+                  "additionalType": "Free",
                 },
                 "organizer": [
                   "http://kg.artsdata.ca/resource/K16-114"
@@ -136,7 +134,7 @@ describe("Testing formatOffers", () => {
       jest.spyOn(personOrganizationService, 'fetchPersonOrganizationFromFootlight').mockImplementation(mockPersonOrganizationService.fetchPersonOrganizationFromFootlight);
 
       const sampleEvent = createMockEventWithSingleOffer()
-      sampleEvent.offers.additionalType[0] = "http://kg.footlight.io/resource/Paid"
+      sampleEvent.offers.additionalType = "Paid"
 
       const formattedEvent = await eventService.formatEvent(
         'calendarId',
