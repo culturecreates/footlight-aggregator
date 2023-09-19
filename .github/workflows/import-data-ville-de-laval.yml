@@ -1,0 +1,31 @@
+name: Run Ville de Laval Aggregator
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * 4"  # Run at 1:00 AM ET every Thursday
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
+          envkey_ENABLING_LOG_TO_DATA_DOG: true
+          file_name: .env
+          fail_on_empty: false
+      - name: Build Footlight Aggregator
+        run: npm run build
+      - name: Import entities to footlight
+        run: |
+          node ./dist/main-commander.js 
+          import:entities -u ${{secrets.AGGREGATOR_USER_VILLELAVAL}} -p ${{secrets.AGGREGATOR_PASSWORD_VILLELAVAL}} 
+          -s http://kg.artsdata.ca/culture-creates/artsdata-planet-ville-de-laval/calendrier-activites 
+          -i https://api.cms.footlight.io 
+          -c 63457978637093005071a053 
+          -b 5 
+          -m https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/co-motion-cms-mapping.json
