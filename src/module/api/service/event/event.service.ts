@@ -81,7 +81,7 @@ export class EventService {
           await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
           this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}\n`);
         } catch (e) {
-          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). Error while adding Event ${event.url}` + e);
+          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). Error while adding Event ${JSON.stringify(event.url)}` + e);
         }
       }
       offset = offset + batchSize;
