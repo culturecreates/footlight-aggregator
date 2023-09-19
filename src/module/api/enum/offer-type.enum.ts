@@ -1,5 +1,5 @@
 export enum AggregateOfferType {
-    FREE = 'FREE',
-    PAID = 'PAID',
-    REGISTER = 'REGISTER'
+    FREE = 'Free',
+    PAID = 'Paid',
+    REGISTER = 'Register'
 }

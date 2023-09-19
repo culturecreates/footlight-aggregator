@@ -421,14 +421,14 @@ export class EventService {
     });
 
     if(aggregateOffer?.additionalType){
-      if (aggregateOffer?.additionalType[0] == AggregateOfferType.PAID) {
+      if (aggregateOffer?.additionalType == AggregateOfferType.PAID) {
         offerConfiguration.category = OfferCategory.PAYING;
         offerConfiguration.prices = prices;
       }
-      else if (aggregateOffer?.additionalType[0] == AggregateOfferType.FREE) {
+      else if (aggregateOffer?.additionalType == AggregateOfferType.FREE) {
         offerConfiguration.category = OfferCategory.FREE;
       }
-      else if (aggregateOffer?.additionalType[0] == AggregateOfferType.REGISTER) {
+      else if (aggregateOffer?.additionalType == AggregateOfferType.REGISTER) {
         offerConfiguration.category = OfferCategory.REGISTRATION;
       }
     }

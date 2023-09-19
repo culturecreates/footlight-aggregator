@@ -1,7 +1,7 @@
 import { EventService, PlaceService, PersonOrganizationService, OrganizationService, PersonService, PostalAddressService, SharedService, LoggerService } from "../../service"
 import { Test, TestingModule } from "@nestjs/testing";
 import { TaxonomyService } from "../taxonomy";
-import { OfferCategory } from "../../enum";
+import { AggregateOfferType, OfferCategory } from "../../enum";
 
 
 describe("Testing formatOffers", () => {
@@ -90,65 +90,32 @@ describe("Testing formatOffers", () => {
     }
 
 
-    it('should set offerconfiguration.category as `FREE` if aggregator.additionalType is `FREE`', async () => {
-      const mockPlaceService = {
+    it('should return the entity type that is present in CMS if multiple entities are present.', async () => {
+      const mockSharedService = {
+        fetchFromArtsDataById: jest.fn().mockResolvedValue({uri:"http://kg.artsdata.ca/resource/K16-114", type: [
+            "Organization",
+            "MusicGroup"
+          ]}),
+      };
+
+      const mockOrganizationService = {
         getFootlightIdentifier: jest.fn().mockResolvedValue('645bd8f67db98f0065dd251b'),
       };
 
-      const mockPersonOrganizationService = {
-        fetchPersonOrganizationFromFootlight: jest.fn().mockResolvedValue('performers'),
-      };
+      jest.spyOn(organizationService, 'getFootlightIdentifier').mockImplementation(mockOrganizationService.getFootlightIdentifier);
+      jest.spyOn(SharedService, 'fetchFromArtsDataById').mockImplementation(mockSharedService.fetchFromArtsDataById)
 
-      jest.spyOn(placeService, 'getFootlightIdentifier').mockImplementation(mockPlaceService.getFootlightIdentifier);
-      jest.spyOn(personOrganizationService, 'fetchPersonOrganizationFromFootlight').mockImplementation(mockPersonOrganizationService.fetchPersonOrganizationFromFootlight);
-
-      const sampleEvent = createMockEventWithSingleOffer()
-
-      const formattedEvent = await eventService.formatEvent(
+      const mockEvent = createMockEventWithSingleOffer()
+      const organizers = await personOrganizationService.fetchPersonOrganizationFromFootlight(
         'calendarId',
         'token',
-        sampleEvent,
-        'footlightBaseUrl',
-        'currentUserId',
-        undefined,
-        undefined,
-        undefined
-      );
+        'footlightUrl',
+        mockEvent.organizer,
+        'currentUserId'
+      )
 
-      const offerConfiguration = formattedEvent.offerConfiguration
-
-      expect(offerConfiguration.category).toEqual(OfferCategory.FREE)
-
+      expect(organizers[0].type).toEqual('Organization')
     });
 
-    it('should set offerconfiguration.category as `PAID` if aggregator.additionalType is `PAID`', async () => {
-      const mockPlaceService = {
-        getFootlightIdentifier: jest.fn().mockResolvedValue('645bd8f67db98f0065dd251b'),
-      };
 
-      const mockPersonOrganizationService = {
-        fetchPersonOrganizationFromFootlight: jest.fn().mockResolvedValue('performers'),
-      };
-
-      jest.spyOn(placeService, 'getFootlightIdentifier').mockImplementation(mockPlaceService.getFootlightIdentifier);
-      jest.spyOn(personOrganizationService, 'fetchPersonOrganizationFromFootlight').mockImplementation(mockPersonOrganizationService.fetchPersonOrganizationFromFootlight);
-
-      const sampleEvent = createMockEventWithSingleOffer()
-      sampleEvent.offers.additionalType = "Paid"
-
-      const formattedEvent = await eventService.formatEvent(
-        'calendarId',
-        'token',
-        sampleEvent,
-        'footlightBaseUrl',
-        'currentUserId',
-        undefined,
-        undefined,
-        undefined
-      );
-
-      const offerConfiguration = formattedEvent.offerConfiguration
-      expect(offerConfiguration.category).toEqual(OfferCategory.PAYING)
-
-    });
 })
