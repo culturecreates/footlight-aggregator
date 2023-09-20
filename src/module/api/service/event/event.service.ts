@@ -115,6 +115,7 @@ export class EventService {
       this._loggerService.infoLogs(event.recurringEvent);
     }
 
+    const offerArray = offers.length?offers:[offers]
 
     const location = locations?.Place;
     const virtualLocation = locations?.VirtualLocation;
@@ -155,7 +156,7 @@ export class EventService {
       patternToConceptIdMapping, existingEventTypeConceptIDs);
     eventToAdd.audience = await this._findMatchingConcepts(event, EventProperty.AUDIENCE,
       patternToConceptIdMapping, existingAudienceConceptIDs);
-    eventToAdd.offerConfiguration = offers?.length ? this._formatOffers(offers) : undefined;
+    eventToAdd.offerConfiguration = offerArray?.length ? this._formatOffers(offerArray) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if(contactPoint){
       eventToAdd.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint
@@ -420,14 +421,14 @@ export class EventService {
     });
 
     if(aggregateOffer?.additionalType){
-      if (aggregateOffer?.additionalType[0] == AggregateOfferType.PAID) {
+      if (aggregateOffer?.additionalType == AggregateOfferType.PAID) {
         offerConfiguration.category = OfferCategory.PAYING;
         offerConfiguration.prices = prices;
       }
-      else if (aggregateOffer?.additionalType[0] == AggregateOfferType.FREE) {
+      else if (aggregateOffer?.additionalType == AggregateOfferType.FREE) {
         offerConfiguration.category = OfferCategory.FREE;
       }
-      else if (aggregateOffer?.additionalType[0] == AggregateOfferType.REGISTER) {
+      else if (aggregateOffer?.additionalType == AggregateOfferType.REGISTER) {
         offerConfiguration.category = OfferCategory.REGISTRATION;
       }
     }
