@@ -187,6 +187,38 @@ describe("Testing cms mapping data", () => {
           }
         )
     }
+    function createMockTestEventWithBluesRockKeyword(){ 
+      return(
+        {
+            "uri": "http://kg.artsdata.ca/resource/K23-599",
+            "type": "Event",
+            "description": {
+              "fr": "André Lemire met en scène une galerie d’automates fragiles, incomplets et partiellement dysfonctionnels, relégués dans un lieu d’entreposage. \n\nLa cour des ossements est cet espace où on dépose ce qui ne sert plus. C’est l’endroit où les décors se reposent d’un spectacle en perpétuel déplacement, là où s’alignent les avions retirés de la circulation, le matériel militaire tombé en désuétude. C’est un lieu de transition, d’oubli et parfois d’abandon.\n\nCe qui hier encore nous émerveillait, à quoi ressemble-t-il, une fois tombé en désuétude?\n\nL’exposition se veut une réflexion sur ce que nous ne terminons pas, sur le temps qui s’arrête parfois au mauvais moment, sur la marche imparfaite de toute chose.\n\nLe vernissage de l'exposition aura lieu le mercredi, 11 octobre 2023, de 18 h à 20 h.\n\nImage : André Lemire, La cour des ossements, 2022.\n"
+            },
+            "endDate": "2023-12-10",
+            "keywords": [
+              "[\"Musique\", \"Blues / rock\"]"
+            ],
+            "location": {
+              "Place": "http://kg.artsdata.ca/resource/K5-13"
+            },
+            "offers": {
+              "uri": "http://kg.footlight.io/resource/gatineau-cloud_33145#AggregateOffer",
+              "type": "AggregateOffer",
+              "additionalType": "Free",
+            },
+            "name": {
+              "fr": "La Cour des ossements, une exposition d'André Lemire"
+            },
+            "sameAs": [
+              {
+                "uri": "http://kg.artsdata.ca/resource/K23-599"
+              }
+            ],
+            "startDate": "2023-10-11",
+          }
+        )
+    }
 
     describe("Format events from arts data", ()=>{
       const testCases = [
@@ -215,6 +247,16 @@ describe("Testing cms mapping data", () => {
           event: createMockTestEventWithAudience(),
           additionalType: [ { entityId: '63c84d71230627006f5655d0' } ],
           audience: [ { entityId: '63bc55b31c6b6c005aad56be' } ]
+        },
+        {
+          description: "When keyword has Blues and Rock",
+          event: createMockTestEventWithBluesRockKeyword(),
+          additionalType: [
+            { entityId: '63bc57dd1c6b6c005aad577c' },
+            { entityId: '643d95811639f100642b4b8b' },
+            { entityId: '643d95811639f100642b4b9f' }
+          ],
+          audience: []
         }
       ]
       for(const testEvent of testCases){
