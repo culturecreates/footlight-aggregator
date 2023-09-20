@@ -105,6 +105,11 @@ describe("Testing cms mapping data", () => {
               "location": {
                 "Place": "http://kg.artsdata.ca/resource/K5-13"
               },
+              "offers": {
+                "uri": "http://kg.footlight.io/resource/gatineau-cloud_33145#AggregateOffer",
+                "type": "AggregateOffer",
+                "additionalType": "Free",
+              },
               "name": {
                 "fr": "La Cour des ossements, une exposition d'André Lemire"
               },
@@ -133,6 +138,11 @@ describe("Testing cms mapping data", () => {
             "location": {
               "Place": "http://kg.artsdata.ca/resource/K5-13"
             },
+            "offers": {
+              "uri": "http://kg.footlight.io/resource/gatineau-cloud_33145#AggregateOffer",
+              "type": "AggregateOffer",
+              "additionalType": "Free",
+            },
             "name": {
               "fr": "La Cour des ossements, une exposition d'André Lemire"
             },
@@ -159,6 +169,11 @@ describe("Testing cms mapping data", () => {
             ],
             "location": {
               "Place": "http://kg.artsdata.ca/resource/K5-13"
+            },
+            "offers": {
+              "uri": "http://kg.footlight.io/resource/gatineau-cloud_33145#AggregateOffer",
+              "type": "AggregateOffer",
+              "additionalType": "Free",
             },
             "name": {
               "fr": "La Cour des ossements, une exposition d'André Lemire"
@@ -196,7 +211,7 @@ describe("Testing cms mapping data", () => {
           audience: []
         },
         {
-          description: "When only audience data is provoided",
+          description: "When only audience is provoided",
           event: createMockTestEventWithAudience(),
           additionalType: [ { entityId: '63c84d71230627006f5655d0' } ],
           audience: [ { entityId: '63bc55b31c6b6c005aad56be' } ]
