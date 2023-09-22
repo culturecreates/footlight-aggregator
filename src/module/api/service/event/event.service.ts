@@ -228,9 +228,16 @@ export class EventService {
       const eventPropertyValues = this._getPropertyValues(patternToConceptIdMappingForTheField.inputProperty, event);
       if (eventPropertyValues?.length) {
         for (const pattern in patternToConceptIdMappingForTheField.mapping) {
-          const regexPattern = new RegExp(`^${pattern}$`, "gi");
+          let regexPattern
+          try {
+            regexPattern = new RegExp(`^${pattern}$`, "gi")
+          } catch (e) {
+            this._loggerService.infoLogs(`Invalid Regex: ${e}`);
+          }
+          
           if (eventPropertyValues.some(eventPropertyValue => eventPropertyValue.toLowerCase() === pattern
-            || regexPattern.test(eventPropertyValue))) {
+            || (regexPattern && regexPattern.test(eventPropertyValue)))
+          ) {
             const mappedUUIDs: string[] = patternToConceptIdMappingForTheField.mapping[pattern];
             const conceptIdToAdd = mappedUUIDs.filter(id => existingConceptIDs.includes(id));
             if (conceptIdToAdd?.length) {

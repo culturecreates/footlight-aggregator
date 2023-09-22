@@ -44,6 +44,9 @@ describe("Testing cms mapping data", () => {
             "keywords"
           ],
           "mapping": { 
+            "*BadRegEx*": [
+              "BadRegExID"
+            ],
             "Musique": [
               "MusicID"
             ],
