@@ -37,39 +37,58 @@ describe("Testing cms mapping data", () => {
     });
 
     async function createMockPatternToConceptIdMapping(){
-      const mappingUrl = "https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/co-motion-cms-mapping.json"
-      const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
+      const patternToConceptIdMapping = [
+        {
+          "fieldName": "additionalType",
+          "inputProperty": [
+            "keywords"
+          ],
+          "mapping": { 
+            "Musique": [
+              "MusicID"
+            ],
+            "Blues.*": [
+              "BluesID"
+            ],
+            ".*Rock": [
+              "RockID"
+            ],
+            "DEFAULT": [
+              "DefaultID"
+            ]
+          }
+        },
+        {
+          "fieldName": "audience",
+          "inputProperty": [
+            "audience"
+          ],
+          "mapping": {
+            "Adulte": [
+              "AdulteID"
+            ],
+            "Adolescent": [
+              "AdolescentID"
+            ],
+            "Famille": [
+              "FamilleAndEnfantID"
+            ],
+            "Enfant": [
+              "FamilleAndEnfantID"
+            ]
+          }
+        }
+      ]
       return patternToConceptIdMapping;
     }
 
     // Mocking event type concept ids from taxonomy
     function createMockexistingEventTypeConceptIDs(){
       const existingEventTypeConceptIDs  = [
-        "63bc57dd1c6b6c005aad5778",
-        "63c01a771c6b6c005aad85c0",
-        "63c01a771c6b6c005aad85b8",
-        "63c01a771c6b6c005aad85ba",
-        "63c01a771c6b6c005aad85c6",
-        "63c01a771c6b6c005aad85bc",
-        "643eb7866f70e40064e0e7a0",
-        "63c01a771c6b6c005aad85c4",
-        "63bf00421c6b6c005aad80a2",
-        "63c01e911c6b6c005aad89a6",
-        "63c01a771c6b6c005aad85c2",
-        "63bc57dd1c6b6c005aad577c",
-        "63bc57dd1c6b6c005aad577a",
-        "643eb7866f70e40064e0e7a7",
-        "63c01b741c6b6c005aad86c0",
-        "643d95811639f100642b4ba7",
-        "63c01b741c6b6c005aad86c4",
-        "63c84d71230627006f5655d0",
-        "64651bdcad41e50064355b0c",
-        "643eb7866f70e40064e0e7fc",
-        "643d95811639f100642b4b8f",
-        "643d95811639f100642b4b8b",
-        "643d95811639f100642b4b95",
-        "643d95811639f100642b4b9f",
-        "643d95811639f100642b4b99"
+        "MusicID",
+        "BluesID",
+        "RockID",
+        "DefaultID"
       ]    
       return existingEventTypeConceptIDs;
     }
@@ -77,10 +96,10 @@ describe("Testing cms mapping data", () => {
     // Mocking audience concept ids from taxonomy
     function createMockexistingAudienceConceptIDs(){
       const existingAudienceConceptIDs = [
-        "63bc55b31c6b6c005aad56c2",
-        "63bc55b31c6b6c005aad56c0",
-        "63bc55b31c6b6c005aad56be",
-        "64413a0d7a2993006450baa6"
+        "AdulteID",
+        "AdolescentID",
+        "FamilleAndEnfantID",
+        "FamilleAndEnfantID"
       ]
       return existingAudienceConceptIDs;
     }
@@ -226,35 +245,35 @@ describe("Testing cms mapping data", () => {
           description: "When both keywords and audience data is provoided",
           event: createMockTestEventWithKeywordAndAudience(),
           additionalType: [
-            { entityId: '63bc57dd1c6b6c005aad577c' },
-            { entityId: '643d95811639f100642b4b8b' },
-            { entityId: '643d95811639f100642b4b9f' }
+            { entityId: 'MusicID' },
+            { entityId: 'BluesID' },
+            { entityId: 'RockID' }
           ],
-          audience: [ { entityId: '63bc55b31c6b6c005aad56be' } ]
+          audience: [ { entityId: 'FamilleAndEnfantID' } ]
         },
         {
           description: "When only keyword is provided",
           event: createMockTestEventWithKeyword(),
           additionalType: [
-            { entityId: '63bc57dd1c6b6c005aad577c' },
-            { entityId: '643d95811639f100642b4b8b' },
-            { entityId: '643d95811639f100642b4b9f' }
+            { entityId: 'MusicID' },
+            { entityId: 'BluesID' },
+            { entityId: 'RockID' }
           ],
           audience: []
         },
         {
-          description: "When only audience is provoided",
+          description: "When only audience is provided",
           event: createMockTestEventWithAudience(),
-          additionalType: [ { entityId: '63c84d71230627006f5655d0' } ],
-          audience: [ { entityId: '63bc55b31c6b6c005aad56be' } ]
+          additionalType: [ { entityId: 'DefaultID' } ],
+          audience: [ { entityId: 'FamilleAndEnfantID' } ]
         },
         {
-          description: "When keyword has Blues and Rock",
+          description: "When keyword has Blues and Rock together",
           event: createMockTestEventWithBluesRockKeyword(),
           additionalType: [
-            { entityId: '63bc57dd1c6b6c005aad577c' },
-            { entityId: '643d95811639f100642b4b8b' },
-            { entityId: '643d95811639f100642b4b9f' }
+            { entityId: 'MusicID' },
+            { entityId: 'BluesID' },
+            { entityId: 'RockID' }
           ],
           audience: []
         }
