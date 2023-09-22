@@ -1,0 +1,151 @@
+[
+    {
+      "fieldName": "additionalType",
+      "inputProperty": [
+        "keywords"
+      ],
+      "mapping": {
+        "Arts visuels": [
+          "63bc57dd1c6b6c005aad5778"
+        ],
+        "Art numérique": [
+          "63c01a771c6b6c005aad85c0"
+        ],
+        "Cinéma": [
+          "63c01a771c6b6c005aad85b8"
+        ],
+        "Cirque": [
+          "63c01a771c6b6c005aad85ba"
+        ],
+        "Culture scientifique": [
+          "63c01a771c6b6c005aad85c6"
+        ],
+        "Danse": [
+          "63c01a771c6b6c005aad85bc"
+        ],
+        "Ballet": [
+          "63c01a771c6b6c005aad85bc"
+        ],
+        "Design": [
+          "643eb7866f70e40064e0e7a0"
+        ],
+        "Histoire et patrimoine": [
+          "63c01a771c6b6c005aad85c4"
+        ],
+        "Humour": [
+          "63bf00421c6b6c005aad80a2"
+        ],
+        "Littérature": [
+          "63c01e911c6b6c005aad89a6"
+        ],
+        "Métiers d'art": [
+          "63c01a771c6b6c005aad85c2"
+        ],
+        "Musique": [
+          "63bc57dd1c6b6c005aad577c"
+        ],
+        "Théâtre": [
+          "63bc57dd1c6b6c005aad577a"
+        ],
+        "Variété": [
+          "643eb7866f70e40064e0e7a7"
+        ],
+        "Autre": [
+          "63c84d71230627006f5655d0"
+        ],
+        "Conférence": [
+          "63c01b741c6b6c005aad86c0"
+        ],
+        "Documentaire": [
+          "643d95811639f100642b4ba7"
+        ],
+        "Festival": [
+          "63c01b741c6b6c005aad86c4"
+        ],
+        "Art de la parole": [
+          "63c84d71230627006f5655d0"
+        ],
+        "Chanson anglaise": [
+          "63bc57dd1c6b6c005aad577c"
+        ],
+        "Chanson autochtone": [
+          "63bc57dd1c6b6c005aad577c"
+        ],
+        "Chanson Française": [
+          "63bc57dd1c6b6c005aad577c"
+        ],
+        "Chorale": [
+          "63bc57dd1c6b6c005aad577c"
+        ],
+        "Conte": [
+          "64651bdcad41e50064355b0c"
+        ],
+        "Magie": [
+          "643eb7866f70e40064e0e7fc"
+        ],
+        "Musique classique": [
+          "643d95811639f100642b4b8f"
+        ],
+        "Musique du monde": [
+          "63bc57dd1c6b6c005aad577c"
+        ],
+        "Noël": [
+          "63c84d71230627006f5655d0"
+        ],
+        "Orchestre symphonique": [
+          "643d95811639f100642b4b8f"
+        ],
+        "Blues": [
+          "643d95811639f100642b4b8b"
+        ],
+        "Jazz": [
+          "643d95811639f100642b4b95"
+        ],
+        "/jazz/i": [
+          "643d95811639f100642b4b95"
+        ],
+        "/blues/i": [
+          "643d95811639f100642b4b8b"
+        ],
+        "Rock": [
+          "643d95811639f100642b4b9f"
+        ],
+        "pop": [
+          "643d95811639f100642b4b99"
+        ],
+        "DEFAULT": [
+          "63c84d71230627006f5655d0"
+        ]
+      }
+    },
+    {
+      "fieldName": "audience",
+      "inputProperty": [
+        "audience"
+      ],
+      "mapping": {
+        "Adulte": [
+          "63bc55b31c6b6c005aad56c2"
+        ],
+        "Adolescent": [
+          "63bc55b31c6b6c005aad56c0"
+        ],
+        "Jeune public": [
+          "63bc55b31c6b6c005aad56be"
+        ],
+        "Famille": [
+          "63bc55b31c6b6c005aad56be"
+        ],
+        "Enfant": [
+          "63bc55b31c6b6c005aad56be"
+        ],
+        "jeunesse": [
+          "63bc55b31c6b6c005aad56be"
+        ],
+        "Pour tous": [
+          "64413a0d7a2993006450baa6"
+        ]
+      }
+    }
+  ]
+
