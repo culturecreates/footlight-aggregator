@@ -50,10 +50,10 @@ describe("Testing cms mapping data", () => {
             "Musique": [
               "MusicID"
             ],
-            "Blues.*": [
+            ".*Blues.*": [
               "BluesID"
             ],
-            ".*Rock": [
+            ".*Rock.*": [
               "RockID"
             ],
             "DEFAULT": [
