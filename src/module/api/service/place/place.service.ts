@@ -35,7 +35,7 @@ export class PlaceService {
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string, currentUserId: string) {
-    artsDataUri = typeof(artsDataUri) != 'string'? artsDataUri[0]:artsDataUri
+    artsDataUri = typeof (artsDataUri) != "string" ? artsDataUri[0] : artsDataUri;
     const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
     const placeIdFromMap = this.synchronisedPlaceMap.get(artsDataId);
     if (placeIdFromMap) {
@@ -84,8 +84,8 @@ export class PlaceService {
   private async _formatPlaceFetched(calendarId: string, token: string, footlightBaseUrl: string, currentUserId, placeFetched: any) {
     const { address, alternateName } = placeFetched;
     delete placeFetched.address;
-    const postalAddressId = await this._postalAddressService
-      .getFootlightIdentifier(calendarId, token, footlightBaseUrl, address, currentUserId);
+    const postalAddressId = !!address ? await this._postalAddressService
+      .getFootlightIdentifier(calendarId, token, footlightBaseUrl, address, currentUserId) : undefined;
     const placeToAdd: PlaceDTO = placeFetched;
     placeToAdd.alternateName = alternateName?.length
       ? SharedService.formatAlternateNames(alternateName) : undefined;
