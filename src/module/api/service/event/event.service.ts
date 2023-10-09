@@ -114,14 +114,13 @@ export class EventService {
       event.recurringEvent = { customDates, frequency: "CUSTOM" };
       this._loggerService.infoLogs(event.recurringEvent);
     }
-
-    const offerArray = offers.length?offers:[offers]
+    // const offerArray = offers?.length ? offers : [offers];
 
     const location = locations?.Place;
     const virtualLocation = locations?.VirtualLocation;
-    const virtualLocationName = virtualLocation? virtualLocation.name:null
-    const virtualLocationDescription = virtualLocation? virtualLocation.description:null
-    const virtualLocationUrl = virtualLocation? virtualLocation.url:null
+    const virtualLocationName = virtualLocation ? virtualLocation.name : null;
+    const virtualLocationDescription = virtualLocation ? virtualLocation.description : null;
+    const virtualLocationUrl = virtualLocation ? virtualLocation.url : null;
 
     const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
       footlightBaseUrl, location, currentUserId) : undefined;
@@ -156,10 +155,10 @@ export class EventService {
       patternToConceptIdMapping, existingEventTypeConceptIDs);
     eventToAdd.audience = await this._findMatchingConcepts(event, EventProperty.AUDIENCE,
       patternToConceptIdMapping, existingAudienceConceptIDs);
-    eventToAdd.offerConfiguration = offerArray?.length ? this._formatOffers(offerArray) : undefined;
+    eventToAdd.offerConfiguration = offers ? this._formatOffers(offers) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
-    if(contactPoint){
-      eventToAdd.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint
+    if (contactPoint) {
+      eventToAdd.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint;
     }
     if (isSingleDayEvent) {
       delete eventToAdd.endDate;
@@ -168,8 +167,9 @@ export class EventService {
     return eventToAdd;
   }
 
-  private async _fetchEventsFromArtsData(source: string, batchSize: number, offset: number) {
+  private async _fetchEventsFromArtsData(source: string, batchSize: number, batch: number) {
     const limit = batchSize ? batchSize : 300;
+    const offset = (batch - 1) * batchSize;
     const url = ArtsDataUrls.EVENTS + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
     this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
@@ -228,13 +228,13 @@ export class EventService {
       const eventPropertyValues = this._getPropertyValues(patternToConceptIdMappingForTheField.inputProperty, event);
       if (eventPropertyValues?.length) {
         for (const pattern in patternToConceptIdMappingForTheField.mapping) {
-          let regexPattern
+          let regexPattern;
           try {
-            regexPattern = new RegExp(`^${pattern}$`, "gi")
+            regexPattern = new RegExp(`^${pattern}$`, "gi");
           } catch (e) {
             this._loggerService.infoLogs(`Invalid Regex: ${e}`);
           }
-          
+
           if (eventPropertyValues.some(eventPropertyValue => eventPropertyValue.toLowerCase() === pattern
             || (regexPattern && regexPattern.test(eventPropertyValue)))
           ) {
@@ -274,23 +274,23 @@ export class EventService {
       if (!artsDataUrl) {
         Exception.badRequest("The event is not linked to Artsdata.");
       }
-      const limit = 10
-      let offset = 0
-      let eventMatching = {}
-      while(true){
+      const limit = 10;
+      let offset = 0;
+      let eventMatching = {};
+      while (true) {
         const eventsFromArtsData = await this._fetchEventsFromArtsData(source, limit, offset);
-        if(!eventsFromArtsData){
+        if (!eventsFromArtsData) {
           Exception.badRequest("The event is not found in Artsdata");
         }
         eventMatching = eventsFromArtsData.find(event => event.uri === artsDataUrl);
-        offset += 10
-        if(eventMatching) {
+        offset += 10;
+        if (eventMatching) {
           console.log("Event found");
-          break
+          break;
         }
       }
 
-      if(!Object.keys(eventMatching).length){
+      if (!Object.keys(eventMatching).length) {
         Exception.badRequest("The event is not found in Artsdata");
       }
 
@@ -403,10 +403,11 @@ export class EventService {
   }
 
   private _getAllConceptIds(conceptMapIds: any) {
-    return conceptMapIds.map((ids) => ids.id);
+    return conceptMapIds?.map((ids) => ids.id);
   }
 
   private _formatOffers(offers: any) {
+    offers = [].concat(offers);
 
     const aggregateOffer = offers.find(offer => offer.type === OfferConstants.AGGREGATE_OFFER);
     const offerConfiguration = {
@@ -427,28 +428,24 @@ export class EventService {
       });
     });
 
-    if(aggregateOffer?.additionalType){
+    if (aggregateOffer?.additionalType) {
       if (aggregateOffer?.additionalType == AggregateOfferType.PAID) {
         offerConfiguration.category = OfferCategory.PAYING;
         offerConfiguration.prices = prices;
-      }
-      else if (aggregateOffer?.additionalType == AggregateOfferType.FREE) {
+      } else if (aggregateOffer?.additionalType == AggregateOfferType.FREE) {
         offerConfiguration.category = OfferCategory.FREE;
-      }
-      else if (aggregateOffer?.additionalType == AggregateOfferType.REGISTER) {
+      } else if (aggregateOffer?.additionalType == AggregateOfferType.REGISTER) {
         offerConfiguration.category = OfferCategory.REGISTRATION;
       }
-    }
-    else {
+    } else {
       const priceExists = () => {
         return prices.some(price => price.price > 0);
       };
 
-      if(priceExists){
+      if (priceExists) {
         offerConfiguration.category = OfferCategory.PAYING;
         offerConfiguration.prices = prices;
-      }
-      else{
+      } else {
         offerConfiguration.category = OfferCategory.FREE;
       }
     }
