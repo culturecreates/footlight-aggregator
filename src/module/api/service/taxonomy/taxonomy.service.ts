@@ -28,7 +28,7 @@ export class TaxonomyService {
   private async _fetchTaxonomyAndConcepts(footlightUrl: string, calendarId: string, token: string,
                                           className: string) {
     let url = footlightUrl + FootlightPaths.GET_TAXONOMY;
-    url = url + "?include-concepts=true";
+    url = url + "?include-concepts=true&page=1&limit=100";
     if (className) {
       url = url + "&taxonomy-class=" + className;
     }
