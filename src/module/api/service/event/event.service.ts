@@ -167,9 +167,8 @@ export class EventService {
     return eventToAdd;
   }
 
-  private async _fetchEventsFromArtsData(source: string, batchSize: number, batch: number) {
+  private async _fetchEventsFromArtsData(source: string, batchSize: number, offset: number) {
     const limit = batchSize ? batchSize : 300;
-    const offset = (batch - 1) * batchSize;
     const url = ArtsDataUrls.EVENTS + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
     this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
