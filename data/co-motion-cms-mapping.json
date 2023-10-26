@@ -20,10 +20,10 @@
         "Culture scientifique": [
           "63c01a771c6b6c005aad85c6"
         ],
-        "Danse": [
+        ".*Danse.*": [
           "63c01a771c6b6c005aad85bc"
         ],
-        "Ballet": [
+        ".*Ballet.*": [
           "63c01a771c6b6c005aad85bc"
         ],
         "Design": [
