@@ -36,12 +36,12 @@ export class EventController {
     example: "https://culturecreates.github.io/footlight-aggregator/data/ville-de-gatineau-cms-mapping.json"
   })
   @ApiQuery({
-    name: "source",
-    description: "**source (Graph)**",
-    required: true,
-    explode: true,
-    example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
-  })
+    name: "source",
+    description: "**source (Graph)**",
+    required: true,
+    explode: true,
+    example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
+  })
   async syncEvents(
     @Req() request: Request,
     @Query("footlight-base-url") footlightBaseUrl?: string,
@@ -51,6 +51,45 @@ export class EventController {
     @Query("mapping-url") mappingUrl?: string): Promise<ApiResponseEnum> {
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
     await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl, batchSize, mappingUrl);
+    return { status: ApiStatusCode.SUCCESS, message: "Syncing Events and related entities completed." };
+  }
+
+
+  @Put("upload-jsonld")
+  @ApiOperation({ summary: "Sync json-ld data into footlight." })
+  @ApiQuery({
+    name: "footlight-base-url",
+    description: "Select the environment",
+    required: true,
+    enum: Object.values(Environment)
+  })
+  @ApiQuery({
+    name: "calendar-id",
+    description: "**calendar-id (The calendar identifier)**",
+    required: true,
+    explode: true
+  })
+  @ApiQuery({
+    name: "mapping-url",
+    description: "**URL to fetch data for mapping keywords to event type taxonomy**",
+    example: "https://culturecreates.github.io/footlight-aggregator/data/ville-de-gatineau-cms-mapping.json"
+  })
+  @ApiQuery({
+    name: "source",
+    description: "**source (Graph)**",
+    required: true,
+    explode: true,
+    example: "https://footlight-condenser.herokuapp.com/databus/index.json?seedurl=gatineau-cloud"
+  })
+  async syncEventsByJsonLd(
+    @Req() request: Request,
+    @Query("footlight-base-url") footlightBaseUrl?: string,
+    @Query("calendar-id") calendarId?: string,
+    @Query("source") source?: string,
+    @Query("batch-size", ParseIntPipe) batchSize?: number,
+    @Query("mapping-url") mappingUrl?: string): Promise<ApiResponseEnum> {
+    const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
+    await this._eventService.syncEntitiesByJsonLd(token, calendarId, source, footlightBaseUrl, batchSize, mappingUrl);
     return { status: ApiStatusCode.SUCCESS, message: "Syncing Events and related entities completed." };
   }
 

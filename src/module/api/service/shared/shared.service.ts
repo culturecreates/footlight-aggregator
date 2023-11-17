@@ -5,6 +5,7 @@ import axios from "axios";
 import { HttpMethodsEnum } from "../../enum";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { LoggerService } from "..";
+import { JsonLdServiceHelper } from "../../helper/json-ld-service.helper";
 
 @Injectable()
 export class SharedService {
@@ -176,6 +177,29 @@ export class SharedService {
       this._loggerService(`Error fetching JSON from URL: ${url}, Error message: ${error.message}`);
       return null;
     }
+  }
+
+  public static async fetchDataAndExtract(url: string){
+   try { 
+      const response = await axios.get(url);
+      if(response?.status === HttpStatus.OK){
+        const downloadUrl = response?.data?.latestArtefact?.downloadUrl;
+        const jsonDataDownloaded = await this._downloadJson(downloadUrl);
+        const jsonDataExtracted = await JsonLdServiceHelper.compactJsonLd(jsonDataDownloaded)
+        if(jsonDataExtracted["@graph"]?.length){
+          return jsonDataExtracted["@graph"]
+        } else {
+          return null;
+        }
+      }
+    } catch (error){
+      this._loggerService(`Error fetching Data from URL: ${url}, Error message: ${error.message}`);
+    }
+  }
+
+  static async _downloadJson(url: string){
+    const response = await axios.get(url);
+    return response.data;
   }
 
 }

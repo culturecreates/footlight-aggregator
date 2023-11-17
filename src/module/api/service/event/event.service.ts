@@ -452,4 +452,13 @@ export class EventService {
     return offerConfiguration;
   }
 
+  async syncEntitiesByJsonLd( calendarId: string, token: string, source: string, footlightBaseUrl: string,
+                      batchSize: number, mappingUrl: string ){
+    const json = await this._extractJsonData(source)
+  }
+
+  private async _extractJsonData(source: string){
+    const jsonDataExtracted = await SharedService.fetchDataAndExtract(source);
+  }
+
 }
