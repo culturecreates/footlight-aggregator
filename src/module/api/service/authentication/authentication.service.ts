@@ -1,6 +1,6 @@
 import { Inject, Injectable, forwardRef } from "@nestjs/common";
 import { UserLoginDTO } from "../../dto";
-import { HEADER, SERVER } from "../../config";
+import { HEADER } from "../../config";
 import axios from "axios";
 import { Environment } from "../../enum/environments.enum";
 import { LoggerService } from "../logger";
@@ -23,7 +23,7 @@ export class AuthenticationService {
           headers: {
             "accept": "*/*",
             "Content-Type": "application/json",
-            "Referer": HEADER.REFERER
+            "Referer": HEADER.CMS_REFERER_HEADER
           }
         }
       );

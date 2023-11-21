@@ -32,12 +32,7 @@ export class TaxonomyService {
     if (className) {
       url = url + "&taxonomy-class=" + className;
     }
-    const headers = {
-      Accept: "*/*",
-      Authorization: `Bearer ${token}`,
-      "calendar-id": calendarId,
-      "Content-Type": "application/json"
-    };
+    const headers = SharedService.createHeaders(token, calendarId);
     const taxonomyResponse = await SharedService.fetchUrl(url, headers);
     return taxonomyResponse.data;
   }
