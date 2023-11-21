@@ -29,16 +29,23 @@ export class ImportEntities extends CommandRunner {
     passedParam: string[],
     options?: BasicCommandOptions
   ): Promise<void> {
-    const authenticationResponse = await this._authService.login({
-      email: options.userName,
-      password: options.password
-    }, options.footlightBaseUrl);
-    if (authenticationResponse?.accessToken) {
-      this._loggerService.infoLogs("Authentication successful");
-      await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl, options?.batchSize, options?.mappingUrl);
-    } else {
-      this._loggerService.errorLogs("Authentication failed");
+    try {
+      const authenticationResponse = await this._authService.login({
+        email: options.userName,
+        password: options.password
+      }, options.footlightBaseUrl);
+      if (authenticationResponse?.accessToken) {
+        this._loggerService.infoLogs("Authentication successful");
+        await this._eventService.syncEntities(authenticationResponse.accessToken, options?.calendar, options?.source, options?.footlightBaseUrl, options?.batchSize, options?.mappingUrl);
+      } else {
+        this._loggerService.errorLogs("Authentication failed");
+        process.exit(1)
+      }
+    } catch(e){
+      this._loggerService.errorLogs(` Something went wrong. ${e.message}`);
+      process.exit(1)
     }
+    
   }
 
   @Option({
