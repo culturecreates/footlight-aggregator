@@ -11,3 +11,7 @@ export const SERVER: { FOOTLIGHT_API_BASE_URL: string } = {
 export const APPLICATION: { PORT: number } = {
     PORT: Number(env.APP_PORT) || 3033
 };
+
+export const HEADER: { REFERER : string } = {
+    REFERER: env.REFERER || undefined 
+}
