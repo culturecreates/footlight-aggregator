@@ -16,7 +16,7 @@ jobs:
         with:
           envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
           envkey_ENABLING_LOG_TO_DATA_DOG: true
-          envkey_REFERER: ${{ secrets.CMS_REFERER }}
+          envkey_CMS_REFERER_HEADER: ${{ secrets.CMS_REFERER_HEADER }}
           file_name: .env
           fail_on_empty: false
       - name: Build Footlight Aggregator
