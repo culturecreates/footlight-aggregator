@@ -5,6 +5,7 @@ import axios from "axios";
 import { HttpMethodsEnum } from "../../enum";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { LoggerService } from "..";
+import { HEADER } from "../../config";
 
 @Injectable()
 export class SharedService {
@@ -141,7 +142,8 @@ export class SharedService {
     const headers = {
       Accept: "*/*",
       Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "Referer": HEADER.REFERER
     };
     if (calendarId) {
       headers["calendar-id"] = calendarId;
