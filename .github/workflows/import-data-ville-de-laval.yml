@@ -26,7 +26,7 @@ jobs:
           node ./dist/main-commander.js  \
             import:entities -u ${{secrets.AGGREGATOR_USER_VILLELAVAL}} -p ${{secrets.AGGREGATOR_PASSWORD_VILLELAVAL}} \
             -s http://kg.artsdata.ca/culture-creates/artsdata-planet-ville-de-laval/calendrier-activites \
-            -i https://apissss.cms.footlight.io \
+            -i https://api.cms.footlight.io \
             -c 63457978637093005071a053 \
             -b 5 \
             -m https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/co-motion-cms-mapping.json 
