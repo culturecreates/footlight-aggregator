@@ -9,5 +9,7 @@ jobs:
       ports:
         - 7333:7333
     steps:
+      - name: check docker ps
+        run:  /usr/bin/docker ps
       - name: Check for OntoRefine version
         run: /opt/ontorefine/dist/bin/ontorefine-cli refine-version -u http://localhost:7333
