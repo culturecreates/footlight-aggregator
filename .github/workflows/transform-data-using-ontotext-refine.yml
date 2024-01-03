@@ -24,12 +24,6 @@ jobs:
       - name: Run the onto-refine service
         run: nohup ./ontorefine-1.2.0/bin/ontorefine &
 
-      - name: Display pwd
-        run: pwd
-
-      - name: Display ls
-        run: ls
-
       - name: Download open-api response
         run: |
           curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
