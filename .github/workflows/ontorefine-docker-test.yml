@@ -10,4 +10,4 @@ jobs:
         - 7333:7333
     steps:
       - name: Check for OntoRefine version
-        run: /opt/ontorefine/dist/bin/ontorefine-cli refine-version -u http://localhost
+        run: /opt/ontorefine/dist/bin/ontorefine-cli refine-version -u http://localhost:7333
