@@ -9,7 +9,9 @@ jobs:
       ports:
         - 7333:7333
     steps:
-      - name: check docker ps
-        run:  /usr/bin/docker ps
+      - uses: GuillaumeFalourd/wait-sleep-action@v1
+        with:
+          time: '10' # for 60 seconds
       - name: Check for OntoRefine version
         run: /opt/ontorefine/dist/bin/ontorefine-cli refine-version -u http://localhost:7333
+
