@@ -1,0 +1,27 @@
+name: Transform data using Onto Refine and upload to Artsdtaa
+
+on:
+  workflow_dispatch:
+
+jobs:
+  download-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+
+      - name: Download file from URL
+        run: |
+          curl -O https://downloads.ontotext.com/refiner-4.9.4.tar.gz -o onto-refine.zip
+
+      - name: Unzip file
+        run: unzip onto-refine.zip
+
+      - name: Run the onto-refine service
+        run: ./onto-refine/bin/ontorefine
+
+      - name: Create project test
+        run: ./onto-refine/bin/ontorefine-cli create --help
