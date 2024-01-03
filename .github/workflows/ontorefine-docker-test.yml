@@ -1,0 +1,13 @@
+name: Ontorefine Docker Test
+on:
+  workflow_dispatch:
+jobs:
+  container-ontorefine-job:
+    runs-on: ubuntu-latest
+    container:
+      image: ontotext/refine:1.2.2
+      ports:
+        - 7333:7333
+    steps:
+      - name: Check for OntoRefine version
+        run: ./dist/bin/ontorefine-cli refine-version -u http://localhost:7333
