@@ -14,9 +14,9 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-      - name: Download file from URL
+      - name: Download ontotext/refine
         run: |
-          curl -O https://download.ontotext.com/owlim/aa8cbf12-ad2d-11ed-b6c3-42843b1b6b38/ontorefine-1.2.0-dist.zip -o onto-refine.zip
+          curl -L https://download.ontotext.com/owlim/aa8cbf12-ad2d-11ed-b6c3-42843b1b6b38/ontorefine-1.2.0-dist.zip -o onto-refine.zip
 
       - name: Unzip file
         run: unzip onto-refine.zip
