@@ -19,10 +19,10 @@ jobs:
           curl -L https://download.ontotext.com/owlim/aa8cbf12-ad2d-11ed-b6c3-42843b1b6b38/ontorefine-1.2.0-dist.zip -o onto-refine.zip
 
       - name: Unzip file
-        run: unzip onto-refine.zip -d onto-refine
+        run: unzip onto-refine.zip
 
       - name: Run the onto-refine service
-        run: ./onto-refine/bin/ontorefine
+        run: ./ontorefine-1.2.0/bin/ontorefine
 
       - name: Create project test
-        run: ./onto-refine/bin/ontorefine-cli create --help
+        run: ./ontorefine-1.2.0/bin/ontorefine-cli create --help
