@@ -24,5 +24,12 @@ jobs:
       - name: Run the onto-refine service
         run: nohup ./ontorefine-1.2.0/bin/ontorefine &
 
-      - name:
-        run: ./ontorefine-1.2.0/bin/ontorefine-cli create --help
+      - name: Download open-api response
+        run: |
+          curl -D ./events.json 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10'
+
+      - name: Transform open-api response to
+        run: ./ontorefine-1.2.0/bin/ontorefine-cli events.json -u http://localhost:7333 -c ../../data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
+
+      - name: Display file
+        run: cat events.ttl
