@@ -9,8 +9,8 @@ jobs:
       ports:
         - 7333:7333
     steps:
-      - name: run ontorefine
+      - name: Run ontorefine
         run: /opt/ontorefine/dist/bin/ontorefine &
-      - name: Call ontorefine-cli
+      - name: Run ontorefine-cli
         run: /opt/ontorefine/dist/bin/ontorefine-cli refine-version -u http://localhost:7333
 
