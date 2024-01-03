@@ -7,7 +7,7 @@ jobs:
     container:
       image: ontotext/refine:1.2.2
       ports:
-        - 7333:7333
+        - 7333
     steps:
       - name: Check for OntoRefine version
         run: /opt/ontorefine/dist/bin/ontorefine-cli refine-version -u http://localhost:7333
