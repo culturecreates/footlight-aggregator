@@ -11,6 +11,10 @@ jobs:
     steps:
       - name: check ps
         run: ps
+      - name: run ontorefine
+        run: /opt/ontorefine/dist/bin/ontorefine
+      - name: check ps again
+        run: ps
       - name: Check for OntoRefine version
         run: /opt/ontorefine/dist/bin/ontorefine-cli refine-version -u http://localhost:7333
 
