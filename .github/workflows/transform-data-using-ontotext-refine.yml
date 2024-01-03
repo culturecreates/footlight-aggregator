@@ -22,7 +22,7 @@ jobs:
         run: unzip onto-refine.zip
 
       - name: Run the onto-refine service
-        run: ./ontorefine-1.2.0/bin/ontorefine
+        run: nohup ./ontorefine-1.2.0/bin/ontorefine &
 
-      - name: Create project test
+      - name:
         run: ./ontorefine-1.2.0/bin/ontorefine-cli create --help
