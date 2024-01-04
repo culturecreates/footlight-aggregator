@@ -12,7 +12,7 @@ jobs:
       ports:
         - 7333:7333
       volumes:
-        -./footlight-aggregator:./footlight-aggregator
+        - ./footlight-aggregator:./footlight-aggregator
     steps:
       - name: Run ontorefine
         run: /opt/ontorefine/dist/bin/ontorefine &
