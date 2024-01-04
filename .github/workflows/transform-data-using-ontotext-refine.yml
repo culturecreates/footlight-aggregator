@@ -4,31 +4,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  transform-data-using-ontorefine:
-    runs-on: ubuntu-latest
-    container:
-      image: ontotext/refine:1.2.1
-      options: --user root
-      ports:
-        - 7333:7333
-    steps:
-      - name: Run ontorefine
-        run: /opt/ontorefine/dist/bin/ontorefine &
-
-      - name: Download open-api response
-        run: |
-          apt-get -y update; apt-get -y install curl; curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
-
-      - name: Transform json data to RDF
-        run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations ./data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
-
-      - name: Upload RDf file to S3
-        uses: prewk/s3-cp-action@v2
-        with:
-          aws_access_key_id: ${{ secrets.S3_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-          source: 'events.ttl'
-          dest: 's3://footlight-aggregator-pipeline-files'
+#  transform-data-using-ontorefine:
+#    runs-on: ubuntu-latest
+#    container:
+#      image: ontotext/refine:1.2.1
+#      options: --user root
+#      ports:
+#        - 7333:7333
+#    steps:
+#      - name: Run ontorefine
+#        run: /opt/ontorefine/dist/bin/ontorefine &
+#
+#      - name: Download open-api response
+#        run: |
+#          apt-get -y update; apt-get -y install curl; curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
+#
+#      - name: Transform json data to RDF
+#        run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations ./data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
+#
+#      - name: Upload RDf file to S3
+#        uses: prewk/s3-cp-action@v2
+#        with:
+#          aws_access_key_id: ${{ secrets.S3_ACCESS_KEY_ID }}
+#          aws_secret_access_key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+#          source: 'events.ttl'
+#          dest: 's3://footlight-aggregator-pipeline-files'
 
   upload-to-artsdata:
     needs: transform-data-using-ontorefine
