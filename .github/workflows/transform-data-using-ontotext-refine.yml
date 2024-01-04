@@ -11,8 +11,6 @@ jobs:
 #      options: --user root
       ports:
         - 7333:7333
-      volumes:
-        - ./.
     steps:
       - name: Run ontorefine
         run: /opt/ontorefine/dist/bin/ontorefine &
