@@ -26,7 +26,7 @@ jobs:
         run: pwd
 
       - name: debug - ls
-        run: ls
+        run: ls ../
 
       - name: Transform json data to RDF
         run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations ./data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
