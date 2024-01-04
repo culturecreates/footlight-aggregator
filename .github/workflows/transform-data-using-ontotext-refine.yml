@@ -15,8 +15,8 @@ jobs:
       - name: Run ontorefine
         run: /opt/ontorefine/dist/bin/ontorefine &
 
-      - name: Check if curl is installed
-        run: curl --version || apt-get update && apt-get install -y curl  # Install if needed
+      - name: Install curl
+        run: apk update && apk add curl
 
       - name: Download open-api response
         run: |
