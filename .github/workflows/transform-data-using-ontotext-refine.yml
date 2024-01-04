@@ -8,11 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ontotext/refine:1.2.1
-      options: --user root
+#      options: --user root
       ports:
         - 7333:7333
       volumes:
-        - ./footlight-aggregator:./footlight-aggregator
+        - ./.
     steps:
       - name: Run ontorefine
         run: /opt/ontorefine/dist/bin/ontorefine &
