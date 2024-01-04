@@ -21,39 +21,39 @@ jobs:
       - name: Transform json data to RDF
         run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations ./data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
 
-  upload-rdf-to-S3:
-      needs: test
-      runs-on: ubuntu-latest
-      permissions:
-        contents: read
-        packages: write
-      steps:
-      - name: Copy a file from s3
-      uses: prewk/s3-cp-action@v2
-      with:
-        aws_access_key_id: ${{ secrets.S3_ACCESS_KEY_ID }}
-        aws_secret_access_key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-        source: 'events.ttl'
-        dest: 's3://footlight-aggregator-pipeline-files'
-
-  upload-to-artsdata:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set current date as output
-        id: version  # this is used on variable path
-        run: echo "dumpdate=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_OUTPUT
-
-      - name: Call Artsdata Databus
-        run: |
-          curl \
-          -H 'Content-Type: application/json' \
-          -X POST http://api.artsdata.ca/databus/  \
-          --data '{ "artifact": "footlight-cms-events",
-                    "comment": "Events from the Footlight CMS",
-                    "publisher": "${{ secrets.PUBLISHER_URI_GREGORY }}",
-                    "group": "${{ github.event.repository.name }}",
-                    "version": "${{ steps.version.outputs.dumpdate }}",
-                    "downloadUrl": "s3://footlight-aggregator-pipeline-files/events.ttl",
-                    "downloadFile": "events.ttl",
-                    "reportCallbackUrl": "https://webhook.site/be245341-5a1b-44cd-896f-590003162b07"
-                  }' 
+#  upload-rdf-to-S3:
+#      needs: test
+#      runs-on: ubuntu-latest
+#      permissions:
+#        contents: read
+#        packages: write
+#      steps:
+#      - name: Copy a file from s3
+#      uses: prewk/s3-cp-action@v2
+#      with:
+#        aws_access_key_id: ${{ secrets.S3_ACCESS_KEY_ID }}
+#        aws_secret_access_key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+#        source: 'events.ttl'
+#        dest: 's3://footlight-aggregator-pipeline-files'
+#
+#  upload-to-artsdata:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Set current date as output
+#        id: version  # this is used on variable path
+#        run: echo "dumpdate=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_OUTPUT
+#
+#      - name: Call Artsdata Databus
+#        run: |
+#          curl \
+#          -H 'Content-Type: application/json' \
+#          -X POST http://api.artsdata.ca/databus/  \
+#          --data '{ "artifact": "footlight-cms-events",
+#                    "comment": "Events from the Footlight CMS",
+#                    "publisher": "${{ secrets.PUBLISHER_URI_GREGORY }}",
+#                    "group": "${{ github.event.repository.name }}",
+#                    "version": "${{ steps.version.outputs.dumpdate }}",
+#                    "downloadUrl": "s3://footlight-aggregator-pipeline-files/events.ttl",
+#                    "downloadFile": "events.ttl",
+#                    "reportCallbackUrl": "https://webhook.site/be245341-5a1b-44cd-896f-590003162b07"
+#                  }'
