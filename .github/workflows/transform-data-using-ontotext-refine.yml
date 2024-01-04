@@ -17,14 +17,20 @@ jobs:
 
       - name: Download json data from the API
         run: |
-          apk update && apk add curl && curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
+          apk update && apk add curl && \
+          curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
 
       - name: Download project-configuration-file
         run: |
-          curl 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/ontorefine/open-api-transform-project-configuration.json' >> project-config.json
+          curl '{{ secrets.ONTO_REFINE_PROJECT_OPEN_API_CONFIGURATION_FILE_URL}}' >> project-config.json
 
       - name: Transform json data to RDF
-        run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations project-config.json -f json >> events.ttl
+        run: |
+          /opt/ontorefine/dist/bin/ontorefine-cli \
+          transform events.json \
+          -u http://localhost:7333 \
+          --configurations project-config.json \
+          -f json >> events.ttl
 
       - name: Upload RDF file to S3
         uses: prewk/s3-cp-action@v2
@@ -55,4 +61,4 @@ jobs:
                     "downloadUrl": "s3://footlight-aggregator-pipeline-files/events.ttl",
                     "downloadFile": "events.ttl",
                     "reportCallbackUrl": "https://webhook.site/be245341-5a1b-44cd-896f-590003162b07"
-                  }' 
+                  }'
