@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ontotext/refine:1.2.1
-#      options: --user root
+      options: --user root
       ports:
         - 7333:7333
     steps:
@@ -22,6 +22,10 @@ jobs:
         run: |
           curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
 
+      - name: Download project-configuration-file
+        run: |
+          curl 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/ontorefine/open-api-transform-project-configuration.json' >> project-config.json
+
       - name: Debug - pwd
         run: pwd
 
@@ -29,7 +33,7 @@ jobs:
         run: ls ../
 
       - name: Transform json data to RDF
-        run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations ./data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
+        run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations project-config.json -f json >> events.ttl
 
       - name: Upload RDf file to S3
         uses: prewk/s3-cp-action@v2
