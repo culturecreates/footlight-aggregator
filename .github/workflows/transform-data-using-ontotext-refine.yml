@@ -17,7 +17,7 @@ jobs:
 
       - name: Download open-api response
         run: |
-          curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
+          apt-get -y update; apt-get -y install curl; curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
 
       - name: Transform json data to RDF
         run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations ./data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
