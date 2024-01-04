@@ -22,7 +22,7 @@ jobs:
 
       - name: Download project-configuration-file
         run: |
-          curl '{{ secrets.ONTO_REFINE_PROJECT_OPEN_API_CONFIGURATION_FILE_URL}}' >> project-config.json
+          curl '${{ secrets.ONTO_REFINE_PROJECT_OPEN_API_CONFIGURATION_FILE_URL }}' >> project-config.json
 
       - name: Transform json data to RDF
         run: |
