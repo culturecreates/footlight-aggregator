@@ -18,11 +18,11 @@ jobs:
       - name: Download json data from the API
         run: |
           apk update && apk add curl && \
-          curl '${{ env.OPEN_API_EVENTS_URL }}' >> events.json
+          curl '$OPEN_API_EVENTS_URL' >> events.json
 
       - name: Download project-configuration-file
-        run: |
-          curl '${{ env.ONTO_REFINE_PROJECT_OPEN_API_CONFIGURATION_FILE_URL }}' >> project-config.json
+        run: | 
+          curl '$ONTO_REFINE_PROJECT_OPEN_API_CONFIGURATION_FILE_URL' >> project-config.json
 
       - name: Transform json data to RDF
         run: |
