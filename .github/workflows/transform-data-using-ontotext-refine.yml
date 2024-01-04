@@ -22,6 +22,12 @@ jobs:
         run: |
           curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
 
+      - name: Debug - pwd
+        run: pwd
+
+      - name: debug - ls
+        run: ls
+
       - name: Transform json data to RDF
         run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations ./data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
 
