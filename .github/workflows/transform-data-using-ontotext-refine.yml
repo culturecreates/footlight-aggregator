@@ -4,40 +4,56 @@ on:
   workflow_dispatch:
 
 jobs:
-  download-and-run:
+  transform-data-using-ontorefine:
     runs-on: ubuntu-latest
-
+    container:
+      image: ontotext/refine:1.2.1
+      ports:
+        - 7333:7333
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: 'adopt'
-
-      - name: Download ontotext/refine
-        run: |
-          curl -L https://download.ontotext.com/owlim/aa8cbf12-ad2d-11ed-b6c3-42843b1b6b38/ontorefine-1.2.0-dist.zip -o onto-refine.zip
-
-      - name: Unzip file
-        run: unzip onto-refine.zip
-
-      - name: Run the onto-refine service
-        run: nohup ./ontorefine-1.2.0/bin/ontorefine &
+      - name: Run ontorefine
+        run: /opt/ontorefine/dist/bin/ontorefine &
 
       - name: Download open-api response
         run: |
           curl 'https://api.footlight.io/calendars/tout-culture/events?page=1&limit=10' >> events.json
 
-      - name: Transform open-api response to
-        run: ./ontorefine-1.2.0/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations ./data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
+      - name: Transform json data to RDF
+        run: /opt/ontorefine/dist/bin/ontorefine-cli transform events.json -u http://localhost:7333 --configurations ./data/ontorefine/open-api-transform-project-configuration.json -f json >> events.ttl
 
-      - name: Display file
-        run: cat events.ttl
-
+  upload-rdf-to-S3:
+      needs: test
+      runs-on: ubuntu-latest
+      permissions:
+        contents: read
+        packages: write
+      steps:
       - name: Copy a file from s3
-        uses: prewk/s3-cp-action@v2
-        with:
-          aws_access_key_id: ${{ secrets.S3_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-          source: 's3://footlight-aggregator-pipeline-files'
-          dest: 'events.ttl'
+      uses: prewk/s3-cp-action@v2
+      with:
+        aws_access_key_id: ${{ secrets.S3_ACCESS_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.S3_SECRET_ACCESS_KEY }}
+        source: 'events.ttl'
+        dest: 's3://footlight-aggregator-pipeline-files'
+
+  upload-to-artsdata:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set current date as output
+        id: version  # this is used on variable path
+        run: echo "dumpdate=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_OUTPUT
+
+      - name: Call Artsdata Databus
+        run: |
+          curl \
+          -H 'Content-Type: application/json' \
+          -X POST http://api.artsdata.ca/databus/  \
+          --data '{ "artifact": "footlight-cms-events",
+                    "comment": "Events from the Footlight CMS",
+                    "publisher": "${{ secrets.PUBLISHER_URI_GREGORY }}",
+                    "group": "${{ github.event.repository.name }}",
+                    "version": "${{ steps.version.outputs.dumpdate }}",
+                    "downloadUrl": "s3://footlight-aggregator-pipeline-files/events.ttl",
+                    "downloadFile": "events.ttl",
+                    "reportCallbackUrl": "https://webhook.site/be245341-5a1b-44cd-896f-590003162b07"
+                  }' 
