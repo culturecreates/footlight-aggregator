@@ -1,4 +1,4 @@
-name: Transform open-api events using Onto Refine and upload to Artsdata
+name: Transform data in json format (URL) and push to Artsdata
 
 on:
   workflow_dispatch:
