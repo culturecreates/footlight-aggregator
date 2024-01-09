@@ -616,35 +616,6 @@
                 "property": {
                   "valueSource": {
                     "source": "constant",
-                    "constant": "attendanceMode"
-                  },
-                  "transformation": {
-                    "language": "prefix",
-                    "expression": "schema"
-                  }
-                },
-                "values": [
-                  {
-                    "valueSource": {
-                      "source": "column",
-                      "columnName": "_ - eventAttendanceMode"
-                    },
-                    "transformation": {
-                      "language": "prefix",
-                      "expression": "schema"
-                    },
-                    "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
-                    }
-                  }
-                ]
-              },
-              {
-                "property": {
-                  "valueSource": {
-                    "source": "constant",
                     "constant": "eventStatus"
                   },
                   "transformation": {
