@@ -13,7 +13,7 @@ on:
         required: true
       artifact-name:
         type: string
-        description: The artifact name for Artsdata to distinguish the graph
+        description: The artifact name for Artsdata to distinguish the dataset
         required: true
 
 jobs:
