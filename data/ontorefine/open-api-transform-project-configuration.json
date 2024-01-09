@@ -13,7 +13,7 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "open api events json",
+      "projectName": "open api events",
       "projectTags": [],
       "fileSource": "open-api-events.json",
       "archiveFileName": null
@@ -27,8 +27,11 @@
         "namespaces": {
           "schema": "http://schema.org/",
           "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-          "footlight": "http://www.kg.footlight.ca/",
-          "xsd": "http://www.w3.org/2001/XMLSchema#"
+          "xsd": "http://www.w3.org/2001/XMLSchema#",
+          "footlight_events": "http://api.footlight.io/events/",
+          "footlight_places": "http://api.footlight.io/places/",
+          "footlight_concepts": "http://api.footlight.io/concepts/",
+          "footlight_postaladdress": "http://api.footlight.io/postal_Address/"
         },
         "subjectMappings": [
           {
@@ -39,7 +42,7 @@
               },
               "transformation": {
                 "language": "prefix",
-                "expression": "footlight"
+                "expression": "footlight_events"
               }
             },
             "typeMappings": [
@@ -64,7 +67,7 @@
               },
               "transformation": {
                 "language": "prefix",
-                "expression": "footlight"
+                "expression": "footlight_events"
               }
             },
             "typeMappings": [],
@@ -335,7 +338,7 @@
                     },
                     "transformation": {
                       "language": "prefix",
-                      "expression": "footlight"
+                      "expression": "footlight_places"
                     },
                     "valueType": {
                       "type": "iri",
@@ -355,7 +358,7 @@
               },
               "transformation": {
                 "language": "prefix",
-                "expression": "footlight"
+                "expression": "footlight_places"
               }
             },
             "typeMappings": [
@@ -375,7 +378,11 @@
                 "property": {
                   "valueSource": {
                     "source": "constant",
-                    "constant": "schema.name"
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
                   }
                 },
                 "values": [
@@ -400,7 +407,11 @@
                 "property": {
                   "valueSource": {
                     "source": "constant",
-                    "constant": "schema.name"
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
                   }
                 },
                 "values": [
@@ -440,7 +451,7 @@
                     },
                     "transformation": {
                       "language": "prefix",
-                      "expression": "footlight"
+                      "expression": "footlight_postaladdress"
                     },
                     "valueType": {
                       "type": "iri",
@@ -460,7 +471,7 @@
               },
               "transformation": {
                 "language": "prefix",
-                "expression": "footlight"
+                "expression": "footlight_postaladdress"
               }
             },
             "typeMappings": [
@@ -553,6 +564,108 @@
                     },
                     "valueType": {
                       "type": "literal"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - id"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "footlight_events"
+              }
+            },
+            "typeMappings": [],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "additionalType"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - additionalType - _ - id"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "footlight_concepts"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "attendanceMode"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - eventAttendanceMode"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "schema"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "eventStatus"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - eventStatus"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "schema"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
                     }
                   }
                 ]
