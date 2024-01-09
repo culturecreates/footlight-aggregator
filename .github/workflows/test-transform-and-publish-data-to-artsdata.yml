@@ -70,7 +70,7 @@ jobs:
           curl \
           -H 'Content-Type: application/json' \
           -X POST http://api.artsdata.ca/databus/  \
-          --data '{ "artifact": '${{inputs.artifact-name}}',
+          --data '{ "artifact": "${{inputs.artifact-name}}",
                     "comment": "Events from the Footlight CMS",
                     "publisher": "${{ secrets.PUBLISHER_URI_GREGORY }}",
                     "group": "${{ github.event.repository.name }}",
