@@ -559,7 +559,7 @@
                 "property": {
                   "valueSource": {
                     "source": "constant",
-                    "constant": "PostalAddress"
+                    "constant": "postalCode"
                   },
                   "transformation": {
                     "language": "prefix",
@@ -935,6 +935,67 @@
                           "constant": "fr"
                         }
                       }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - location - _ - id"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "footlight_places"
+              }
+            },
+            "typeMappings": [],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "longitude"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - location - _ - geo - longitude"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "latitude"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - location - _ - geo - latitude"
+                    },
+                    "valueType": {
+                      "type": "literal"
                     }
                   }
                 ]
