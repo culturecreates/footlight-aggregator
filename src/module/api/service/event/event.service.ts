@@ -7,14 +7,17 @@ import {
 } from "../../service";
 import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
-import { EventDTO } from "../../dto";
+import { EventDTO, PlaceDTO } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
 import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory } from "../../enum";
-import { Exception } from "../../helper";
+import { Exception, JsonLdParseHelper } from "../../helper";
 import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
 import { LoggerService } from "../logger";
+import { parse } from '@frogcat/ttl2jsonld'
+import * as jsonld from 'jsonld';
+import { RdfTypes } from "../../constants/artsdata-urls/rdf-types.constants";
 
 @Injectable()
 export class EventService {
@@ -452,4 +455,53 @@ export class EventService {
     return offerConfiguration;
   }
 
+  async syncEntitiesUsingRdf(token:string, rdfFiles: Express.Multer.File[], mappingFiles: Express.Multer.File[], footlightBaseUrl: string, calendarId: string) {
+    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
+    const currentUserId = currentUser.id
+    const rdfDataArray = await Promise.all(rdfFiles.map(file => file.buffer.toString('utf-8')));
+    const rdfData = rdfDataArray.join('\n');
+
+    const jsonldData = parse(rdfData)
+    const test = this.exportJsonLdData(jsonldData['@graph'], token, calendarId, footlightBaseUrl, currentUserId) 
+
+  }
+
+  async exportJsonLdData(data:any, token:string, calendarId:string, footlightBaseUrl:string, currentUserId:string){
+    let jsonLdPlaces =  data.filter(item => item['@type'] === RdfTypes.PLACE)
+    let jsonLdPostalAddresses = data.filter(item => item['@type'] === RdfTypes.POSTAL_ADDRESS)
+    let events = []
+    for(const node of data){
+        if(node["@type"] == RdfTypes.EVENT)
+        {
+          await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
+        }
+    }
+    return events;
+}
+
+
+  async formatAndPushJsonLdEvents(event:any, places:Object[], token:string, calendarId:string,
+     footlightBaseUrl:string, currentUserId:string, jsonLdPostalAddresses: any){
+    const formattedEvent = new EventDTO();
+    if(event[RdfTypes.NAME]){
+        formattedEvent.name = JsonLdParseHelper.formatMultilingualField(event[RdfTypes.NAME]);
+    }
+    if(event[RdfTypes.EVENT_STATUS]){
+        formattedEvent.eventStatus = JsonLdParseHelper.formatEventStatus(event[RdfTypes.EVENT_STATUS]);
+    }
+    if(event[RdfTypes.EVENT_ATTENDANCE_MODE]){
+        formattedEvent.eventAttendanceMode = event[RdfTypes.EVENT_ATTENDANCE_MODE]["@id"].replace("schema:","");
+    }
+    if(event[RdfTypes.START_DATE]){
+        formattedEvent.startDateTime = event[RdfTypes.START_DATE]["@value"]
+    }
+    if(event[RdfTypes.LOCATION]){
+        let placeDetails = places.find(place => place['@id'] === event[RdfTypes.LOCATION]['@id'])
+        let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
+        formattedEvent.locationId = {place:{entityId:placeEntityId}}
+    }
+    formattedEvent.sameAs = [{uri: event['@id'], type: "ExternalSourceIdentifier"}] 
+    formattedEvent.uri = event['@id']
+    await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
+  }
 }

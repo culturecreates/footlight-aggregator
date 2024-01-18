@@ -20,4 +20,5 @@ export class PlaceDTO {
   additionalType: IdentifierString[];
   contactPoint: ContactPointDTO;
   openingHours: UriString;
+  uri?:string;
 }

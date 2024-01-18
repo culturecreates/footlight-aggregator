@@ -7,4 +7,5 @@ export class PostalAddressDTO {
   postalCode: string;
   streetAddress: MultilingualString;
   sameAs: SameAs[];
+  uri?: string
 }
