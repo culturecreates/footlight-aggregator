@@ -4,6 +4,7 @@ import { PersonOrganizationType } from "../../enum";
 import { OrganizationService, PersonService, PlaceService } from "../../service";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { LoggerService } from "../logger";
+import { RdfTypes } from "../../constants/artsdata-urls/rdf-types.constants";
 
 
 @Injectable()
@@ -75,5 +76,20 @@ export class PersonOrganizationService {
       }
     }
     return personOrganizations;
+  }
+
+  async processJsonLdParticipants(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event){
+    let participantId, participantType;
+    let performerInOrganizations = jsonLdOrganizations.find(organization => organization['@id'] === event[RdfTypes.PERFORMER]['@id'])
+    let performerInPeople = jsonLdPeople.find(person => person['@id'] === event[RdfTypes.PERFORMER]['@id'])
+    if(performerInOrganizations){
+      participantId = await this._organizationService.formatAndPushJsonLdOrganization(performerInOrganizations, token, calendarId, footlightBaseUrl, currentUserId);
+      participantType = PersonOrganizationType.ORGANIZATION;
+    }
+    if(performerInPeople){
+      participantId = await this._personService.formatAndPushJsonLdPerson(performerInPeople, token, calendarId, footlightBaseUrl, currentUserId);
+      participantType = PersonOrganizationType.PERSON;
+    }
+    return {participantId, participantType}
   }
 }

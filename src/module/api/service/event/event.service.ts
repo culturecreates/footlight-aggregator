@@ -7,10 +7,10 @@ import {
 } from "../../service";
 import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
-import { EventDTO, PlaceDTO } from "../../dto";
+import { EventDTO } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
-import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory } from "../../enum";
+import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory, PersonOrganizationType } from "../../enum";
 import { Exception, JsonLdParseHelper } from "../../helper";
 import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
@@ -469,11 +469,13 @@ export class EventService {
   async exportJsonLdData(data:any, token:string, calendarId:string, footlightBaseUrl:string, currentUserId:string){
     let jsonLdPlaces =  data.filter(item => item['@type'] === RdfTypes.PLACE)
     let jsonLdPostalAddresses = data.filter(item => item['@type'] === RdfTypes.POSTAL_ADDRESS)
+    let jsonLdOrganizations = data.filter(item => item['@type'] === RdfTypes.ORGANIZATION)
+    let jsonLdPeople = data.filter(item => item['@type'] === RdfTypes.PERSON)
     let events = []
     for(const node of data){
         if(node["@type"] == RdfTypes.EVENT)
         {
-          await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
+          await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople);
         }
     }
     return events;
@@ -481,7 +483,7 @@ export class EventService {
 
 
   async formatAndPushJsonLdEvents(event:any, places:Object[], token:string, calendarId:string,
-     footlightBaseUrl:string, currentUserId:string, jsonLdPostalAddresses: any){
+     footlightBaseUrl:string, currentUserId:string, jsonLdPostalAddresses: any, jsonLdOrganizations: any, jsonLdPeople: any){
     const formattedEvent = new EventDTO();
     if(event[RdfTypes.NAME]){
         formattedEvent.name = JsonLdParseHelper.formatMultilingualField(event[RdfTypes.NAME]);
@@ -493,12 +495,33 @@ export class EventService {
         formattedEvent.eventAttendanceMode = event[RdfTypes.EVENT_ATTENDANCE_MODE]["@id"].replace("schema:","");
     }
     if(event[RdfTypes.START_DATE]){
-        formattedEvent.startDateTime = event[RdfTypes.START_DATE]["@value"]
+        formattedEvent.startDateTime = event[RdfTypes.START_DATE]["@value"] || event[RdfTypes.START_DATE][0]["@value"]
     }
     if(event[RdfTypes.LOCATION]){
         let placeDetails = places.find(place => place['@id'] === event[RdfTypes.LOCATION]['@id'])
         let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
         formattedEvent.locationId = {place:{entityId:placeEntityId}}
+    }
+
+    if(event[RdfTypes.ORGANIZER] || event[RdfTypes.PERFORMER] || event[RdfTypes.COLLABORATOR]){
+      if(event[RdfTypes.ORGANIZER]){
+        let {participantId,participantType} = await this._personOrganizationService.processJsonLdParticipants(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event);
+        formattedEvent.organizers = [{entityId: participantId, type: participantType}]
+      }
+
+      if(event[RdfTypes.PERFORMER]){
+        let {participantId,participantType} = await this._personOrganizationService.processJsonLdParticipants(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event);
+        formattedEvent.performers = [{entityId: participantId, type: participantType}]
+      }
+
+      if(event[RdfTypes.COLLABORATOR]){
+        let {participantId,participantType} = await this._personOrganizationService.processJsonLdParticipants(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event);
+        formattedEvent.collaborators = [{entityId: participantId, type: participantType}]
+      }
+    }
+
+    if(event[RdfTypes.URL]){
+        formattedEvent.url = {uri:RdfTypes.URL}
     }
     formattedEvent.sameAs = [{uri: event['@id'], type: "ExternalSourceIdentifier"}] 
     formattedEvent.uri = event['@id']

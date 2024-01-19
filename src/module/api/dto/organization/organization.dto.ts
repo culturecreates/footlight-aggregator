@@ -15,4 +15,5 @@ export class OrganizationDTO {
     type: UriString[];
     image: Image;
     logo: Image;
+    uri?:string;
 }
