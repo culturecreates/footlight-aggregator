@@ -1,11 +1,12 @@
-import { Controller, Inject, Param, ParseIntPipe, Put, Query, Req } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
+import { Controller, Inject, Param, ParseIntPipe, Put, Query, Req, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { ApiResponseEnum, ApiStatusCode } from "../../enum";
 import { EventService } from "../../service";
 import { AuthHeaderExtractor } from "../../helper";
 import { Request } from "express";
 import { Environment } from "../../enum/environments.enum";
 import { Sources } from "../../enum/sources.enum";
+import { FileFieldsInterceptor, FileInterceptor } from "@nestjs/platform-express";
 
 @Controller("events")
 @ApiTags("Event APIs")
@@ -123,4 +124,51 @@ export class EventController {
     await this._eventService.reloadEventImages(token, calendarId, source, footlightBaseUrl);
     return { status: ApiStatusCode.SUCCESS, message: "Re-syncing event completed.." };
   }
+
+
+  @Put("import-rdf")
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'rdf_file', maxCount: 1 },
+    { name: 'mapping_file', maxCount: 1 },
+  ]))
+  @ApiQuery({
+    name: "calendar-id",
+    description: "**calendar-id (The calendar identifier)**",
+    required: true,
+    explode: true
+  })  
+  @ApiQuery({
+    name: "footlight-base-url",
+    description: "Select the environment",
+    required: true,
+    enum: Object.values(Environment)
+  })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({
+    schema: {
+      type: "object",
+      properties: {
+        rdf_file: {
+          type: "string",
+          format: "binary"
+        },
+        mapping_file: {
+          type: "string",
+          format: "binary"
+        },
+      },
+    },
+    required: true,
+  })
+  async importEventsFromRDF(
+    @Req() request: Request,
+    @UploadedFiles() files: { rdf_file?: Express.Multer.File[], mapping_file?: Express.Multer.File[] },
+    @Query("footlight-base-url") footlightBaseUrl?: string,
+    @Query("calendar-id") calendarId?: string,
+    ) {
+    const {rdf_file, mapping_file} = files
+    const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
+    await this._eventService.syncEntitiesUsingRdf(token, rdf_file, mapping_file, footlightBaseUrl, calendarId)
+  }
+  
 }

@@ -2,6 +2,8 @@ import { SharedService } from "../shared";
 import { PersonDTO } from "../../dto";
 import { Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
+import { JsonLdParseHelper } from "../../helper";
+import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 
 @Injectable()
 export class PersonService {
@@ -14,6 +16,16 @@ export class PersonService {
                                        personToAdd: PersonDTO, currentUserId: string) {
     const url = footlightUrl + FootlightPaths.ADD_PEOPLE;
     return await SharedService.syncEntityWithFootlight(calendarId, token, url, personToAdd, currentUserId);
+  }
+
+  async formatAndPushJsonLdPerson(person: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string) {
+    const formattedPerson = new PersonDTO();
+    formattedPerson.name = JsonLdParseHelper.formatMultilingualField(person[EventPredicates.NAME]);
+    formattedPerson.sameAs = [{uri: person['@id'], type: "ExternalSourceIdentifier"}] 
+    formattedPerson.uri = person['@id']
+
+    return await this._pushPersonToFootlight(footlightBaseUrl, calendarId, token, formattedPerson, currentUserId)
+
   }
 
 }

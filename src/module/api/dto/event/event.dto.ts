@@ -42,4 +42,5 @@ export class EventDTO {
     videoUrl?: string;
     inLanguage?: IdentifierString[];
     keywords?: string[];
+    uri?:string;
 }

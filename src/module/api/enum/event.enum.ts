@@ -19,3 +19,8 @@ export enum EventProperty {
     ADDITIONAL_TYPE = 'additionalType',
     AUDIENCE = 'audience'
 }
+
+export enum Languages {
+    ENGLISH  = 'en',
+    FRENCH = 'fr'
+}

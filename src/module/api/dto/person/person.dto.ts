@@ -10,4 +10,5 @@ export class PersonDTO {
     url: UriString;
     sameAs: SameAs[];
     image: Image;
+    uri?:string;
 }

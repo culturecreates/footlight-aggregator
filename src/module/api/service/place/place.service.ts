@@ -4,6 +4,8 @@ import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { LoggerService } from "../logger";
+import { EventPredicates, PlacePredicates } from "../../constants/artsdata-urls/rdf-types.constants";
+import { JsonLdParseHelper } from "../../helper";
 
 
 @Injectable()
@@ -28,13 +30,14 @@ export class PlaceService {
     return await this._formatPlaceFetched(calendarId, token, footlightBaseUrl, currentUserId, placeFetched);
   }
 
-  private async _pushPlaceToFootlight(footlightBaseUrl: string, calendarId: string, token: string,
-                                      placeToAdd: PlaceDTO, currentUserId: string) {
+  async pushPlaceToFootlight(footlightBaseUrl: string, calendarId: string, token: string,
+                             placeToAdd: PlaceDTO, currentUserId: string) {
     const url = footlightBaseUrl + FootlightPaths.ADD_PLACE;
     return await SharedService.syncEntityWithFootlight(calendarId, token, url, placeToAdd, currentUserId);
   }
 
-  async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string, currentUserId: string) {
+  async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string,
+                               currentUserId: string) {
     artsDataUri = typeof (artsDataUri) != "string" ? artsDataUri[0] : artsDataUri;
     const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
     const placeIdFromMap = this.synchronisedPlaceMap.get(artsDataId);
@@ -42,9 +45,10 @@ export class PlaceService {
       this._loggerService.infoLogs(`\tThe Place with Artsdata id :${artsDataId} is already synced during this process.`);
       return placeIdFromMap;
     }
-    const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token, artsDataId, currentUserId);
+    const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token,
+      artsDataId, currentUserId);
     if (placeDetails) {
-      const placeId = await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId);
+      const placeId = await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId);
       this.synchronisedPlaceMap.set(artsDataId, placeId);
       return placeId;
     }
@@ -62,9 +66,11 @@ export class PlaceService {
         let id = place.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
         id = place.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX_HTTPS, "");
         const placeFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PLACE_BY_ID);
-        const placeFormatted = await this._formatPlaceFetched(calendarId, token, footlightBaseUrl, currentUser.id, placeFetched);
-        await this._pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeFormatted, currentUser.id);
-        this._loggerService.infoLogs(`(${syncCount}/${fetchedPlacesCount}) Synchronised place with id: ${JSON.stringify(placeFormatted.sameAs)}`);
+        const placeFormatted = await this._formatPlaceFetched(calendarId, token, footlightBaseUrl,
+          currentUser.id, placeFetched);
+        await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeFormatted, currentUser.id);
+        this._loggerService.infoLogs(`(${syncCount}/${fetchedPlacesCount}) Synchronised place with id: 
+        ${JSON.stringify(placeFormatted.sameAs)}`);
       } catch (e) {
         this._loggerService.errorLogs(`(${syncCount}/${fetchedPlacesCount}) Error while adding Place ${place.url}` + e);
       }
@@ -81,7 +87,8 @@ export class PlaceService {
     });
   }
 
-  private async _formatPlaceFetched(calendarId: string, token: string, footlightBaseUrl: string, currentUserId, placeFetched: any) {
+  private async _formatPlaceFetched(calendarId: string, token: string, footlightBaseUrl: string, currentUserId,
+                                    placeFetched: any) {
     const { address, alternateName } = placeFetched;
     delete placeFetched.address;
     const postalAddressId = !!address ? await this._postalAddressService
@@ -92,5 +99,22 @@ export class PlaceService {
 
     placeToAdd.postalAddressId = postalAddressId ? { entityId: postalAddressId } : undefined;
     return placeToAdd;
+  }
+
+  async formatAndPushJsonLdPlaces(place: any, token: string, calendarId: string, footlightBaseUrl: string,
+                                  currentUserId: string, postalAddresses: any) {
+    const formattedPlace = new PlaceDTO();
+    formattedPlace.name = JsonLdParseHelper.formatMultilingualField(place[EventPredicates.NAME]);
+    formattedPlace.geo = (place[PlacePredicates.LONGITUDE] && place[PlacePredicates.LATITUDE]) ?
+      { latitude: place[PlacePredicates.LATITUDE], longitude: place[PlacePredicates.LONGITUDE] } : undefined;
+    formattedPlace.sameAs = [{ uri: place["@id"], type: "ExternalSourceIdentifier" }];
+    formattedPlace.uri = place["@id"];
+    if (place[PlacePredicates.ADDRESS]) {
+      const postalAddressDetails = postalAddresses
+        .find(postalAddress => postalAddress["@id"] === place[PlacePredicates.ADDRESS]["@id"]);
+      formattedPlace.postalAddressId = await this._postalAddressService
+        .formatAndPushJsonLdPostalAddress(postalAddressDetails, footlightBaseUrl, calendarId, token, currentUserId);
+    }
+    return await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, formattedPlace, currentUserId);
   }
 }
