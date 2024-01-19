@@ -7,7 +7,7 @@ import { PlaceService } from "../place";
 import { PersonOrganizationService } from "../person-organization";
 import { LoggerService } from "..";
 import { JsonLdParseHelper } from "../../helper";
-import { RdfTypes } from "../../constants/artsdata-urls/rdf-types.constants";
+import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 
 @Injectable()
 export class OrganizationService {
@@ -67,7 +67,7 @@ export class OrganizationService {
 
   async formatAndPushJsonLdOrganization(organization: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string) {
     const formattedOrganization = new OrganizationDTO();
-    formattedOrganization.name = JsonLdParseHelper.formatMultilingualField(organization[RdfTypes.NAME]);
+    formattedOrganization.name = JsonLdParseHelper.formatMultilingualField(organization[EventPredicates.NAME]);
     formattedOrganization.sameAs = [{uri: organization['@id'], type: "ExternalSourceIdentifier"}] 
     formattedOrganization.uri = organization['@id']
 

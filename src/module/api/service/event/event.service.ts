@@ -10,14 +10,13 @@ import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
 import { EventDTO } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
-import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory, PersonOrganizationType } from "../../enum";
+import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory } from "../../enum";
 import { Exception, JsonLdParseHelper } from "../../helper";
 import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
 import { LoggerService } from "../logger";
-import { parse } from '@frogcat/ttl2jsonld'
-import * as jsonld from 'jsonld';
-import { RdfTypes } from "../../constants/artsdata-urls/rdf-types.constants";
+import { parse } from "@frogcat/ttl2jsonld";
+import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 
 @Injectable()
 export class EventService {
@@ -47,11 +46,14 @@ export class EventService {
   private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string,
                             batchSize: number, mappingUrl: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
-    let offset = 0, hasNext = true, batch = 1, totalCount = 0, tries = 0, maxTry = 3;
+    let offset = 0, hasNext = true, batch = 1, totalCount = 0, tries = 0,
+      maxTry = 3;
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
-    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
-    const existingAudienceConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.AUDIENCE, this.audienceConceptMap);
+    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping,
+      EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
+    const existingAudienceConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.AUDIENCE,
+      this.audienceConceptMap);
 
     do {
       let events = await this._fetchEventsFromArtsData(source, batchSize, offset);
@@ -82,9 +84,12 @@ export class EventService {
           const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
             patternToConceptIdMapping, existingEventTypeConceptIDs, existingAudienceConceptIDs);
           await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
-          this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: ${JSON.stringify(eventFormatted.sameAs)}\n`);
+          this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
+          ${JSON.stringify(eventFormatted.sameAs)}\n`);
         } catch (e) {
-          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). Error while adding Event ${JSON.stringify(event.url)}` + e);
+          this._loggerService
+            .errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). Error while adding Event 
+            ${JSON.stringify(event.url)}` + e);
         }
       }
       offset = offset + batchSize;
@@ -330,7 +335,8 @@ export class EventService {
       try {
         const eventFormatted = await this._formatEventForImageReload(event);
         const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
-        const addResponse = await SharedService.addEntityToFootlight(calendarId, token, url, eventFormatted);
+        const addResponse = await SharedService.addEntityToFootlight(calendarId, token, url,
+          eventFormatted);
         const { status, response } = addResponse;
         if (status === HttpStatus.CREATED) {
           this._loggerService.infoLogs(`Added Entity (${response.id} : ${eventFormatted.uri}) to Footlight!`);
@@ -365,7 +371,10 @@ export class EventService {
   private async _formatEventForImageReload(event: any) {
     delete event?.image?.uri;
     const { uri, name, startDate, startDateTime, endDate, endDateTime, image, sameAs } = event;
-    const formattedEvent = { name, image, startDate, startDateTime, endDate, endDateTime, sameAs, uri };
+    const formattedEvent = {
+      name, image, startDate, startDateTime, endDate, endDateTime,
+      sameAs, uri
+    };
 
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
 
@@ -455,76 +464,92 @@ export class EventService {
     return offerConfiguration;
   }
 
-  async syncEntitiesUsingRdf(token:string, rdfFiles: Express.Multer.File[], mappingFiles: Express.Multer.File[], footlightBaseUrl: string, calendarId: string) {
+  async syncEntitiesUsingRdf(token: string, rdfFiles: Express.Multer.File[], mappingFiles: Express.Multer.File[],
+                             footlightBaseUrl: string, calendarId: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
-    const currentUserId = currentUser.id
-    const rdfDataArray = await Promise.all(rdfFiles.map(file => file.buffer.toString('utf-8')));
-    const rdfData = rdfDataArray.join('\n');
+    const currentUserId = currentUser.id;
+    const rdfDataArray = await Promise.all(rdfFiles.map(file => file.buffer.toString("utf-8")));
+    const rdfData = rdfDataArray.join("\n");
 
-    const jsonldData = parse(rdfData)
-    const test = this.exportJsonLdData(jsonldData['@graph'], token, calendarId, footlightBaseUrl, currentUserId) 
+    const jsonldData = parse(rdfData);
+    await this.syncEntitiesInJsonLd(jsonldData["@graph"], token, calendarId, footlightBaseUrl, currentUserId);
 
   }
 
-  async exportJsonLdData(data:any, token:string, calendarId:string, footlightBaseUrl:string, currentUserId:string){
-    let jsonLdPlaces =  data.filter(item => item['@type'] === RdfTypes.PLACE)
-    let jsonLdPostalAddresses = data.filter(item => item['@type'] === RdfTypes.POSTAL_ADDRESS)
-    let jsonLdOrganizations = data.filter(item => item['@type'] === RdfTypes.ORGANIZATION)
-    let jsonLdPeople = data.filter(item => item['@type'] === RdfTypes.PERSON)
-    let events = []
-    for(const node of data){
-        if(node["@type"] == RdfTypes.EVENT)
-        {
-          await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople);
-        }
+  async syncEntitiesInJsonLd(data: any, token: string, calendarId: string, footlightBaseUrl: string,
+                             currentUserId: string) {
+    let jsonLdPlaces = data.filter(item => item["@type"] === EventPredicates.PLACE);
+    let jsonLdPostalAddresses = data.filter(item => item["@type"] === EventPredicates.POSTAL_ADDRESS);
+    let jsonLdOrganizations = data.filter(item => item["@type"] === EventPredicates.ORGANIZATION);
+    let jsonLdPeople = data.filter(item => item["@type"] === EventPredicates.PERSON);
+    let events = [];
+    for (const node of data) {
+      if (node["@type"] == EventPredicates.EVENT) {
+        await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl, currentUserId,
+          jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople);
+      }
     }
     return events;
-}
+  }
 
 
-  async formatAndPushJsonLdEvents(event:any, places:Object[], token:string, calendarId:string,
-     footlightBaseUrl:string, currentUserId:string, jsonLdPostalAddresses: any, jsonLdOrganizations: any, jsonLdPeople: any){
+  async formatAndPushJsonLdEvents(event: any, places: Object[], token: string, calendarId: string,
+                                  footlightBaseUrl: string, currentUserId: string, jsonLdPostalAddresses: any,
+                                  jsonLdOrganizations: any, jsonLdPeople: any) {
     const formattedEvent = new EventDTO();
-    if(event[RdfTypes.NAME]){
-        formattedEvent.name = JsonLdParseHelper.formatMultilingualField(event[RdfTypes.NAME]);
+    if (event[EventPredicates.NAME]) {
+      formattedEvent.name = JsonLdParseHelper.formatMultilingualField(event[EventPredicates.NAME]);
     }
-    if(event[RdfTypes.EVENT_STATUS]){
-        formattedEvent.eventStatus = JsonLdParseHelper.formatEventStatus(event[RdfTypes.EVENT_STATUS]);
+    if (event[EventPredicates.EVENT_STATUS]) {
+      formattedEvent.eventStatus = JsonLdParseHelper.formatEventStatus(event[EventPredicates.EVENT_STATUS]);
     }
-    if(event[RdfTypes.EVENT_ATTENDANCE_MODE]){
-        formattedEvent.eventAttendanceMode = event[RdfTypes.EVENT_ATTENDANCE_MODE]["@id"].replace("schema:","");
+    if (event[EventPredicates.EVENT_ATTENDANCE_MODE]) {
+      formattedEvent.eventAttendanceMode = event[EventPredicates.EVENT_ATTENDANCE_MODE]["@id"].replace("schema:", "");
     }
-    if(event[RdfTypes.START_DATE]){
-        formattedEvent.startDateTime = event[RdfTypes.START_DATE]["@value"] || event[RdfTypes.START_DATE][0]["@value"]
+    if (event[EventPredicates.START_DATE]) {
+      formattedEvent.startDateTime = event[EventPredicates.START_DATE]["@value"]
+        || event[EventPredicates.START_DATE][0]["@value"];
     }
-    if(event[RdfTypes.LOCATION]){
-        let placeDetails = places.find(place => place['@id'] === event[RdfTypes.LOCATION]['@id'])
-        let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
-        formattedEvent.locationId = {place:{entityId:placeEntityId}}
+    if (event[EventPredicates.LOCATION]) {
+      let placeDetails = places.find(place => place["@id"] === event[EventPredicates.LOCATION]["@id"]);
+      let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId,
+        footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
+      formattedEvent.locationId = { place: { entityId: placeEntityId } };
     }
 
-    if(event[RdfTypes.ORGANIZER] || event[RdfTypes.PERFORMER] || event[RdfTypes.COLLABORATOR]){
-      if(event[RdfTypes.ORGANIZER]){
-        let {participantId,participantType} = await this._personOrganizationService.processJsonLdParticipants(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event);
-        formattedEvent.organizers = [{entityId: participantId, type: participantType}]
+    if (event[EventPredicates.ORGANIZER] || event[EventPredicates.PERFORMER] || event[EventPredicates.COLLABORATOR]) {
+      if (event[EventPredicates.ORGANIZER]) {
+        let {
+          participantId,
+          participantType
+        } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl,
+          currentUserId, jsonLdOrganizations, jsonLdPeople, event);
+        formattedEvent.organizers = [{ entityId: participantId, type: participantType }];
       }
 
-      if(event[RdfTypes.PERFORMER]){
-        let {participantId,participantType} = await this._personOrganizationService.processJsonLdParticipants(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event);
-        formattedEvent.performers = [{entityId: participantId, type: participantType}]
+      if (event[EventPredicates.PERFORMER]) {
+        let {
+          participantId,
+          participantType
+        } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl,
+          currentUserId, jsonLdOrganizations, jsonLdPeople, event);
+        formattedEvent.performers = [{ entityId: participantId, type: participantType }];
       }
 
-      if(event[RdfTypes.COLLABORATOR]){
-        let {participantId,participantType} = await this._personOrganizationService.processJsonLdParticipants(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event);
-        formattedEvent.collaborators = [{entityId: participantId, type: participantType}]
+      if (event[EventPredicates.COLLABORATOR]) {
+        let {
+          participantId,
+          participantType
+        } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event);
+        formattedEvent.collaborators = [{ entityId: participantId, type: participantType }];
       }
     }
 
-    if(event[RdfTypes.URL]){
-        formattedEvent.url = {uri:RdfTypes.URL}
+    if (event[EventPredicates.URL]) {
+      formattedEvent.url = { uri: EventPredicates.URL };
     }
-    formattedEvent.sameAs = [{uri: event['@id'], type: "ExternalSourceIdentifier"}] 
-    formattedEvent.uri = event['@id']
+    formattedEvent.sameAs = [{ uri: event["@id"], type: "ExternalSourceIdentifier" }];
+    formattedEvent.uri = event["@id"];
     await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
   }
 }

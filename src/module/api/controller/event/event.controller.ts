@@ -126,7 +126,7 @@ export class EventController {
   }
 
 
-  @Put("sync-using-rdf")
+  @Put("import-rdf")
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'rdf_file', maxCount: 1 },
     { name: 'mapping_file', maxCount: 1 },
@@ -160,7 +160,7 @@ export class EventController {
     },
     required: true,
   })
-  async syncEntitiesUsingRdf(
+  async importEventsFromRDF(
     @Req() request: Request,
     @UploadedFiles() files: { rdf_file?: Express.Multer.File[], mapping_file?: Express.Multer.File[] },
     @Query("footlight-base-url") footlightBaseUrl?: string,

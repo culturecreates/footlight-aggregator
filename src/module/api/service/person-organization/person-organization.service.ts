@@ -4,7 +4,7 @@ import { PersonOrganizationType } from "../../enum";
 import { OrganizationService, PersonService, PlaceService } from "../../service";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { LoggerService } from "../logger";
-import { RdfTypes } from "../../constants/artsdata-urls/rdf-types.constants";
+import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 
 
 @Injectable()
@@ -40,9 +40,9 @@ export class PersonOrganizationService {
         entityFetched.alternateName = alternateName?.length
           ? SharedService.formatAlternateNames(alternateName) : undefined;
 
-        entityFetched.type = entityFetched.type.includes(PersonOrganizationType.PERSON) ? PersonOrganizationType.PERSON 
-        : entityFetched.type.includes(PersonOrganizationType.ORGANIZATION) ? PersonOrganizationType.ORGANIZATION 
-        : entityFetched.type;
+        entityFetched.type = entityFetched.type.includes(PersonOrganizationType.PERSON) ? PersonOrganizationType.PERSON
+          : entityFetched.type.includes(PersonOrganizationType.ORGANIZATION) ? PersonOrganizationType.ORGANIZATION
+            : entityFetched.type;
 
         const { type } = entityFetched;
         let entityId: string;
@@ -62,8 +62,8 @@ export class PersonOrganizationService {
               entityFetched.logo.url = logoUrl?.[0];
             }
           }
-          if(contactPoint){
-            entityFetched.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint
+          if (contactPoint) {
+            entityFetched.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint;
           }
           entityId = await this._organizationService.getFootlightIdentifier(calendarId, token, footlightUrl,
             entityFetched, currentUserId);
@@ -78,18 +78,22 @@ export class PersonOrganizationService {
     return personOrganizations;
   }
 
-  async processJsonLdParticipants(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event){
+  async formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations,
+                                        jsonLdPeople, event) {
     let participantId, participantType;
-    let performerInOrganizations = jsonLdOrganizations.find(organization => organization['@id'] === event[RdfTypes.PERFORMER]['@id'])
-    let performerInPeople = jsonLdPeople.find(person => person['@id'] === event[RdfTypes.PERFORMER]['@id'])
-    if(performerInOrganizations){
-      participantId = await this._organizationService.formatAndPushJsonLdOrganization(performerInOrganizations, token, calendarId, footlightBaseUrl, currentUserId);
+    let performerInOrganizations = jsonLdOrganizations
+      .find(organization => organization["@id"] === event[EventPredicates.PERFORMER]["@id"]);
+    let performerInPeople = jsonLdPeople.find(person => person["@id"] === event[EventPredicates.PERFORMER]["@id"]);
+    if (performerInOrganizations) {
+      participantId = await this._organizationService.formatAndPushJsonLdOrganization(performerInOrganizations,
+        token, calendarId, footlightBaseUrl, currentUserId);
       participantType = PersonOrganizationType.ORGANIZATION;
     }
-    if(performerInPeople){
-      participantId = await this._personService.formatAndPushJsonLdPerson(performerInPeople, token, calendarId, footlightBaseUrl, currentUserId);
+    if (performerInPeople) {
+      participantId = await this._personService.formatAndPushJsonLdPerson(performerInPeople, token, calendarId,
+        footlightBaseUrl, currentUserId);
       participantType = PersonOrganizationType.PERSON;
     }
-    return {participantId, participantType}
+    return { participantId, participantType };
   }
 }
