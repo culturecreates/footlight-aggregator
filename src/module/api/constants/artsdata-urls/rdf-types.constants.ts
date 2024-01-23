@@ -1,20 +1,21 @@
 export const EventPredicates = {
-  EVENT: "schema:Event",
-  PLACE: "schema:Place",
-  POSTAL_ADDRESS: "schema:PostalAddress",
-  ORGANIZATION: "schema:Organization",
-  PERSON: "schema:Person",
-  NAME: "schema:name",
-  EVENT_STATUS: "schema:eventStatus",
-  EVENT_ATTENDANCE_MODE: "schema:eventAttendanceMode",
-  START_DATE: "schema:startDate",
-  SAME_AS: "schema:sameAs",
-  LOCATION: "schema:location",
-  ORGANIZER: "schema:organizer",
-  PERFORMER: "schema:performer",
-  COLLABORATOR: "schema:collaborator",
-  URL: "schema:url"
-};
+    EVENT : "schema:Event",
+    PLACE: "schema:Place",
+    POSTAL_ADDRESS: "schema:PostalAddress",
+    ORGANIZATION: "schema:Organization",
+    PERSON: "schema:Person",
+    ADDITIONAL_TYPE: "schema:additionalType",
+    NAME : "schema:name",
+    EVENT_STATUS: "schema:eventStatus",
+    EVENT_ATTENDANCE_MODE: "schema:eventAttendanceMode",
+    START_DATE: "schema:startDate",
+    SAME_AS: "schema:sameAs",
+    LOCATION: "schema:location",
+    ORGANIZER: "schema:organizer",
+    PERFORMER: "schema:performer",
+    COLLABORATOR: "schema:collaborator",
+    URL: "schema:url"
+}
 
 export const EventStatusConstants = {
   CANCELLED: "schema:EventCancelled",

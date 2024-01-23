@@ -15,6 +15,7 @@ import { Exception, JsonLdParseHelper } from "../../helper";
 import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
 import { LoggerService } from "../logger";
+import * as fs from 'fs';
 import { parse } from "@frogcat/ttl2jsonld";
 import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 
@@ -464,41 +465,39 @@ export class EventService {
     return offerConfiguration;
   }
 
-  async syncEntitiesUsingRdf(token: string, rdfFiles: Express.Multer.File[], mappingFiles: Express.Multer.File[],
-                             footlightBaseUrl: string, calendarId: string) {
+  async syncEntitiesUsingRdf(token: string, rdfFilePath: string, mappingFileUrl: string, footlightBaseUrl: string, calendarId: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const currentUserId = currentUser.id;
-    const rdfDataArray = await Promise.all(rdfFiles.map(file => file.buffer.toString("utf-8")));
-    const rdfData = rdfDataArray.join("\n");
+    let rdfData = fs.readFileSync(rdfFilePath, 'utf8')
 
     const jsonldData = parse(rdfData);
-    await this.syncEntitiesInJsonLd(jsonldData["@graph"], token, calendarId, footlightBaseUrl, currentUserId);
-
+    await this.exportJsonLdData(jsonldData['@graph'], token, calendarId, footlightBaseUrl, currentUserId, mappingFileUrl);
   }
 
-  async syncEntitiesInJsonLd(data: any, token: string, calendarId: string, footlightBaseUrl: string,
-                             currentUserId: string) {
-    let jsonLdPlaces = data.filter(item => item["@type"] === EventPredicates.PLACE);
-    let jsonLdPostalAddresses = data.filter(item => item["@type"] === EventPredicates.POSTAL_ADDRESS);
-    let jsonLdOrganizations = data.filter(item => item["@type"] === EventPredicates.ORGANIZATION);
-    let jsonLdPeople = data.filter(item => item["@type"] === EventPredicates.PERSON);
-    let events = [];
-    for (const node of data) {
-      if (node["@type"] == EventPredicates.EVENT) {
-        await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl, currentUserId,
-          jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople);
-      }
+  async exportJsonLdData(data:any, token:string, calendarId:string, footlightBaseUrl:string, currentUserId:string, mappingFiles: any){
+    let jsonLdPlaces =  data.filter(item => item['@type'] === EventPredicates.PLACE)
+    let jsonLdPostalAddresses = data.filter(item => item['@type'] === EventPredicates.POSTAL_ADDRESS)
+    let jsonLdOrganizations = data.filter(item => item['@type'] === EventPredicates.ORGANIZATION)
+    let jsonLdPeople = data.filter(item => item['@type'] === EventPredicates.PERSON)
+    let events = []
+    for(const node of data){
+        if(node["@type"] == EventPredicates.EVENT)
+        {
+          await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople, mappingFiles);
+        }
     }
     return events;
   }
 
 
-  async formatAndPushJsonLdEvents(event: any, places: Object[], token: string, calendarId: string,
-                                  footlightBaseUrl: string, currentUserId: string, jsonLdPostalAddresses: any,
-                                  jsonLdOrganizations: any, jsonLdPeople: any) {
+  async formatAndPushJsonLdEvents(event:any, places:Object[], token:string, calendarId:string,
+     footlightBaseUrl:string, currentUserId:string, jsonLdPostalAddresses: any, jsonLdOrganizations: any, jsonLdPeople: any, mappingFiles: any){
     const formattedEvent = new EventDTO();
-    if (event[EventPredicates.NAME]) {
-      formattedEvent.name = JsonLdParseHelper.formatMultilingualField(event[EventPredicates.NAME]);
+    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
+    const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFiles))?.data;
+    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
+    if(event[EventPredicates.NAME]){
+        formattedEvent.name = JsonLdParseHelper.formatMultilingualField(event[EventPredicates.NAME]);
     }
     if (event[EventPredicates.EVENT_STATUS]) {
       formattedEvent.eventStatus = JsonLdParseHelper.formatEventStatus(event[EventPredicates.EVENT_STATUS]);
@@ -510,11 +509,14 @@ export class EventService {
       formattedEvent.startDateTime = event[EventPredicates.START_DATE]["@value"]
         || event[EventPredicates.START_DATE][0]["@value"];
     }
-    if (event[EventPredicates.LOCATION]) {
-      let placeDetails = places.find(place => place["@id"] === event[EventPredicates.LOCATION]["@id"]);
-      let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId,
-        footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
-      formattedEvent.locationId = { place: { entityId: placeEntityId } };
+    if(event[EventPredicates.ADDITIONAL_TYPE]){
+      const additionalTypeId = await this._getConceptIdByNameForRdf(event[EventPredicates.ADDITIONAL_TYPE], patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE)
+      formattedEvent.additionalType = [{entityId: additionalTypeId}]
+    }
+    if(event[EventPredicates.LOCATION]){
+        let placeDetails = places.find(place => place['@id'] === event[EventPredicates.LOCATION]['@id'])
+        let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
+        formattedEvent.locationId = {place:{entityId:placeEntityId}}
     }
 
     if (event[EventPredicates.ORGANIZER] || event[EventPredicates.PERFORMER] || event[EventPredicates.COLLABORATOR]) {
@@ -551,5 +553,24 @@ export class EventService {
     formattedEvent.sameAs = [{ uri: event["@id"], type: "ExternalSourceIdentifier" }];
     formattedEvent.uri = event["@id"];
     await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
+  }
+  private _getConceptIdByNameForRdf(
+    conceptName: string,
+    patternToConceptIdMapping: any,
+    existingEventTypeConceptIDs: unknown[],
+    eventPropertyValue: EventProperty
+  ) {
+    for (const mappingType of patternToConceptIdMapping) {
+      const isMatchingField = mappingType.fieldName === eventPropertyValue;
+  
+      if (isMatchingField && mappingType.mapping[conceptName]) {
+        const conceptId = mappingType.mapping[conceptName][0];
+  
+        if (existingEventTypeConceptIDs.includes(conceptId)) {
+          return conceptId;
+        }
+      }
+    }
+    return null;
   }
 }
