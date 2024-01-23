@@ -3,7 +3,7 @@ import { PersonDTO } from "../../dto";
 import { Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { JsonLdParseHelper } from "../../helper";
-import { RdfTypes } from "../../constants/artsdata-urls/rdf-types.constants";
+import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 
 @Injectable()
 export class PersonService {
@@ -20,7 +20,7 @@ export class PersonService {
 
   async formatAndPushJsonLdPerson(person: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string) {
     const formattedPerson = new PersonDTO();
-    formattedPerson.name = JsonLdParseHelper.formatMultilingualField(person[RdfTypes.NAME]);
+    formattedPerson.name = JsonLdParseHelper.formatMultilingualField(person[EventPredicates.NAME]);
     formattedPerson.sameAs = [{uri: person['@id'], type: "ExternalSourceIdentifier"}] 
     formattedPerson.uri = person['@id']
 

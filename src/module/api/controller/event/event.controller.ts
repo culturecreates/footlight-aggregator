@@ -126,7 +126,7 @@ export class EventController {
   }
 
 
-  @Put("sync-using-rdf")
+  @Put("import-rdf")
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'rdf_file', maxCount: 1 },
     { name: 'mapping_file', maxCount: 1 },
@@ -155,7 +155,7 @@ export class EventController {
     required: true,
     type:String
   })
-  async syncEntitiesUsingRdf(
+  async importEventsFromRDF(
     @Req() request: Request,
     @Query("rdf-file") rdfFilePath: string,
     @Query("mapping-file") mappingFileUrl: string,

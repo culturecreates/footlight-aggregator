@@ -1,4 +1,4 @@
-import { RdfEventStatus } from "../constants/artsdata-urls/rdf-types.constants";
+import { EventStatusConstants } from "../constants/artsdata-urls/rdf-types.constants";
 import { EventStatus } from "../enum";
 import { MultilingualString } from "../model";
 
@@ -14,11 +14,11 @@ export class JsonLdParseHelper{
 
     static formatEventStatus(eventStatus): EventStatus{
         switch (eventStatus['@id']){
-            case RdfEventStatus.SCHEDULED:
+            case EventStatusConstants.SCHEDULED:
                 return EventStatus.SCHEDULED
-            case RdfEventStatus.POSTPONED:
+            case EventStatusConstants.POSTPONED:
                 return EventStatus.POSTPONED
-            case RdfEventStatus.CANCELLED:
+            case EventStatusConstants.CANCELLED:
                 return EventStatus.CANCELLED
         }
     }

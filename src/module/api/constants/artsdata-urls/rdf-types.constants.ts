@@ -1,4 +1,4 @@
-export const RdfTypes = {
+export const EventPredicates = {
     EVENT : "schema:Event",
     PLACE: "schema:Place",
     POSTAL_ADDRESS: "schema:PostalAddress",
@@ -17,22 +17,22 @@ export const RdfTypes = {
     URL: "schema:url"
 }
 
-export const RdfEventStatus = {
-    CANCELLED: "schema:EventCancelled",
-    POSTPONED: "schema:EventPostponed",
-    SCHEDULED: "schema:EventScheduled"
-}
+export const EventStatusConstants = {
+  CANCELLED: "schema:EventCancelled",
+  POSTPONED: "schema:EventPostponed",
+  SCHEDULED: "schema:EventScheduled"
+};
 
-export const RdfPostalAddressTypes = {
-    ADDRESS_COUNTRY: "schema:addressCountry",
-    ADDRESS_LOCALITY: "schema:addressLocality",
-    ADDRESS_REGION: "schema:addressRegion",
-    POSTAL_CODE: "schema:postalCode",
-    STREET_ADDRESS: "schema:streetAddress"
-}
+export const PostalAddressPredicates = {
+  ADDRESS_COUNTRY: "schema:addressCountry",
+  ADDRESS_LOCALITY: "schema:addressLocality",
+  ADDRESS_REGION: "schema:addressRegion",
+  POSTAL_CODE: "schema:postalCode",
+  STREET_ADDRESS: "schema:streetAddress"
+};
 
-export const RdfPlaceTypes = {
-    LATITUDE: "schema:latitude",
-    LONGITUDE: "schema:longitude",
-    ADDRESS: "schema:address"
-}
+export const PlacePredicates = {
+  LATITUDE: "schema:latitude",
+  LONGITUDE: "schema:longitude",
+  ADDRESS: "schema:address"
+};

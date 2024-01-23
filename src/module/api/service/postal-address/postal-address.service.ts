@@ -3,7 +3,7 @@ import { PostalAddressDTO } from "../../dto";
 import { Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { JsonLdParseHelper } from "../../helper";
-import { RdfPostalAddressTypes } from "../../constants/artsdata-urls/rdf-types.constants";
+import { PostalAddressPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 
 @Injectable()
 export class PostalAddressService {
@@ -22,19 +22,19 @@ export class PostalAddressService {
   async formatAndPushJsonLdPostalAddress(postalAddress: any, footlightBaseUrl: string, calendarId: string, token: string, currentUserId: string) {
     const formattedPostallAddress = new PostalAddressDTO();
 
-    formattedPostallAddress.addressCountry = postalAddress[RdfPostalAddressTypes.ADDRESS_COUNTRY]
-    ? JsonLdParseHelper.formatMultilingualField(postalAddress[RdfPostalAddressTypes.ADDRESS_COUNTRY])
+    formattedPostallAddress.addressCountry = postalAddress[PostalAddressPredicates.ADDRESS_COUNTRY]
+    ? JsonLdParseHelper.formatMultilingualField(postalAddress[PostalAddressPredicates.ADDRESS_COUNTRY])
     : undefined;
-    formattedPostallAddress.addressLocality = postalAddress[RdfPostalAddressTypes.ADDRESS_LOCALITY]
-      ? JsonLdParseHelper.formatMultilingualField(postalAddress[RdfPostalAddressTypes.ADDRESS_LOCALITY])
+    formattedPostallAddress.addressLocality = postalAddress[PostalAddressPredicates.ADDRESS_LOCALITY]
+      ? JsonLdParseHelper.formatMultilingualField(postalAddress[PostalAddressPredicates.ADDRESS_LOCALITY])
       : undefined;
-    formattedPostallAddress.addressRegion = postalAddress[RdfPostalAddressTypes.ADDRESS_REGION]
-      ? JsonLdParseHelper.formatMultilingualField(postalAddress[RdfPostalAddressTypes.ADDRESS_REGION])
+    formattedPostallAddress.addressRegion = postalAddress[PostalAddressPredicates.ADDRESS_REGION]
+      ? JsonLdParseHelper.formatMultilingualField(postalAddress[PostalAddressPredicates.ADDRESS_REGION])
       : undefined;
-    formattedPostallAddress.streetAddress = postalAddress[RdfPostalAddressTypes.STREET_ADDRESS]
-      ? JsonLdParseHelper.formatMultilingualField(postalAddress[RdfPostalAddressTypes.STREET_ADDRESS])
+    formattedPostallAddress.streetAddress = postalAddress[PostalAddressPredicates.STREET_ADDRESS]
+      ? JsonLdParseHelper.formatMultilingualField(postalAddress[PostalAddressPredicates.STREET_ADDRESS])
       : undefined;
-    formattedPostallAddress.postalCode = postalAddress[RdfPostalAddressTypes.POSTAL_CODE] || undefined;
+    formattedPostallAddress.postalCode = postalAddress[PostalAddressPredicates.POSTAL_CODE] || undefined;
     formattedPostallAddress.uri = postalAddress['@id']
     formattedPostallAddress.sameAs = [{uri: postalAddress['@id'], type: "ExternalSourceIdentifier"}] 
     return this._pushPostalAddressToFootlight(footlightBaseUrl, calendarId, token, formattedPostallAddress, currentUserId)
