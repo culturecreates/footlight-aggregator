@@ -4,6 +4,7 @@ export const RdfTypes = {
     POSTAL_ADDRESS: "schema:PostalAddress",
     ORGANIZATION: "schema:Organization",
     PERSON: "schema:Person",
+    ADDITIONAL_TYPE: "schema:additionalType",
     NAME : "schema:name",
     EVENT_STATUS: "schema:eventStatus",
     EVENT_ATTENDANCE_MODE: "schema:eventAttendanceMode",

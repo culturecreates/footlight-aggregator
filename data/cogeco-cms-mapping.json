@@ -1,0 +1,13 @@
+[
+    {
+      "fieldName": "additionalType",
+      "inputProperty": [
+        "keywords"
+      ],
+      "mapping": {
+        "Atelier": ["65af69117235511d87b5d2f1"],
+        "Divers": ["65af69117235511d87b5d2f3"],
+        "Chanson": ["65af69117235511d87b5d2f5"]
+      }
+    }
+  ]

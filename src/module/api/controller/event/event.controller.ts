@@ -143,32 +143,27 @@ export class EventController {
     required: true,
     enum: Object.values(Environment)
   })
-  @ApiConsumes("multipart/form-data")
-  @ApiBody({
-    schema: {
-      type: "object",
-      properties: {
-        rdf_file: {
-          type: "string",
-          format: "binary"
-        },
-        mapping_file: {
-          type: "string",
-          format: "binary"
-        },
-      },
-    },
+  @ApiQuery({
+    name: "rdf-file",
+    description: "RDF file for import",
     required: true,
+    type:String
+  })
+  @ApiQuery({
+    name: "mapping-file",
+    description: "Mapping file for additionaltype",
+    required: true,
+    type:String
   })
   async syncEntitiesUsingRdf(
     @Req() request: Request,
-    @UploadedFiles() files: { rdf_file?: Express.Multer.File[], mapping_file?: Express.Multer.File[] },
+    @Query("rdf-file") rdfFilePath: string,
+    @Query("mapping-file") mappingFileUrl: string,
     @Query("footlight-base-url") footlightBaseUrl?: string,
     @Query("calendar-id") calendarId?: string,
     ) {
-    const {rdf_file, mapping_file} = files
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-    await this._eventService.syncEntitiesUsingRdf(token, rdf_file, mapping_file, footlightBaseUrl, calendarId)
+    await this._eventService.syncEntitiesUsingRdf(token, rdfFilePath, mappingFileUrl, footlightBaseUrl, calendarId)
   }
   
 }

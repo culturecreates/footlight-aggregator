@@ -15,7 +15,8 @@
     "start:prod": "node dist/main",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit ",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "import:entities": "node ./dist/main-commander.js import:entities"
+    "import:entities": "node ./dist/main-commander.js import:entities",
+    "import:rdf": "node ./dist/main-commander.js import:rdf"
   },
   "dependencies": {
     "@datadog/browser-logs": "^4.45.0",
