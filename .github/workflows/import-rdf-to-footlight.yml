@@ -88,6 +88,9 @@ jobs:
         with:
           name: entities
 
+      - name: cat entities
+        run: cat /home/runner/work/footlight-aggregator/footlight-aggregator/entities.ttl
+
       - name: Import entities to footlight
         run: |
           node ./dist/main-commander.js  \
