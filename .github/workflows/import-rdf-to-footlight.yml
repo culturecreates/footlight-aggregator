@@ -36,7 +36,7 @@ jobs:
 
       - name: Install requirements
         run: apk update && apk add curl && apk add util-linux
-        
+
       - name: Run ontorefine server
         run: /opt/ontorefine/dist/bin/ontorefine &
 
@@ -93,5 +93,5 @@ jobs:
           import:rdf -u ${{vars.ADMIN_EMAIL_RDF_IMPORT}} -p ${{secrets.ADMIN_PASSWORD_RDF_IMPORT}} \
           -i ${{inputs.destination-url}} \
           -c ${{inputs.calendar-id}} \
-          -r './entities.ttl'  \
+          -r '/home/runner/work/footlight-aggregator/footlight-aggregator/entities.ttl'  \
           -m ${{inputs.mapping-file-url}}
