@@ -33,6 +33,7 @@ jobs:
       ports:
         - 7333:7333
     steps:
+
       - name: Install requirements
         run: apk update && apk add curl && apk add util-linux
         
