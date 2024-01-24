@@ -25,7 +25,7 @@ on:
         required: true
 
 jobs:
-  transform-data-into-rdf-and-import:
+  transform-data-into-rdf:
     runs-on: ubuntu-latest
     container:
       image: ontotext/refine:1.2.1
@@ -33,23 +33,11 @@ jobs:
       ports:
         - 7333:7333
     steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: npm install
+      - name: Install requirements
+        run: apk update && apk add curl && apk add util-linux
+        
       - name: Run ontorefine server
         run: /opt/ontorefine/dist/bin/ontorefine &
-      
-      - name: Make envfile
-        uses: SpicyPizza/create-envfile@v1.3
-        with:
-          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }} 
-          envkey_ENABLING_LOG_TO_DATA_DOG: true 
-          envkey_CMS_REFERER_HEADER: ${{ vars.CMS_REFERER_HEADER }} 
-          file_name: .env 
-          fail_on_empty: false
-
-      - name: Build Footlight Aggregator
-        run: npm run build
 
       - name: Download json data from the API
         run: |
@@ -67,6 +55,36 @@ jobs:
           -u http://localhost:7333 \
           --configurations project-config.json \
           -f json >> entities.ttl
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: entities
+          path: ./entities.ttl
+          retention-days: 1
+
+  run-aggregator-and-import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }} 
+          envkey_ENABLING_LOG_TO_DATA_DOG: true 
+          envkey_CMS_REFERER_HEADER: ${{ vars.CMS_REFERER_HEADER }} 
+          file_name: .env 
+          fail_on_empty: false
+
+      - name: Build Footlight Aggregator
+        run: npm run build
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: entities
 
       - name: Import entities to footlight
         run: |
