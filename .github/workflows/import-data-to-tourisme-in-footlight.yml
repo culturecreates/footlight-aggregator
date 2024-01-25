@@ -10,9 +10,10 @@ jobs:
   get-tourisme-data:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: SSH and get data
         env:
-            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY_OPENAPI_DEV  }}
+            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY_OPENAPI_DEV}}
             HOSTNAME : ${{ secrets.HOSTNAME_OPENAPI_DEV  }}
             USER_NAME : ${{ secrets.USER_NAME_OPENAPI_DEV  }}
         run: |
