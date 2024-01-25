@@ -624,15 +624,6 @@
                   {
                     "valueSource": {
                       "source": "column",
-                      "columnName": "record - eventratingname"
-                    },
-                    "valueType": {
-                      "type": "literal"
-                    }
-                  },
-                  {
-                    "valueSource": {
-                      "source": "column",
                       "columnName": "record - showtimemaincategoryname"
                     },
                     "valueType": {
