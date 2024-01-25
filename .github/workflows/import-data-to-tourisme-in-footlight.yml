@@ -103,4 +103,4 @@ jobs:
           -i 'https://staging.api.cms.footlight.io' \
           -c 657199fea5ac3d006314ea92 \
           -r '/home/runner/work/footlight-aggregator/footlight-aggregator/entities.ttl'  \
-          -m 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/cogeco-cms-mapping.json'
+          -m 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/tourisme-mouricie-cms-mapping.json'
