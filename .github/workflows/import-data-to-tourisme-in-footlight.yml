@@ -1,0 +1,106 @@
+name: Run Tourism Mauricie Aggregator
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 */6 *'
+
+jobs:
+
+  get-tourisme-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH and get data
+        env:
+            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY_OPENAPI_DEV  }}
+            HOSTNAME : ${{ secrets.HOSTNAME_OPENAPI_DEV  }}
+            USER_NAME : ${{ secrets.USER_NAME_OPENAPI_DEV  }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> tourisme.json"
+
+      - name: Copy data to github instance
+        run: scp -i private_key ${USER_NAME}@${HOSTNAME}:~/tourisme.json ./
+
+      - name: Upload json into artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: tourisme
+          path: ./tourisme.json
+          retention-days: 1
+
+  transform-data-into-rdf:
+    runs-on: ubuntu-latest
+    needs: get-tourisme-data
+    container:
+      image: ontotext/refine:1.2.1
+      options: --user root
+      ports:
+        - 7333:7333
+    steps:
+      - name: Install requirements
+        run: apk update && apk add curl && apk add util-linux
+
+      - name: Run ontorefine server
+        run: /opt/ontorefine/dist/bin/ontorefine &
+
+      - name: Download data from artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: tourisme
+
+      - name: Download project-configuration-file
+        id: step-4
+        run: | 
+          curl 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/ontorefine/cogeco-ontorefine-project-configurations.json' >> project-config.json
+
+      - name: Transform json data to RDF
+        run: |
+          /opt/ontorefine/dist/bin/ontorefine-cli \
+          transform '/home/runner/work/footlight-aggregator/footlight-aggregator/tourisme.json' \
+          -u http://localhost:7333 \
+          --configurations project-config.json \
+          -f json >> entities.ttl
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: entities
+          path: ./entities.ttl
+          retention-days: 1
+
+  run-aggregator-and-import:
+    needs: transform-data-into-rdf
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }} 
+          envkey_ENABLING_LOG_TO_DATA_DOG: true 
+          envkey_CMS_REFERER_HEADER: ${{ vars.CMS_REFERER_HEADER }} 
+          file_name: .env 
+          fail_on_empty: false
+
+      - name: Build Footlight Aggregator
+        run: npm run build
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: entities
+
+      - name: cat entities
+        run: cat /home/runner/work/footlight-aggregator/footlight-aggregator/entities.ttl
+
+      - name: Import entities to footlight
+        run: |
+          node ./dist/main-commander.js  \
+          import:rdf -u ${{vars.AGGREGATOR_USER_COGECO}} -p ${{secrets.AGGREGATOR_PASSWORD_COGECO}} \
+          -i 'https://staging.api.cms.footlight.io' \
+          -c 657199fea5ac3d006314ea92 \
+          -r '/home/runner/work/footlight-aggregator/footlight-aggregator/entities.ttl'  \
+          -m 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/cogeco-cms-mapping.json'
