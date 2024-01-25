@@ -31,7 +31,7 @@ jobs:
           username: ${{ vars.STAGING_SERVER_3_USER_NAME }}
           port: ${{ 22 }}
           key: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY }}
-          source: "~/tourisme-mouricie/tourisme.json"
+          source: "tourisme-mouricie/tourisme.json"
           target: "tourisme.json"
 
       - name: cat tourisme.json
