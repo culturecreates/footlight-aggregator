@@ -12,7 +12,8 @@
         "Salon": ["6571a0c1a5ac3d006314ee15"],
         "Musique": ["6571a0c1a5ac3d006314ee17"],
         "Danse": ["6571a0c1a5ac3d006314ee19"],
-        "Humour": ["659eef9550bec800641d67e4"]
+        "Humour": ["659eef9550bec800641d67e4"],
+        "DEFAULT": ["65b2575b8468f40064831053"]
       }
     },
     {
