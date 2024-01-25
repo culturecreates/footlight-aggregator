@@ -21,8 +21,21 @@ jobs:
 
 #          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> tourisme.json"
 
-      - name: Copy data to github instance
-        run: scp -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}:/home/ubuntu/tourisme-mouricie/tourisme.json ./
+#      - name: Copy data to github instance
+#        run: scp -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}:/home/ubuntu/tourisme-mouricie/tourisme.json ./
+
+      - name: copy file via ssh key
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ vars.STAGING_SERVER_3_IP }}
+          username: ${{ vars.STAGING_SERVER_3_USER_NAME }}
+          port: ${{ 22 }}
+          key: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY }}
+          source: "~/tourisme-mouricie/tourisme.json"
+          target: "tourisme.json"
+
+      - name: cat tourisme.json
+        run: cat tourisme.json
 
       - name: Upload json into artifact
         uses: actions/upload-artifact@v2
