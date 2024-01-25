@@ -79,18 +79,18 @@ export class PersonOrganizationService {
   }
 
   async formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations,
-                                        jsonLdPeople, event) {
+                                        jsonLdPeople, event, organizationType) {
     let participantId, participantType;
-    let performerInOrganizations = jsonLdOrganizations
-      .find(organization => organization["@id"] === event[EventPredicates.PERFORMER]["@id"]);
-    let performerInPeople = jsonLdPeople.find(person => person["@id"] === event[EventPredicates.PERFORMER]["@id"]);
-    if (performerInOrganizations) {
-      participantId = await this._organizationService.formatAndPushJsonLdOrganization(performerInOrganizations,
+    let participantInOrganizations = jsonLdOrganizations
+      .find(organization => organization["@id"] === event[organizationType]["@id"]);
+    let participantInPeople = jsonLdPeople.find(person => person["@id"] === event[organizationType]["@id"]);
+    if (participantInOrganizations) {
+      participantId = await this._organizationService.formatAndPushJsonLdOrganization(participantInOrganizations,
         token, calendarId, footlightBaseUrl, currentUserId);
       participantType = PersonOrganizationType.ORGANIZATION;
     }
-    if (performerInPeople) {
-      participantId = await this._personService.formatAndPushJsonLdPerson(performerInPeople, token, calendarId,
+    if (participantInPeople) {
+      participantId = await this._personService.formatAndPushJsonLdPerson(participantInPeople, token, calendarId,
         footlightBaseUrl, currentUserId);
       participantType = PersonOrganizationType.PERSON;
     }

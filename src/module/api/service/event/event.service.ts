@@ -532,7 +532,7 @@ export class EventService {
           participantId,
           participantType
         } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl,
-          currentUserId, jsonLdOrganizations, jsonLdPeople, event);
+          currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.ORGANIZER);
         formattedEvent.organizers = [{ entityId: participantId, type: participantType }];
       }
 
@@ -541,7 +541,7 @@ export class EventService {
           participantId,
           participantType
         } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl,
-          currentUserId, jsonLdOrganizations, jsonLdPeople, event);
+          currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.PERFORMER);
         formattedEvent.performers = [{ entityId: participantId, type: participantType }];
       }
 
@@ -549,7 +549,8 @@ export class EventService {
         let {
           participantId,
           participantType
-        } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl, currentUserId, jsonLdOrganizations, jsonLdPeople, event);
+        } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl, 
+          currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.COLLABORATOR);
         formattedEvent.collaborators = [{ entityId: participantId, type: participantType }];
       }
     }
