@@ -13,9 +13,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: SSH and get data
         env:
-            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY_OPENAPI_DEV}}
-            HOSTNAME : ${{ secrets.HOSTNAME_OPENAPI_DEV  }}
-            USER_NAME : ${{ secrets.USER_NAME_OPENAPI_DEV  }}
+            PRIVATE_KEY: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY}}
+            HOSTNAME : ${{ vars.STAGING_SERVER_3_IP}}
+            USER_NAME : ${{ vars.STAGING_SERVER_3_USER_NAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> tourisme.json"
