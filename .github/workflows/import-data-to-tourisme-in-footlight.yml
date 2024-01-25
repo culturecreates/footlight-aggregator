@@ -1,4 +1,4 @@
-name: Run Tourism Mauricie Aggregator
+name: Run Tourisme Mauricie Aggregator
 
 on:
   workflow_dispatch:
@@ -11,17 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: SSH and get data
-        env:
-            PRIVATE_KEY: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY}}
-            HOSTNAME : ${{ vars.STAGING_SERVER_3_IP}}
-            USER_NAME : ${{ vars.STAGING_SERVER_3_USER_NAME }}
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> tourisme.json"
+#      - name: SSH and get data
+#        env:
+#            PRIVATE_KEY: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY}}
+#            HOSTNAME : ${{ vars.STAGING_SERVER_3_IP}}
+#            USER_NAME : ${{ vars.STAGING_SERVER_3_USER_NAME }}
+#        run: |
+#          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+#          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> tourisme.json"
 
       - name: Copy data to github instance
-        run: scp -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}:~/tourisme.json ./
+        run: scp -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}:/home/ubuntu/tourisme-mouricie/tourisme.json ./
 
       - name: Upload json into artifact
         uses: actions/upload-artifact@v2
