@@ -499,6 +499,9 @@ export class EventService {
     if(event[EventPredicates.NAME]){
         formattedEvent.name = JsonLdParseHelper.formatMultilingualField(event[EventPredicates.NAME]);
     }
+    if(event[EventPredicates.DESCRIPTION]){
+      formattedEvent.description = JsonLdParseHelper.formatMultilingualField(event[EventPredicates.DESCRIPTION]);
+    }
     if (event[EventPredicates.EVENT_STATUS]) {
       formattedEvent.eventStatus = JsonLdParseHelper.formatEventStatus(event[EventPredicates.EVENT_STATUS]);
     }
@@ -508,6 +511,10 @@ export class EventService {
     if (event[EventPredicates.START_DATE]) {
       formattedEvent.startDateTime = event[EventPredicates.START_DATE]["@value"]
         || event[EventPredicates.START_DATE][0]["@value"];
+    }
+    if(event[EventPredicates.END_DATE]) {
+      formattedEvent.endDateTime = event[EventPredicates.END_DATE]["@value"]
+      || event[EventPredicates.END_DATE][0]["@value"];
     }
     if(event[EventPredicates.ADDITIONAL_TYPE]){
       const additionalTypeId = await this._getConceptIdByNameForRdf(event[EventPredicates.ADDITIONAL_TYPE], patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE)
