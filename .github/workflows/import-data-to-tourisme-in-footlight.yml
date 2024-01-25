@@ -51,8 +51,8 @@ jobs:
 
       - name: Download project-configuration-file
         id: step-4
-        run: | 
-          curl 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/ontorefine/cogeco-ontorefine-project-configurations.json' >> project-config.json
+        run: |
+          curl 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/ontorefine/tourisme-mouricie-ontorefine-project-configurations.json' >> project-config.json
 
       - name: Transform json data to RDF
         run: |
@@ -99,7 +99,7 @@ jobs:
       - name: Import entities to footlight
         run: |
           node ./dist/main-commander.js  \
-          import:rdf -u ${{vars.AGGREGATOR_USER_COGECO}} -p ${{secrets.AGGREGATOR_PASSWORD_COGECO}} \
+          import:rdf -u ${{vars.AGGREGATOR_USER_TOURISME_MOURICIE}} -p ${{secrets.AGGREGATOR_PASSWORD_TOURISME_MOURICIE}} \
           -i 'https://staging.api.cms.footlight.io' \
           -c 657199fea5ac3d006314ea92 \
           -r '/home/runner/work/footlight-aggregator/footlight-aggregator/entities.ttl'  \
