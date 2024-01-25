@@ -21,7 +21,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> tourisme.json"
 
       - name: Copy data to github instance
-        run: scp -i private_key ${USER_NAME}@${HOSTNAME}:~/tourisme.json ./
+        run: scp -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}:~/tourisme.json ./
 
       - name: Upload json into artifact
         uses: actions/upload-artifact@v2
