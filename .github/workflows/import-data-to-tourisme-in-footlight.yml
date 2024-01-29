@@ -19,10 +19,6 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> ./tourisme-mouricie/tourisme.json "
-
-      - name: Copy data to github instance
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           scp -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}:/home/ubuntu/tourisme-mouricie/tourisme.json ./
 
       - name: Upload json into artifact
