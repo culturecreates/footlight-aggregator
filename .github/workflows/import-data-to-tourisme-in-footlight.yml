@@ -1,4 +1,4 @@
-name: Run Tourism Mauricie Aggregator
+name: Run Tourisme Mauricie Aggregator
 
 on:
   workflow_dispatch:
@@ -10,17 +10,32 @@ jobs:
   get-tourisme-data:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: SSH and get data
         env:
-            PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY_OPENAPI_DEV  }}
-            HOSTNAME : ${{ secrets.HOSTNAME_OPENAPI_DEV  }}
-            USER_NAME : ${{ secrets.USER_NAME_OPENAPI_DEV  }}
+            PRIVATE_KEY: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY}}
+            HOSTNAME : ${{ vars.STAGING_SERVER_3_IP}}
+            USER_NAME : ${{ vars.STAGING_SERVER_3_USER_NAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> tourisme.json"
 
-      - name: Copy data to github instance
-        run: scp -i private_key ${USER_NAME}@${HOSTNAME}:~/tourisme.json ./
+#          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> tourisme.json"
+
+#      - name: Copy data to github instance
+#        run: scp -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}:/home/ubuntu/tourisme-mouricie/tourisme.json ./
+
+      - name: copy file via ssh key
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ vars.STAGING_SERVER_3_IP }}
+          username: ${{ vars.STAGING_SERVER_3_USER_NAME }}
+          port: ${{ 22 }}
+          key: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY }}
+          source: "tourisme-mouricie/tourisme.json"
+          target: "tourisme.json"
+
+      - name: cat tourisme.json
+        run: cat tourisme.json
 
       - name: Upload json into artifact
         uses: actions/upload-artifact@v2
@@ -51,8 +66,8 @@ jobs:
 
       - name: Download project-configuration-file
         id: step-4
-        run: | 
-          curl 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/ontorefine/cogeco-ontorefine-project-configurations.json' >> project-config.json
+        run: |
+          curl 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/ontorefine/tourisme-mouricie-ontorefine-project-configurations.json' >> project-config.json
 
       - name: Transform json data to RDF
         run: |
@@ -99,8 +114,8 @@ jobs:
       - name: Import entities to footlight
         run: |
           node ./dist/main-commander.js  \
-          import:rdf -u ${{vars.AGGREGATOR_USER_COGECO}} -p ${{secrets.AGGREGATOR_PASSWORD_COGECO}} \
+          import:rdf -u ${{vars.AGGREGATOR_USER_TOURISME_MOURICIE}} -p ${{secrets.AGGREGATOR_PASSWORD_TOURISME_MOURICIE}} \
           -i 'https://staging.api.cms.footlight.io' \
           -c 657199fea5ac3d006314ea92 \
           -r '/home/runner/work/footlight-aggregator/footlight-aggregator/entities.ttl'  \
-          -m 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/cogeco-cms-mapping.json'
+          -m 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/tourisme-mouricie-cms-mapping.json'
