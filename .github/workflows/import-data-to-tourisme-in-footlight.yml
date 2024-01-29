@@ -56,7 +56,7 @@ jobs:
       - name: Transform json data to RDF
         run: |
           /opt/ontorefine/dist/bin/ontorefine-cli \
-          transform '/home/runner/work/footlight-aggregator/footlight-aggregator/tourisme.json' \
+          transform '/__w/footlight-aggregator/footlight-aggregator/tourisme.json' \
           -u http://localhost:7333 \
           --configurations project-config.json \
           -f json >> entities.ttl
