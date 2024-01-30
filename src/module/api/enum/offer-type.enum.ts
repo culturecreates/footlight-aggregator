@@ -21,12 +21,6 @@ export enum OfferAvailability {
     AGGREGATE_OFFER = "AggregateOffer"
   }
   
-  export enum OfferCategory {
-    FREE = "FREE",
-    REGISTRATION = "REGISTRATION",
-    PAYING = "PAYING"
-  }
-  
   export enum OfferAdditionalType {
     FREE = "FREE",
     REGISTRATION = "REGISTRATION",
