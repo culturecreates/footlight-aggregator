@@ -1,6 +1,6 @@
 import { PostalAddressService, SharedService } from "../../service";
 import { PlaceDTO } from "../../dto";
-import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
+import { ArtsDataConstants, ArtsDataUrls, CaligramUrls } from "../../constants";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { LoggerService } from "../logger";
@@ -115,6 +115,18 @@ export class PlaceService {
       formattedPlace.postalAddressId = await this._postalAddressService
         .formatAndPushJsonLdPostalAddress(postalAddressDetails, footlightBaseUrl, calendarId, token, currentUserId);
     }
+    return await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, formattedPlace, currentUserId);
+  }
+
+  async formatAndPushCaligramPlaces(place: any, token: any, footlightBaseUrl: string, calendarId: string, currentUserId: string) {
+    const formattedPlace = new PlaceDTO();
+    formattedPlace.name = {fr: place.name};
+    formattedPlace.description = {fr: place.description};
+    formattedPlace.geo = {latitude: place.latitude, longitude: place.longitude};
+    formattedPlace.contactPoint = {telephone: place.telephone, url: place.website_url}
+    formattedPlace.postalAddressId = await this._postalAddressService.formatAndPushCaligramPostalAddress(place,token, footlightBaseUrl, calendarId, currentUserId)
+    formattedPlace.uri = CaligramUrls.VENUE_URL + place.id
+    formattedPlace.sameAs = [{uri: formattedPlace.uri, type: "ExternalSourceIdentifier"}]    
     return await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, formattedPlace, currentUserId);
   }
 }

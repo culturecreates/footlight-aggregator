@@ -6,11 +6,11 @@ import {
   SharedService
 } from "../../service";
 import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
-import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
-import { EventDTO } from "../../dto";
+import { ArtsDataConstants, ArtsDataUrls, CaligramUrls } from "../../constants";
+import { EventDTO, EventDTOCaligram } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
-import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory } from "../../enum";
+import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory, PriceCurrency } from "../../enum";
 import { Exception, JsonLdParseHelper } from "../../helper";
 import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
@@ -18,6 +18,7 @@ import { LoggerService } from "../logger";
 import * as fs from 'fs';
 import { parse } from "@frogcat/ttl2jsonld";
 import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
+import axios from "axios";
 
 @Injectable()
 export class EventService {
@@ -556,7 +557,7 @@ export class EventService {
     }
 
     if (event[EventPredicates.URL]) {
-      formattedEvent.url = { uri: EventPredicates.URL };
+      formattedEvent.url = { uri: event[EventPredicates.URL] };
     }
     formattedEvent.sameAs = [{ uri: event["@id"], type: "ExternalSourceIdentifier" }];
     formattedEvent.uri = event["@id"];
@@ -580,5 +581,66 @@ export class EventService {
       }
     }
     return null;
+  }
+
+  async importCaligram(token: any, footlightBaseUrl: string, calendarId: string) {
+    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
+    const currentUserId = currentUser.id;
+    const eventIds = await this.getCaligramEventIds();
+    for(const eventId of eventIds){
+      const data  = (await (axios.get(CaligramUrls.EVENT_URL + eventId))).data
+      await this.formatAndPushCaligramEvents(data, token, footlightBaseUrl, calendarId, currentUserId)
+    }
+  }
+  
+
+  async getCaligramEventIds() {
+    const eventIds = []
+    let pageNumber = 1;
+    while(true){
+      let eventData;
+      try {
+        eventData = (await axios.get(CaligramUrls.PAGE_URL + pageNumber)).data.data;  
+        if(!eventData.length){
+          this._loggerService.infoLogs(`no more events found on page ${pageNumber}`);
+          break
+        }
+      } catch (error) {
+        Exception.internalServerError("Unable to fetch from Caligram listing URL")
+      }
+      eventIds.push(...eventData.map(event => event.id))
+      pageNumber++;
+    }
+    return eventIds
+  }
+
+  async formatAndPushCaligramEvents(event: any, token: any, footlightBaseUrl: string, calendarId: string, currentUserId: string){
+    const formattedEvent = new EventDTOCaligram();
+    formattedEvent.name = {fr: event.title};
+    formattedEvent.description = {fr: event.description};
+    formattedEvent.startDateTime = event.start_date;
+    formattedEvent.endDateTime = event.end_date;
+    formattedEvent.isFeaturedEvent = event.featured == 'true'? true: false;
+    formattedEvent.url = {uri:event.url}
+    formattedEvent.uri = event.url;
+    formattedEvent.offerConfiguration = this._formatCaligramOffers(event.price_currency, event.prices)
+    formattedEvent.image = {url:{uri: event.image.sizes.original}}
+    formattedEvent.sameAs = [{ uri: event.url, type: "ExternalSourceIdentifier" }];
+    if(event.venue){
+      const location = await this._placeService.formatAndPushCaligramPlaces(event.venue,token, footlightBaseUrl, calendarId, currentUserId)
+      formattedEvent.locationId = {place:{entityId: location}}
+    }
+    await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
+  
+  }
+
+  private _formatCaligramOffers(currency:string, prices: any ){
+    let offerPrices = []
+    for (const price of prices){
+      const offerPrice = {price: price.value, name :price.description}
+      offerPrices.push(offerPrice)
+    }
+    let priceCurrency = currency == "CAD"? PriceCurrency.CAD:currency == "USD"? PriceCurrency.USD:null
+    return {priceCurrency: priceCurrency, offerPrices}
   }
 }

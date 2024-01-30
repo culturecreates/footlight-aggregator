@@ -1,0 +1,34 @@
+name: Run Calligram Aggregator
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 1 */6 *'
+
+
+jobs:
+    run-aggregator-and-import:
+        runs-on: ubuntu-latest
+        steps:
+          - uses: actions/checkout@v2
+          - name: Install dependencies
+            run: npm install
+    
+          - name: Make envfile
+            uses: SpicyPizza/create-envfile@v1.3
+            with:
+              envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }} 
+              envkey_ENABLING_LOG_TO_DATA_DOG: true 
+              envkey_CMS_REFERER_HEADER: ${{ vars.CMS_REFERER_HEADER }} 
+              file_name: .env 
+              fail_on_empty: false
+    
+          - name: Build Footlight Aggregator
+            run: npm run build
+    
+          - name: Import entities to footlight
+            run: |
+              node ./dist/main-commander.js  \
+              import:caligram -u ${{vars.AGGREGATOR_USER_CALIGRAM}} -p ${{secrets.AGGREGATOR_PASSWORD_CALIGRAM}} \
+              -i 'https://staging.api.cms.footlight.io' \
+              -c 657199fea5ac3d006314ea92

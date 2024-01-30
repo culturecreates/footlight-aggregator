@@ -4,6 +4,7 @@ import { Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { JsonLdParseHelper } from "../../helper";
 import { PostalAddressPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
+import { CaligramUrls } from "../../constants";
 
 @Injectable()
 export class PostalAddressService {
@@ -37,6 +38,16 @@ export class PostalAddressService {
     formattedPostallAddress.postalCode = postalAddress[PostalAddressPredicates.POSTAL_CODE] || undefined;
     formattedPostallAddress.uri = postalAddress['@id']
     formattedPostallAddress.sameAs = [{uri: postalAddress['@id'], type: "ExternalSourceIdentifier"}] 
-    return this._pushPostalAddressToFootlight(footlightBaseUrl, calendarId, token, formattedPostallAddress, currentUserId)
+    return {entityId: await this._pushPostalAddressToFootlight(footlightBaseUrl, calendarId, token, formattedPostallAddress, currentUserId)};
+  }
+
+  async formatAndPushCaligramPostalAddress(place: any, token: any, footlightBaseUrl: string, calendarId: string, currentUserId: string) {
+    const formattedPostalAddress = new PostalAddressDTO();
+    formattedPostalAddress.addressCountry = place.country;
+    formattedPostalAddress.postalCode = place.zip;
+    formattedPostalAddress.streetAddress = place.address;
+    formattedPostalAddress.uri = CaligramUrls.VENUE_URL + place.id
+    formattedPostalAddress.sameAs = [{uri: formattedPostalAddress.uri, type: "ExternalSourceIdentifier"}]
+    return {entityId: await this._pushPostalAddressToFootlight(footlightBaseUrl, calendarId, token, formattedPostalAddress, currentUserId)};
   }
 }

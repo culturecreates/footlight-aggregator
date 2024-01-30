@@ -165,5 +165,28 @@ export class EventController {
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
     await this._eventService.syncEntitiesUsingRdf(token, rdfFilePath, mappingFileUrl, footlightBaseUrl, calendarId)
   }
+
+  @Put("import-caligram")
+  @ApiQuery({
+    name: "calendar-id",
+    description: "**calendar-id (The calendar identifier)**",
+    required: true,
+    explode: true
+  })  
+  @ApiQuery({
+    name: "footlight-base-url",
+    description: "Select the environment",
+    required: true,
+    enum: Object.values(Environment)
+  })
+  async importCaligram(
+    @Req() request: Request,
+    @Query("footlight-base-url") footlightBaseUrl?: string,
+    @Query("calendar-id") calendarId?: string,
+  ){
+    const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
+    await this._eventService.importCaligram(token, footlightBaseUrl, calendarId);
+
+  }
   
 }

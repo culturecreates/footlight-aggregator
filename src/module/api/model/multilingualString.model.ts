@@ -2,8 +2,8 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class MultilingualString {
   @ApiPropertyOptional()
-  en: string;
+  en?: string;
 
   @ApiPropertyOptional()
-  fr: string;
+  fr?: string;
 }
