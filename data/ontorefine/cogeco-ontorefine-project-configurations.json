@@ -12,9 +12,9 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "json",
+      "projectName": "cogeco api response json",
       "projectTags": [],
-      "fileSource": "https://www.amphitheatrecogeco.com/json?module=spectacle&method=getspectacles",
+      "fileSource": "cogeco-api-response.json",
       "archiveFileName": null
     }
   ],
@@ -28,7 +28,8 @@
           "cogeco_events": "https://www.amphitheatrecogeco.com/events/",
           "cogeco_places": "https://www.amphitheatrecogeco.com/places/",
           "schema": "https://schema.org/",
-          "cogeco_postal_address": "https://www.amphitheatrecogeco.com/postal_address/"
+          "cogeco_postal_address": "https://www.amphitheatrecogeco.com/postal_address/",
+          "cogeco_offers": "https://www.amphitheatrecogeco.com/offers/"
         },
         "subjectMappings": [
           {
@@ -227,6 +228,59 @@
                     },
                     "valueType": {
                       "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "image"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - images - _ - url"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "offers"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - ticket_url"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
                     }
                   }
                 ]
@@ -476,6 +530,59 @@
                           "constant": "fr"
                         }
                       }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - ticket_url"
+              },
+              "transformation": {
+                "language": "raw"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Offer"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "url"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - ticket_url"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
                     }
                   }
                 ]

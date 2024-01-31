@@ -12,9 +12,9 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "tourismemauricie json",
+      "projectName": "tourisme-mouricie-31-01",
       "projectTags": [],
-      "fileSource": "tourismemauricie.json",
+      "fileSource": "tourisme.json",
       "archiveFileName": null
     }
   ],
@@ -28,7 +28,8 @@
           "mouricie_places": "https://www.tourismemauricie.com/places/",
           "mouricie_postal_address": "https://www.tourismemauricie.com/postal_address/",
           "schema": "https://schema.org/",
-          "xsd": "http://www.w3.org/2001/XMLSchema#"
+          "xsd": "http://www.w3.org/2001/XMLSchema#",
+          "mouricie_offers": "https://www.tourismemauricie.com/offers/"
         },
         "subjectMappings": [
           {
@@ -223,6 +224,34 @@
                     "transformation": {
                       "language": "prefix",
                       "expression": "mouricie_places"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "image"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - image"
+                    },
+                    "transformation": {
+                      "language": "raw"
                     },
                     "valueType": {
                       "type": "iri",

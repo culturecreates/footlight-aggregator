@@ -12,7 +12,7 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "showtimes xml",
+      "projectName": "showinigan-31-01",
       "projectTags": [],
       "fileSource": "showtimes.xml",
       "archiveFileName": null
@@ -29,7 +29,8 @@
           "xsd": "http://www.w3.org/2001/XMLSchema#",
           "shawinigan_places": "http://shawinigan.ticketacces.net/places/",
           "shawinigan_postal_address": "http://shawinigan.ticketacces.net/postal_address/",
-          "shawinigan_organization": "http://shawinigan.ticketacces.net/organization/"
+          "shawinigan_organization": "http://shawinigan.ticketacces.net/organization/",
+          "shawinigan_offers": "http://shawinigan.ticketacces.net/offers/"
         },
         "subjectMappings": [
           {
@@ -232,7 +233,7 @@
                   {
                     "valueSource": {
                       "source": "column",
-                      "columnName": "record - eventwebsiteurl"
+                      "columnName": "record - urldetails"
                     },
                     "transformation": {
                       "language": "raw"
@@ -265,6 +266,60 @@
                     "transformation": {
                       "language": "prefix",
                       "expression": "shawinigan_organization"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "image"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventimagelarge"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "offers"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventid"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "shawinigan_offers"
                     },
                     "valueType": {
                       "type": "iri",
@@ -594,6 +649,115 @@
                     "valueSource": {
                       "source": "column",
                       "columnName": "record - organizationdomain"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "record - eventid"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "shawinigan_offers"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Offer"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - tickettypewebdefaultname"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "price"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - tickettypewebdefaultprice"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "url"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - urlpurchase"
                     },
                     "transformation": {
                       "language": "raw"
