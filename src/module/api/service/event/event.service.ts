@@ -557,7 +557,7 @@ export class EventService {
     }
 
     if (event[EventPredicates.URL]) {
-      formattedEvent.url = { uri: event[EventPredicates.URL] };
+      formattedEvent.url = { uri: event[EventPredicates.URL]["@id"] };
     }
     formattedEvent.sameAs = [{ uri: event["@id"], type: "ExternalSourceIdentifier" }];
     formattedEvent.uri = event["@id"];
