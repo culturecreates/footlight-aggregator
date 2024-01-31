@@ -7,10 +7,10 @@ import {
 } from "../../service";
 import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import { ArtsDataConstants, ArtsDataUrls, CaligramUrls } from "../../constants";
-import { EventDTO, EventDTOCaligram } from "../../dto";
+import { CustomDates, EventDTO, EventDTOCaligram } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
-import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory, PriceCurrency } from "../../enum";
+import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory, PriceCurrency, RecurringEventFrequency } from "../../enum";
 import { Exception, JsonLdParseHelper } from "../../helper";
 import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
@@ -518,8 +518,8 @@ export class EventService {
       || event[EventPredicates.END_DATE][0]["@value"];
     }
     if(event[EventPredicates.ADDITIONAL_TYPE]){
-      const additionalTypeId = await this._getConceptIdByNameForRdf(event[EventPredicates.ADDITIONAL_TYPE], patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE)
-      formattedEvent.additionalType = [{entityId: additionalTypeId}]
+      const additionalTypeIds = await this._getConceptIdByNameForRdf(event[EventPredicates.ADDITIONAL_TYPE], patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE)
+      formattedEvent.additionalType = additionalTypeIds
     }
     if(event[EventPredicates.LOCATION]){
         let placeDetails = places.find(place => place['@id'] === event[EventPredicates.LOCATION]['@id'])
@@ -564,32 +564,44 @@ export class EventService {
     await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
   }
   private _getConceptIdByNameForRdf(
-    conceptName: string,
+    conceptNames: string[],
     patternToConceptIdMapping: any,
     existingEventTypeConceptIDs: unknown[],
     eventPropertyValue: EventProperty
   ) {
+    const conceptIds = []
     for (const mappingType of patternToConceptIdMapping) {
       const isMatchingField = mappingType.fieldName === eventPropertyValue;
-  
-      if (isMatchingField && mappingType.mapping[conceptName]) {
-        const conceptId = mappingType.mapping[conceptName][0];
-  
-        if (existingEventTypeConceptIDs.includes(conceptId)) {
-          return conceptId;
+      for (const conceptName of conceptNames){
+        if (isMatchingField && mappingType.mapping[conceptName]) {
+          const conceptIdArray = mappingType.mapping[conceptName];
+          for(let conceptId of conceptIdArray){
+            if (existingEventTypeConceptIDs.includes(conceptId)) {
+              conceptIds.push(conceptId)
+            }
+          }
         }
       }
     }
-    return null;
+    
+    if(conceptIds.length){
+      let uniqueConceptIdsList = [...new Set(conceptIds)];
+      const uniqueConceptIds = Array.from(uniqueConceptIdsList).map((conceptId) => ({
+        entityId: conceptId
+      }));
+      return uniqueConceptIds;
+    } else {
+      return null
+    }
   }
 
-  async importCaligram(token: any, footlightBaseUrl: string, calendarId: string) {
+  async importCaligram(token: any, footlightBaseUrl: string, calendarId: string, mappingFileUrl: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const currentUserId = currentUser.id;
     const eventIds = await this.getCaligramEventIds();
     for(const eventId of eventIds){
       const data  = (await (axios.get(CaligramUrls.EVENT_URL + eventId))).data
-      await this.formatAndPushCaligramEvents(data, token, footlightBaseUrl, calendarId, currentUserId)
+      await this.formatAndPushCaligramEvents(data, token, footlightBaseUrl, calendarId, currentUserId, mappingFileUrl)
     }
   }
   
@@ -614,33 +626,78 @@ export class EventService {
     return eventIds
   }
 
-  async formatAndPushCaligramEvents(event: any, token: any, footlightBaseUrl: string, calendarId: string, currentUserId: string){
-    const formattedEvent = new EventDTOCaligram();
+  async formatAndPushCaligramEvents(event: any, token: any, footlightBaseUrl: string, calendarId: string, currentUserId: string, mappingFileUrl: string){
+    let formattedEvent = new EventDTOCaligram();
+    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
+    const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFileUrl))?.data;
+    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
     formattedEvent.name = {fr: event.title};
     formattedEvent.description = {fr: event.description};
-    formattedEvent.startDateTime = event.start_date;
-    formattedEvent.endDateTime = event.end_date;
+    formattedEvent = this._formatDatesForCaligram(formattedEvent, event.start_date, event.end_date, event.dates);
     formattedEvent.isFeaturedEvent = event.featured == 'true'? true: false;
-    formattedEvent.url = {uri:event.url}
+    formattedEvent.url = {uri:event.url};
     formattedEvent.uri = event.url;
-    formattedEvent.offerConfiguration = this._formatCaligramOffers(event.price_currency, event.prices)
-    formattedEvent.image = {url:{uri: event.image.sizes.original}}
+    formattedEvent.offerConfiguration = this._formatCaligramOffers(event.price_currency, event.prices, event.price_type);
+    if(event.types){
+      let additionalTypeNames = [] 
+
+      for(const type of event.types){
+        additionalTypeNames.push(type.name)
+      }
+      formattedEvent.additionalType = await this._getConceptIdByNameForRdf(additionalTypeNames, patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE)
+    }
+    formattedEvent.image = {url:{uri: event.image.sizes.original}};
     formattedEvent.sameAs = [{ uri: event.url, type: "ExternalSourceIdentifier" }];
     if(event.venue){
-      const location = await this._placeService.formatAndPushCaligramPlaces(event.venue,token, footlightBaseUrl, calendarId, currentUserId)
-      formattedEvent.locationId = {place:{entityId: location}}
+      const location = await this._placeService.formatAndPushCaligramPlaces(event.venue,token, footlightBaseUrl, calendarId, currentUserId);
+      formattedEvent.locationId = {place:{entityId: location}};
+    }
+    if(event.organization){
+      const organizer = await this._organizationService.formatAndPushCaligramOrganization(event.organization, token, calendarId, footlightBaseUrl, currentUserId);
     }
     await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
   
   }
-
-  private _formatCaligramOffers(currency:string, prices: any ){
-    let offerPrices = []
-    for (const price of prices){
-      const offerPrice = {price: price.value, name :price.description}
-      offerPrices.push(offerPrice)
+  private _formatDatesForCaligram(formattedEvent: EventDTOCaligram, start_date: any, end_date: any, dates: any): EventDTOCaligram {
+    if(dates){
+      let customDate = new CustomDates()
+      let customDates = []
+      for(const date of dates){
+        let dateAndTime = date.start_date.split(" ")
+        customDate = {
+          startDate: dateAndTime[0],
+          customTimes:[{
+            startTime: dateAndTime[1]
+          }]
+        }
+        customDates.push(customDate)
+      }
+      formattedEvent.recurringEvent = {
+        frequency: RecurringEventFrequency.CUSTOM,
+        customDates:customDates
+      }
+      return formattedEvent
     }
+    else if (start_date || end_date){
+      formattedEvent.startDateTime = start_date;
+      formattedEvent.endDateTime = end_date;
+      return formattedEvent;
+    }
+    return formattedEvent;
+  }
+
+  private _formatCaligramOffers(currency:string, prices: any, priceType: string ){
     let priceCurrency = currency == "CAD"? PriceCurrency.CAD:currency == "USD"? PriceCurrency.USD:null
-    return {priceCurrency: priceCurrency, offerPrices}
+    if(priceType == OfferCategory.FREE){
+      return { category: OfferCategory.FREE, priceCurrency: priceCurrency}
+    }
+    else{
+      let offerPrices = []
+      for (const price of prices){
+        const offerPrice = {price: price.value, name: {fr:price.description}}
+        offerPrices.push(offerPrice)
+      }
+      return {category: OfferCategory.PAYING, priceCurrency: priceCurrency, prices: offerPrices}
+    }
   }
 }

@@ -2,7 +2,7 @@ import { OrganizationDTO } from "../../dto";
 import { SharedService } from "../shared";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
-import { ArtsDataConstants, ArtsDataUrls } from "../../constants";
+import { ArtsDataConstants, ArtsDataUrls, CaligramUrls } from "../../constants";
 import { PlaceService } from "../place";
 import { PersonOrganizationService } from "../person-organization";
 import { LoggerService } from "..";
@@ -71,6 +71,17 @@ export class OrganizationService {
     formattedOrganization.sameAs = [{uri: organization['@id'], type: "ExternalSourceIdentifier"}] 
     formattedOrganization.uri = organization['@id']
 
+    return await this._pushOrganizationToFootlight(footlightBaseUrl, calendarId, token, formattedOrganization, currentUserId)
+
+  }
+
+
+  async formatAndPushCaligramOrganization(organization: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string) {
+    const formattedOrganization = new OrganizationDTO();
+    formattedOrganization.name = {fr: organization.name};
+    const uri = CaligramUrls.ORGANIZATION_URL + organization.id;
+    formattedOrganization.sameAs = [{uri: uri, type: "ExternalSourceIdentifier"}];
+    formattedOrganization.uri = uri;
     return await this._pushOrganizationToFootlight(footlightBaseUrl, calendarId, token, formattedOrganization, currentUserId)
 
   }

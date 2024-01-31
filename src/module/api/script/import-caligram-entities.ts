@@ -6,6 +6,7 @@ interface BasicCommandOptions {
   userName: string;
   password: string;
   calendar: string;
+  mappingFile: string;
   footlightBaseUrl: string;
 }
 
@@ -33,7 +34,7 @@ export class ImportCaligramEntities extends CommandRunner {
       }, options.footlightBaseUrl);
       if (authenticationResponse?.accessToken) {
         this._loggerService.infoLogs("Authentication successful");
-        await this._eventService.importCaligram(authenticationResponse.accessToken, options?.footlightBaseUrl, options?.calendar);
+        await this._eventService.importCaligram(authenticationResponse.accessToken, options?.footlightBaseUrl, options?.calendar, options?.mappingFile);
       } else {
         this._loggerService.errorLogs("Authentication failed");
         process.exit(1)
@@ -78,6 +79,14 @@ export class ImportCaligramEntities extends CommandRunner {
     required: true
   })
   parseFootlightBaseUrl(val: string): string {
+    return val;
+  }
+  @Option({
+    flags: "-m, --mapping-file [string]",
+    description: "Mapping file url",
+    required: true
+  })
+  parseMappingFile(val: string): string {
     return val;
   }
 }

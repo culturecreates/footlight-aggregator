@@ -1,7 +1,7 @@
 import {IdentifierString, MultilingualString, SameAs, UriString} from "../../model";
 import {ContactPointDTO} from "../contact-point";
 import {PersonOrganizationWithRole} from "../../model/personOrganizationWithRole.model";
-import {EventStatus, OfferCategory} from "../../enum/event.enum";
+import {EventStatus, OfferCategory, RecurringEventFrequency} from "../../enum/event.enum";
 import {Location} from "../../model/location.model";
 import {Image} from "../shared";
 import { PriceCurrency } from "../../enum";
@@ -76,6 +76,7 @@ export class EventDTOCaligram {
     isRepresentationOf?: UriString;
     isTopLevelEvent?: boolean;
     isFeaturedEvent?: boolean;
+    recurringEvent: RecurringEvent;
     offerConfiguration: OfferDTO;
     scheduleTimezone?: string;
     facebookUrl?: string;
@@ -100,3 +101,26 @@ export class OfferDTO {
     price: number;
     name: MultilingualString;
   }
+
+
+export class RecurringEvent {
+  frequency?: RecurringEventFrequency;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
+  weekDays?: string[];
+  customDates?: CustomDates[];
+}
+
+
+export class CustomDates {
+  startDate: string;
+  customTimes: CustomTimes[];
+}
+
+export class CustomTimes {
+  startTime: string;
+  endTime?: string;
+}
+

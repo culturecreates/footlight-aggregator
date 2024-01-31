@@ -179,13 +179,20 @@ export class EventController {
     required: true,
     enum: Object.values(Environment)
   })
+  @ApiQuery({
+    name: "mapping-file",
+    description: "Mapping file for additionaltype",
+    required: true,
+    type:String
+  })
   async importCaligram(
     @Req() request: Request,
-    @Query("footlight-base-url") footlightBaseUrl?: string,
-    @Query("calendar-id") calendarId?: string,
+    @Query("footlight-base-url") footlightBaseUrl: string,
+    @Query("calendar-id") calendarId: string,
+    @Query("mapping-file") mappingFileUrl: string,
   ){
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-    await this._eventService.importCaligram(token, footlightBaseUrl, calendarId);
+    await this._eventService.importCaligram(token, footlightBaseUrl, calendarId, mappingFileUrl);
 
   }
   

@@ -6,13 +6,12 @@
       ],
       "mapping": {
         "Atelier": ["6571a0c1a5ac3d006314ee10"],
-        "Divers": ["65719e94a5ac3d006314ed92"],
+        "Divers": ["65719e94a5ac3d006314ed92", "65ba04108468f40064841b1d", "6571a0c1a5ac3d006314ee15", "65ba04108468f40064841b1f"],
         "Chanson": ["65719e94a5ac3d006314ed94"],
         "Musique": ["6571a0c1a5ac3d006314ee17"],
         "Danse": ["6571a0c1a5ac3d006314ee19"],
         "Exposition": ["65b2575b8468f40064831051"],
-        "Salon": ["6571a0c1a5ac3d006314ee15"],
-        "Festival": ["65719e94a5ac3d006314ed96"],
+        "Festival": ["65719e94a5ac3d006314ed96", "65ba04108468f40064841b23"],
         "DEFAULT": ["65b2575b8468f40064831053"]
       }
     },
