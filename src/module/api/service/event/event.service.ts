@@ -591,7 +591,7 @@ export class EventService {
       }));
       return uniqueConceptIds;
     } else {
-      return null
+      return []
     }
   }
 
