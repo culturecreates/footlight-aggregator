@@ -24,3 +24,9 @@ export enum Languages {
     ENGLISH  = 'en',
     FRENCH = 'fr'
 }
+
+export enum RecurringEventFrequency {
+    DAILY = "DAILY",
+    WEEKLY = "WEEKLY",
+    CUSTOM = "CUSTOM"
+  }
