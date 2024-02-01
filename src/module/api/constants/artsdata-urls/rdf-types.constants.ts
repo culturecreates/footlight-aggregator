@@ -1,22 +1,34 @@
+export const EntityPredicates = {
+  EVENT : "schema:Event",
+  PLACE: "schema:Place",
+  POSTAL_ADDRESS: "schema:PostalAddress",
+  ORGANIZATION: "schema:Organization",
+  PERSON: "schema:Person",
+  OFFER: "schema:Offer",
+  CONTACT_POINT: "schema:ContactPoint",
+}
+
 export const EventPredicates = {
-    EVENT : "schema:Event",
-    PLACE: "schema:Place",
-    POSTAL_ADDRESS: "schema:PostalAddress",
-    ORGANIZATION: "schema:Organization",
-    PERSON: "schema:Person",
     ADDITIONAL_TYPE: "schema:additionalType",
     NAME : "schema:name",
     DESCRIPTION: "schema:description",
     EVENT_STATUS: "schema:eventStatus",
     EVENT_ATTENDANCE_MODE: "schema:eventAttendanceMode",
     START_DATE: "schema:startDate",
+    IMAGE: "schema:image",
     END_DATE: "schema:endDate",
     SAME_AS: "schema:sameAs",
     LOCATION: "schema:location",
     ORGANIZER: "schema:organizer",
     PERFORMER: "schema:performer",
     COLLABORATOR: "schema:collaborator",
-    URL: "schema:url"
+    VIDEO_URL: "schema:recordedIn",
+    EVENT_OFFER: "schema:offers",
+    EVENT_CONTACT_POINT: "schema:contactPoint",
+    PRICE: "schema:price",
+    URL: "schema:url",
+    EMAIL: "schema:email",
+    TELEPHONE: "schema:telephone"
 }
 
 export const EventStatusConstants = {
