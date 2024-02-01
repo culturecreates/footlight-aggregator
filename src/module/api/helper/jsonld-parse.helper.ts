@@ -6,6 +6,9 @@ export class JsonLdParseHelper{
 
     static formatMultilingualField(fields): MultilingualString {
         const multilingualField = new MultilingualString();
+        if(!fields){
+            return undefined
+        }
         fields = Array.isArray(fields) ? fields : [fields];
         
         fields.forEach(field => multilingualField[field["@language"]] = field["@value"]);
