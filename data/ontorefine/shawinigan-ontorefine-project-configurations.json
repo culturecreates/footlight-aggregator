@@ -12,7 +12,7 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "Shwinigan-01-02-24",
+      "projectName": "shawinigan0102",
       "projectTags": [],
       "fileSource": "https://api.ticketacces.net/v1/showtimes?KeyID=CULTURESHAWI&KeySecret=wMalrXUtnFEMIK7PDENGbPxRfiGY&Domains=shawinigan.ticketacces.net&Language=fr",
       "archiveFileName": null
@@ -239,9 +239,7 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "type": "literal"
                     }
                   }
                 ]
@@ -293,9 +291,7 @@
                       "columnName": "record - eventimagelarge"
                     },
                     "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "type": "literal"
                     }
                   }
                 ]
@@ -350,9 +346,7 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "type": "literal"
                     }
                   }
                 ]
@@ -682,9 +676,7 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "type": "literal"
                     }
                   }
                 ]
@@ -791,9 +783,7 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "type": "literal"
                     }
                   }
                 ]

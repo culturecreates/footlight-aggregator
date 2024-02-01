@@ -12,9 +12,9 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "tourismemauricie json",
+      "projectName": "tourism01-02",
       "projectTags": [],
-      "fileSource": "tourismemauricie.json",
+      "fileSource": "tourisme.json",
       "archiveFileName": null
     }
   ],
@@ -36,6 +36,10 @@
             "subject": {
               "valueSource": {
                 "source": "row_index"
+              },
+              "transformation": {
+                "language": "grel",
+                "expression": "row"
               }
             },
             "typeMappings": [
@@ -254,9 +258,7 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "type": "literal"
                     }
                   }
                 ]
@@ -317,9 +319,7 @@
                                 "language": "raw"
                               },
                               "valueType": {
-                                "type": "iri",
-                                "typeMappings": [],
-                                "propertyMappings": []
+                                "type": "literal"
                               }
                             }
                           ]

@@ -12,7 +12,7 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "cogeco api response json",
+      "projectName": "cogeco0102",
       "projectTags": [],
       "fileSource": "cogeco-api-response.json",
       "archiveFileName": null
@@ -250,9 +250,7 @@
                       "columnName": "_ - images - _ - url"
                     },
                     "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "type": "literal"
                     }
                   }
                 ]
@@ -306,9 +304,7 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "type": "literal"
                     }
                   }
                 ]
@@ -608,9 +604,7 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "type": "literal"
                     }
                   }
                 ]
