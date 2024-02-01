@@ -12,9 +12,9 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "showinigan-31-01",
+      "projectName": "Shwinigan-01-02-24",
       "projectTags": [],
-      "fileSource": "showtimes.xml",
+      "fileSource": "https://api.ticketacces.net/v1/showtimes?KeyID=CULTURESHAWI&KeySecret=wMalrXUtnFEMIK7PDENGbPxRfiGY&Domains=shawinigan.ticketacces.net&Language=fr",
       "archiveFileName": null
     }
   ],
@@ -320,6 +320,34 @@
                     "transformation": {
                       "language": "prefix",
                       "expression": "shawinigan_offers"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "recordedIn"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventtrailer"
+                    },
+                    "transformation": {
+                      "language": "raw"
                     },
                     "valueType": {
                       "type": "iri",
