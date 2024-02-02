@@ -4,7 +4,7 @@ export const EntityPredicates = {
   POSTAL_ADDRESS: "schema:PostalAddress",
   ORGANIZATION: "schema:Organization",
   PERSON: "schema:Person",
-  OFFER: "schema:Offer",
+  AGGREGATE_OFFER: "schema:AggregateOffer",
   CONTACT_POINT: "schema:ContactPoint",
 }
 

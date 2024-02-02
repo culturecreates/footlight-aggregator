@@ -480,9 +480,10 @@ export class EventService {
     let jsonLdPostalAddresses = data.filter(item => item['@type'] === EntityPredicates.POSTAL_ADDRESS)
     let jsonLdOrganizations = data.filter(item => item['@type'] === EntityPredicates.ORGANIZATION)
     let jsonLdPeople = data.filter(item => item['@type'] === EntityPredicates.PERSON)
-    let jsonLdOffers = data.filter(item => item['@type'] === EntityPredicates.OFFER)
+    let jsonLdOffers = data.filter(item => item['@type'] === EntityPredicates.AGGREGATE_OFFER)
     let jsonLdContactPoints = data.filter(item => item['@type'] === EntityPredicates.CONTACT_POINT)
     let events = []
+    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     for(const node of data){
         if(node["@type"] == EntityPredicates.EVENT)
         {
@@ -508,7 +509,6 @@ export class EventService {
       event[EventPredicates.URL], event[EventPredicates.IMAGE], event[EventPredicates.EVENT_CONTACT_POINT]
     ]
 
-    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFiles))?.data;
     const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
     if(name){
@@ -532,7 +532,7 @@ export class EventService {
       || endDate[0]["@value"];
     }
     if(image) {
-      formattedEvent.image = {url:{uri: image["@id"]}}
+      formattedEvent.image = {url:{uri: image}}
     }
     if(additionalType){
       const additionalTypeIds = await this._getConceptIdByNameForRdf(additionalType, patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE)
@@ -602,16 +602,17 @@ export class EventService {
   }
 
   private _formatJsonLdOffers(offer: any, jsonLdOffers: any) {
-    let offerData = jsonLdOffers
-      .find(jsonLdOffer => jsonLdOffer["@id"] === offer["@id"]);  
+    let offerData = jsonLdOffers.find(jsonLdOffer => jsonLdOffer["@id"] === offer["@id"])
+      || jsonLdOffers.find(jsonLdOffer => jsonLdOffer["@id"] === offer[0]["@id"]);
     let offerPrice: OfferPrice = {
       name: JsonLdParseHelper.formatMultilingualField(offerData[EventPredicates.NAME]),
       price: offerData[EventPredicates.PRICE]
-
     }
+    const uri = offerData[EventPredicates.URL]
     let offerConfiguration:OfferDTO = {
-      url: {uri: offerData[EventPredicates.URL]},
-      prices: [offerPrice]
+      url: {uri: uri},
+      prices: [offerPrice],
+      category: uri? OfferCategory.PAYING: OfferCategory.FREE
     }
     return offerConfiguration;
   }
@@ -622,6 +623,7 @@ export class EventService {
     existingEventTypeConceptIDs: unknown[],
     eventPropertyValue: EventProperty
   ) {
+    conceptNames = [].concat(conceptNames);
     const conceptIds = []
     for (const mappingType of patternToConceptIdMapping) {
       const isMatchingField = mappingType.fieldName === eventPropertyValue;
