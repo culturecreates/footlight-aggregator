@@ -12,7 +12,7 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "cogeco0102",
+      "projectName": "cogeco api response json",
       "projectTags": [],
       "fileSource": "cogeco-api-response.json",
       "archiveFileName": null
@@ -574,7 +574,7 @@
               {
                 "valueSource": {
                   "source": "constant",
-                  "constant": "Offer"
+                  "constant": "AggregateOffer"
                 },
                 "transformation": {
                   "language": "prefix",

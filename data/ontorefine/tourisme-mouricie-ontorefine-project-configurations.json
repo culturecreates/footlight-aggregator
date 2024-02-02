@@ -12,9 +12,9 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "tourism01-02",
+      "projectName": "tourismemauricie json",
       "projectTags": [],
-      "fileSource": "tourisme.json",
+      "fileSource": "tourismemauricie.json",
       "archiveFileName": null
     }
   ],
@@ -363,6 +363,132 @@
                               "valueSource": {
                                 "source": "column",
                                 "columnName": "_ - contact - telephone"
+                              },
+                              "valueType": {
+                                "type": "literal"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "offers"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "row_index"
+                    },
+                    "transformation": {
+                      "language": "grel",
+                      "expression": "row"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [
+                        {
+                          "valueSource": {
+                            "source": "constant",
+                            "constant": "AggregateOffer"
+                          },
+                          "transformation": {
+                            "language": "prefix",
+                            "expression": "schema"
+                          }
+                        }
+                      ],
+                      "propertyMappings": [
+                        {
+                          "property": {
+                            "valueSource": {
+                              "source": "constant",
+                              "constant": "url"
+                            },
+                            "transformation": {
+                              "language": "prefix",
+                              "expression": "schema"
+                            }
+                          },
+                          "values": [
+                            {
+                              "valueSource": {
+                                "source": "column",
+                                "columnName": "_ - url_billeterie"
+                              },
+                              "valueType": {
+                                "type": "literal"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "offers"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "row_index"
+                    },
+                    "transformation": {
+                      "language": "grel",
+                      "expression": "row"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [
+                        {
+                          "valueSource": {
+                            "source": "constant",
+                            "constant": "Offer"
+                          },
+                          "transformation": {
+                            "language": "prefix",
+                            "expression": "schema"
+                          }
+                        }
+                      ],
+                      "propertyMappings": [
+                        {
+                          "property": {
+                            "valueSource": {
+                              "source": "constant",
+                              "constant": "price"
+                            },
+                            "transformation": {
+                              "language": "prefix",
+                              "expression": "schema"
+                            }
+                          },
+                          "values": [
+                            {
+                              "valueSource": {
+                                "source": "column",
+                                "columnName": "_ - prix"
                               },
                               "valueType": {
                                 "type": "literal"

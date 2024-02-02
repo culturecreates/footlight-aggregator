@@ -12,7 +12,7 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "shawinigan0102",
+      "projectName": "showtimes",
       "projectTags": [],
       "fileSource": "https://api.ticketacces.net/v1/showtimes?KeyID=CULTURESHAWI&KeySecret=wMalrXUtnFEMIK7PDENGbPxRfiGY&Domains=shawinigan.ticketacces.net&Language=fr",
       "archiveFileName": null
@@ -310,17 +310,51 @@
                 "values": [
                   {
                     "valueSource": {
-                      "source": "column",
-                      "columnName": "record - eventid"
+                      "source": "row_index"
                     },
                     "transformation": {
-                      "language": "prefix",
-                      "expression": "shawinigan_offers"
+                      "language": "grel",
+                      "expression": "row"
                     },
                     "valueType": {
                       "type": "iri",
-                      "typeMappings": [],
-                      "propertyMappings": []
+                      "typeMappings": [
+                        {
+                          "valueSource": {
+                            "source": "constant",
+                            "constant": "AggregateOffer"
+                          },
+                          "transformation": {
+                            "language": "prefix",
+                            "expression": "schema"
+                          }
+                        }
+                      ],
+                      "propertyMappings": [
+                        {
+                          "property": {
+                            "valueSource": {
+                              "source": "constant",
+                              "constant": "url"
+                            },
+                            "transformation": {
+                              "language": "prefix",
+                              "expression": "schema"
+                            }
+                          },
+                          "values": [
+                            {
+                              "valueSource": {
+                                "source": "column",
+                                "columnName": "record - urlpurchase"
+                              },
+                              "valueType": {
+                                "type": "literal"
+                              }
+                            }
+                          ]
+                        }
+                      ]
                     }
                   }
                 ]
@@ -347,6 +381,92 @@
                     },
                     "valueType": {
                       "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "offers"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "row_index"
+                    },
+                    "transformation": {
+                      "language": "grel",
+                      "expression": "row "
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [
+                        {
+                          "valueSource": {
+                            "source": "constant",
+                            "constant": "Offer"
+                          },
+                          "transformation": {
+                            "language": "prefix",
+                            "expression": "schema"
+                          }
+                        }
+                      ],
+                      "propertyMappings": [
+                        {
+                          "property": {
+                            "valueSource": {
+                              "source": "constant",
+                              "constant": "name"
+                            },
+                            "transformation": {
+                              "language": "prefix",
+                              "expression": "schema"
+                            }
+                          },
+                          "values": [
+                            {
+                              "valueSource": {
+                                "source": "column",
+                                "columnName": "record - tickettypewebdefaultname"
+                              },
+                              "valueType": {
+                                "type": "literal"
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "property": {
+                            "valueSource": {
+                              "source": "constant",
+                              "constant": "price"
+                            },
+                            "transformation": {
+                              "language": "prefix",
+                              "expression": "schema"
+                            }
+                          },
+                          "values": [
+                            {
+                              "valueSource": {
+                                "source": "column",
+                                "columnName": "record - tickettypewebdefaultprice"
+                              },
+                              "valueType": {
+                                "type": "literal"
+                              }
+                            }
+                          ]
+                        }
+                      ]
                     }
                   }
                 ]
@@ -671,113 +791,6 @@
                     "valueSource": {
                       "source": "column",
                       "columnName": "record - organizationdomain"
-                    },
-                    "transformation": {
-                      "language": "raw"
-                    },
-                    "valueType": {
-                      "type": "literal"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "subject": {
-              "valueSource": {
-                "source": "column",
-                "columnName": "record - eventid"
-              },
-              "transformation": {
-                "language": "prefix",
-                "expression": "shawinigan_offers"
-              }
-            },
-            "typeMappings": [
-              {
-                "valueSource": {
-                  "source": "constant",
-                  "constant": "Offer"
-                },
-                "transformation": {
-                  "language": "prefix",
-                  "expression": "schema"
-                }
-              }
-            ],
-            "propertyMappings": [
-              {
-                "property": {
-                  "valueSource": {
-                    "source": "constant",
-                    "constant": "name"
-                  },
-                  "transformation": {
-                    "language": "prefix",
-                    "expression": "schema"
-                  }
-                },
-                "values": [
-                  {
-                    "valueSource": {
-                      "source": "column",
-                      "columnName": "record - tickettypewebdefaultname"
-                    },
-                    "valueType": {
-                      "type": "language_literal",
-                      "language": {
-                        "valueSource": {
-                          "source": "constant",
-                          "constant": "fr"
-                        }
-                      }
-                    }
-                  }
-                ]
-              },
-              {
-                "property": {
-                  "valueSource": {
-                    "source": "constant",
-                    "constant": "price"
-                  },
-                  "transformation": {
-                    "language": "prefix",
-                    "expression": "schema"
-                  }
-                },
-                "values": [
-                  {
-                    "valueSource": {
-                      "source": "column",
-                      "columnName": "record - tickettypewebdefaultprice"
-                    },
-                    "transformation": {
-                      "language": "raw"
-                    },
-                    "valueType": {
-                      "type": "literal"
-                    }
-                  }
-                ]
-              },
-              {
-                "property": {
-                  "valueSource": {
-                    "source": "constant",
-                    "constant": "url"
-                  },
-                  "transformation": {
-                    "language": "prefix",
-                    "expression": "schema"
-                  }
-                },
-                "values": [
-                  {
-                    "valueSource": {
-                      "source": "column",
-                      "columnName": "record - urlpurchase"
                     },
                     "transformation": {
                       "language": "raw"
