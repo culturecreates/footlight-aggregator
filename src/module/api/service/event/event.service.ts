@@ -714,6 +714,11 @@ export class EventService {
   
   }
   private _formatDatesForCaligram(formattedEvent: EventDTO, start_date: any, end_date: any, dates: any): EventDTO {
+    if(dates.length === 1){
+      formattedEvent.startDateTime = start_date;
+      formattedEvent.endDateTime = end_date;
+      return formattedEvent;
+    }
     if(dates){
       let customDate = new CustomDates()
       let customDates = []
@@ -732,11 +737,6 @@ export class EventService {
         customDates:customDates
       }
       return formattedEvent
-    }
-    else if (start_date || end_date){
-      formattedEvent.startDateTime = start_date;
-      formattedEvent.endDateTime = end_date;
-      return formattedEvent;
     }
     return formattedEvent;
   }
