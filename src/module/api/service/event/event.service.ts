@@ -656,7 +656,9 @@ export class EventService {
     const eventIds = await this.getCaligramEventIds();
     for(const eventId of eventIds){
       const data  = (await (axios.get(CaligramUrls.EVENT_URL + eventId))).data
-      await this.formatAndPushCaligramEvents(data, token, footlightBaseUrl, calendarId, currentUserId, mappingFileUrl)
+      if(data.status == 'published'){
+        await this.formatAndPushCaligramEvents(data, token, footlightBaseUrl, calendarId, currentUserId, mappingFileUrl)
+      }
     }
   }
   
