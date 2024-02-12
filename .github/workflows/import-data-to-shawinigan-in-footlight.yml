@@ -2,8 +2,6 @@ name: Run Shawinigan Aggregator
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 1 */6 *'
 
 jobs:
   transform-data-into-rdf:
@@ -76,7 +74,7 @@ jobs:
         run: |
           node ./dist/main-commander.js  \
           import:rdf -u ${{vars.AGGREGATOR_USER_SHAWINIGAN}} -p ${{secrets.AGGREGATOR_PASSWORD_SHAWINIGAN}} \
-          -i 'https://staging.api.cms.footlight.io' \
+          -i 'https://api.cms.footlight.io' \
           -c 657199fea5ac3d006314ea92 \
           -r '/home/runner/work/footlight-aggregator/footlight-aggregator/entities.ttl'  \
           -m 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/shawinigan-cms-mapping.json'

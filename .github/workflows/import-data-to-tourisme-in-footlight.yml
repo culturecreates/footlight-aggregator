@@ -2,8 +2,6 @@ name: Run Tourisme Mauricie Aggregator
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 1 */6 *'
 
 jobs:
 
@@ -99,7 +97,7 @@ jobs:
         run: |
           node ./dist/main-commander.js  \
           import:rdf -u ${{vars.AGGREGATOR_USER_TOURISME_MOURICIE}} -p ${{secrets.AGGREGATOR_PASSWORD_TOURISME_MOURICIE}} \
-          -i 'https://staging.api.cms.footlight.io' \
+          -i 'https://api.cms.footlight.io' \
           -c 657199fea5ac3d006314ea92 \
           -r '/home/runner/work/footlight-aggregator/footlight-aggregator/entities.ttl'  \
           -m 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/tourisme-mouricie-cms-mapping.json'

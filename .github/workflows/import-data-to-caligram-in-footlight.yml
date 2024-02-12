@@ -2,9 +2,6 @@ name: Run Calligram Aggregator
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '0 0 1 */6 *'
-
 
 jobs:
     run-aggregator-and-import:
@@ -30,6 +27,6 @@ jobs:
             run: |
               node ./dist/main-commander.js  \
               import:caligram -u ${{vars.AGGREGATOR_USER_CALIGRAM}} -p ${{secrets.AGGREGATOR_PASSWORD_CALIGRAM}} \
-              -i 'https://staging.api.cms.footlight.io' \
+              -i 'https://api.cms.footlight.io' \
               -c 657199fea5ac3d006314ea92 \
               -m 'https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/caligram-cms-mapping.json'
