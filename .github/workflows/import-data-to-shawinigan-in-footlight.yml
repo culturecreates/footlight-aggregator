@@ -36,7 +36,7 @@ jobs:
           transform entities.xml \
           -u http://localhost:7333 \
           --configurations project-config.json \
-          -f csv >> entities.ttl
+          -f xml >> entities.ttl
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
