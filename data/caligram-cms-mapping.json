@@ -12,7 +12,21 @@
         "Conference": ["65ba04108468f40064841b19"],
         "Festival": ["65719e94a5ac3d006314ed96"],
         "Rencontre d'artiste": ["65ba04108468f40064841b1d"],
-        "DEFAULT": ["65b2575b8468f40064831053"]
+        "Chanson":["65719e94a5ac3d006314ed94"],
+        "Cinéma": ["65ba04108468f40064841b29"],
+        "Musique": ["6571a0c1a5ac3d006314ee17"],
+        "Improvisation": ["65ba04108468f40064841b25"],
+        "Conte":["65ba04108468f40064841b2b"],
+        "Variétés": ["65b214428468f40064830346"],
+        "Danse": ["6571a0c1a5ac3d006314ee19"],
+        "Théâtre": ["65b214428468f40064830340"],
+        "Humour": ["659eef9550bec800641d67e4"],
+        "Cirque": ["65ba04108468f40064841b17"],
+        "Lancement": ["65ba04108468f40064841b1b"],
+        "Salon": ["6571a0c1a5ac3d006314ee15"],
+        "Visite guidée": ["65ba04108468f40064841b1f"],
+        "Symposium": ["65ba04108468f40064841b23"],
+        "Indéterminé": ["65b2575b8468f40064831053"]
       }
     },
     {

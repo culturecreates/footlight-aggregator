@@ -695,11 +695,13 @@ export class EventService {
     formattedEvent.url = {uri:event.url};
     formattedEvent.uri = event.url;
     formattedEvent.offerConfiguration = this._formatCaligramOffers(event.price_currency, event.prices, event.price_type);
-    if(event.types){
+    if(event.types || event.tags){
       let additionalTypeNames = [] 
-
       for(const type of event.types){
-        additionalTypeNames.push(type.name)
+        additionalTypeNames.push(type.name.trim())
+      }
+      for(const type of event.tags){
+        additionalTypeNames.push(type.name.trim())
       }
       formattedEvent.additionalType = await this._getConceptIdByNameForRdf(additionalTypeNames, patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE)
     }
