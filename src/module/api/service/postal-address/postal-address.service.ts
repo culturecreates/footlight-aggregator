@@ -43,9 +43,9 @@ export class PostalAddressService {
 
   async formatAndPushCaligramPostalAddress(place: any, token: any, footlightBaseUrl: string, calendarId: string, currentUserId: string) {
     const formattedPostalAddress = new PostalAddressDTO();
-    formattedPostalAddress.addressCountry = place.country;
+    formattedPostalAddress.addressCountry = {fr: place.country != null? place.country : "Canada"};
     formattedPostalAddress.postalCode = place.zip;
-    formattedPostalAddress.streetAddress = place.address;
+    formattedPostalAddress.streetAddress = {fr: place.address};
     formattedPostalAddress.uri = CaligramUrls.VENUE_URL + place.id
     formattedPostalAddress.sameAs = [{uri: formattedPostalAddress.uri, type: "ExternalSourceIdentifier"}]
     return {entityId: await this._pushPostalAddressToFootlight(footlightBaseUrl, calendarId, token, formattedPostalAddress, currentUserId)};
