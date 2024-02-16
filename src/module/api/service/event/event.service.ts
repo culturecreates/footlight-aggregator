@@ -10,12 +10,20 @@ import { ArtsDataConstants, ArtsDataUrls, CaligramUrls } from "../../constants";
 import { ContactPointDTO, CustomDates, EventDTO, OfferDTO, OfferPrice } from "../../dto";
 import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
-import { AggregateOfferType, EventProperty, HttpMethodsEnum, OfferCategory, PriceCurrency, RecurringEventFrequency } from "../../enum";
+import {
+  AggregateOfferType,
+  EventProperty,
+  HttpMethodsEnum,
+  OfferCategory,
+  PersonOrganizationType,
+  PriceCurrency,
+  RecurringEventFrequency
+} from "../../enum";
 import { Exception, JsonLdParseHelper } from "../../helper";
 import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from "../../constants/footlight-urls";
 import * as moment from "moment-timezone";
 import { LoggerService } from "../logger";
-import * as fs from 'fs';
+import * as fs from "fs";
 import { parse } from "@frogcat/ttl2jsonld";
 import { EntityPredicates, EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 import axios from "axios";
@@ -469,52 +477,51 @@ export class EventService {
   async syncEntitiesUsingRdf(token: string, rdfFilePath: string, mappingFileUrl: string, footlightBaseUrl: string, calendarId: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const currentUserId = currentUser.id;
-    let rdfData = fs.readFileSync(rdfFilePath, 'utf8')
+    let rdfData = fs.readFileSync(rdfFilePath, "utf8");
 
     const jsonldData = parse(rdfData);
-    await this.exportJsonLdData(jsonldData['@graph'], token, calendarId, footlightBaseUrl, currentUserId, mappingFileUrl);
+    await this.exportJsonLdData(jsonldData["@graph"], token, calendarId, footlightBaseUrl, currentUserId, mappingFileUrl);
   }
 
-  async exportJsonLdData(data:any, token:string, calendarId:string, footlightBaseUrl:string, currentUserId:string, mappingFiles: any){
-    let jsonLdPlaces =  data.filter(item => item['@type'] === EntityPredicates.PLACE)
-    let jsonLdPostalAddresses = data.filter(item => item['@type'] === EntityPredicates.POSTAL_ADDRESS)
-    let jsonLdOrganizations = data.filter(item => item['@type'] === EntityPredicates.ORGANIZATION)
-    let jsonLdPeople = data.filter(item => item['@type'] === EntityPredicates.PERSON)
-    let jsonLdOffers = data.filter(item => item['@type'] === EntityPredicates.AGGREGATE_OFFER)
-    let jsonLdContactPoints = data.filter(item => item['@type'] === EntityPredicates.CONTACT_POINT)
-    let events = []
+  async exportJsonLdData(data: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string, mappingFiles: any) {
+    let jsonLdPlaces = data.filter(item => item["@type"] === EntityPredicates.PLACE);
+    let jsonLdPostalAddresses = data.filter(item => item["@type"] === EntityPredicates.POSTAL_ADDRESS);
+    let jsonLdOrganizations = data.filter(item => item["@type"] === EntityPredicates.ORGANIZATION);
+    let jsonLdPeople = data.filter(item => item["@type"] === EntityPredicates.PERSON);
+    let jsonLdOffers = data.filter(item => item["@type"] === EntityPredicates.AGGREGATE_OFFER);
+    let jsonLdContactPoints = data.filter(item => item["@type"] === EntityPredicates.CONTACT_POINT);
+    let events = [];
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
-    for(const node of data){
-        if(node["@type"] == EntityPredicates.EVENT)
-        {
-          await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl, 
-            currentUserId, jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople, jsonLdOffers, jsonLdContactPoints, mappingFiles);
-        }
+    for (const node of data) {
+      if (node["@type"] == EntityPredicates.EVENT) {
+        await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl,
+          currentUserId, jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople, jsonLdOffers, jsonLdContactPoints, mappingFiles);
+      }
     }
     return events;
   }
 
 
-  async formatAndPushJsonLdEvents(event:any, places:Object[], token:string, calendarId:string,
-    footlightBaseUrl:string, currentUserId:string, jsonLdPostalAddresses: any, jsonLdOrganizations: any,
-    jsonLdPeople: any, jsonLdOffers:any, jsonLdContactPoints, mappingFiles: any){
+  async formatAndPushJsonLdEvents(event: any, places: Object[], token: string, calendarId: string,
+                                  footlightBaseUrl: string, currentUserId: string, jsonLdPostalAddresses: any, jsonLdOrganizations: any,
+                                  jsonLdPeople: any, jsonLdOffers: any, jsonLdContactPoints, mappingFiles: any) {
     const formattedEvent = new EventDTO();
 
     const [name, description, eventStatus, attendanceMode, startDate, endDate, additionalType, videoUrl, location,
       offer, organizer, performer, collaborator, url, image, contactPoint] = [
       event[EventPredicates.NAME], event[EventPredicates.DESCRIPTION], event[EventPredicates.EVENT_STATUS],
-      event[EventPredicates.EVENT_ATTENDANCE_MODE],  event[EventPredicates.START_DATE], event[EventPredicates.END_DATE],
+      event[EventPredicates.EVENT_ATTENDANCE_MODE], event[EventPredicates.START_DATE], event[EventPredicates.END_DATE],
       event[EventPredicates.ADDITIONAL_TYPE], event[EventPredicates.VIDEO_URL], event[EventPredicates.LOCATION],
-      event[EventPredicates.EVENT_OFFER], event[EventPredicates.ORGANIZER], event[EventPredicates.PERFORMER],event[EventPredicates.COLLABORATOR],
+      event[EventPredicates.EVENT_OFFER], event[EventPredicates.ORGANIZER], event[EventPredicates.PERFORMER], event[EventPredicates.COLLABORATOR],
       event[EventPredicates.URL], event[EventPredicates.IMAGE], event[EventPredicates.EVENT_CONTACT_POINT]
-    ]
+    ];
 
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFiles))?.data;
     const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
-    if(name){
-        formattedEvent.name = JsonLdParseHelper.formatMultilingualField(name);
+    if (name) {
+      formattedEvent.name = JsonLdParseHelper.formatMultilingualField(name);
     }
-    if(description){
+    if (description) {
       formattedEvent.description = JsonLdParseHelper.formatMultilingualField(description);
     }
     if (eventStatus) {
@@ -527,30 +534,30 @@ export class EventService {
       formattedEvent.startDateTime = startDate["@value"]
         || startDate[0]["@value"];
     }
-    if(endDate) {
+    if (endDate) {
       formattedEvent.endDateTime = endDate["@value"]
-      || endDate[0]["@value"];
+        || endDate[0]["@value"];
     }
-    if(image) {
-      formattedEvent.image = {url:{uri: image}}
+    if (image) {
+      formattedEvent.image = { url: { uri: image } };
     }
-    if(additionalType){
-      const additionalTypeIds = await this._getConceptIdByNameForRdf(additionalType, patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE)
-      formattedEvent.additionalType = additionalTypeIds
+    if (additionalType) {
+      const additionalTypeIds = await this._getConceptIdByNameForRdf(additionalType, patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE);
+      formattedEvent.additionalType = additionalTypeIds;
     }
-    if(videoUrl){
-      formattedEvent.videoUrl = videoUrl["@id"]
+    if (videoUrl) {
+      formattedEvent.videoUrl = videoUrl["@id"];
     }
-    if(contactPoint){
-      formattedEvent.contactPoint = this._formatJsonLdContactPoint(contactPoint, jsonLdContactPoints)
+    if (contactPoint) {
+      formattedEvent.contactPoint = this._formatJsonLdContactPoint(contactPoint, jsonLdContactPoints);
     }
-    if(location){
-      let placeDetails = places.find(place => place['@id'] === location['@id'])
+    if (location) {
+      let placeDetails = places.find(place => place["@id"] === location["@id"]);
       let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
-      formattedEvent.locationId = {place:{entityId:placeEntityId}}
+      formattedEvent.locationId = { place: { entityId: placeEntityId } };
     }
-    if(offer){
-      formattedEvent.offerConfiguration = this._formatJsonLdOffers(offer, jsonLdOffers)
+    if (offer) {
+      formattedEvent.offerConfiguration = this._formatJsonLdOffers(offer, jsonLdOffers);
     }
 
     if (organizer || performer || collaborator) {
@@ -576,7 +583,7 @@ export class EventService {
         let {
           participantId,
           participantType
-        } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl, 
+        } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl,
           currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.COLLABORATOR);
         formattedEvent.collaborators = [{ entityId: participantId, type: participantType }];
       }
@@ -589,15 +596,15 @@ export class EventService {
     formattedEvent.uri = event["@id"];
     await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
   }
-  
+
   private _formatJsonLdContactPoint(contactPoint: any, jsonLdContactPoints: any) {
     let contactPointData = jsonLdContactPoints
-    .find(jsonLdContactPoint => jsonLdContactPoint["@id"] === contactPoint["@id"]);  
+      .find(jsonLdContactPoint => jsonLdContactPoint["@id"] === contactPoint["@id"]);
     const formattedContactPoint: ContactPointDTO = {
-      url: {uri: contactPointData[EventPredicates.URL]["@id"]},
+      url: { uri: contactPointData[EventPredicates.URL]["@id"] },
       email: contactPoint[EventPredicates.EMAIL],
       telephone: contactPoint[EventPredicates.TELEPHONE]
-    }
+    };
     return formattedContactPoint;
   }
 
@@ -607,13 +614,13 @@ export class EventService {
     let offerPrice: OfferPrice = {
       name: JsonLdParseHelper.formatMultilingualField(offerData[EventPredicates.NAME]),
       price: offerData[EventPredicates.PRICE]
-    }
-    const uri = offerData[EventPredicates.URL]
-    let offerConfiguration:OfferDTO = {
-      url: {uri: uri},
+    };
+    const uri = offerData[EventPredicates.URL];
+    let offerConfiguration: OfferDTO = {
+      url: { uri: uri },
       prices: [offerPrice],
-      category: uri? OfferCategory.PAYING: OfferCategory.FREE
-    }
+      category: uri ? OfferCategory.PAYING : OfferCategory.FREE
+    };
     return offerConfiguration;
   }
 
@@ -624,29 +631,29 @@ export class EventService {
     eventPropertyValue: EventProperty
   ) {
     conceptNames = [].concat(conceptNames);
-    const conceptIds = []
+    const conceptIds = [];
     for (const mappingType of patternToConceptIdMapping) {
       const isMatchingField = mappingType.fieldName === eventPropertyValue;
-      for (const conceptName of conceptNames){
+      for (const conceptName of conceptNames) {
         if (isMatchingField && mappingType.mapping[conceptName]) {
           const conceptIdArray = mappingType.mapping[conceptName];
-          for(let conceptId of conceptIdArray){
+          for (let conceptId of conceptIdArray) {
             if (existingEventTypeConceptIDs.includes(conceptId)) {
-              conceptIds.push(conceptId)
+              conceptIds.push(conceptId);
             }
           }
         }
       }
     }
-    
-    if(conceptIds.length){
+
+    if (conceptIds.length) {
       let uniqueConceptIdsList = [...new Set(conceptIds)];
       const uniqueConceptIds = Array.from(uniqueConceptIdsList).map((conceptId) => ({
         entityId: conceptId
       }));
       return uniqueConceptIds;
     } else {
-      return []
+      return [];
     }
   }
 
@@ -654,109 +661,122 @@ export class EventService {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const currentUserId = currentUser.id;
     const eventIds = await this.getCaligramEventIds();
-    for(const eventId of eventIds){
-      const data  = (await (axios.get(CaligramUrls.EVENT_URL + eventId))).data
-      if(data.status == 'published'){
-        await this.formatAndPushCaligramEvents(data, token, footlightBaseUrl, calendarId, currentUserId, mappingFileUrl)
+    let count = 1;
+    let eventUrl;
+    for (const eventId of eventIds) {
+      try {
+        this._loggerService.infoLogs(`(${count}/${eventIds.length})`);
+        eventUrl = CaligramUrls.EVENT_URL + eventId;
+        const data = (await (axios.get(eventUrl))).data;
+        if (data.status == "published") {
+          await this.formatAndPushCaligramEvents(data, token, footlightBaseUrl, calendarId, currentUserId, mappingFileUrl);
+        }
+        count++;
+      } catch (e) {
+        this._loggerService.errorLogs(`Error while adding/updating event ${eventUrl}`);
       }
     }
   }
-  
+
 
   async getCaligramEventIds() {
-    const eventIds = []
+    const eventIds = [];
     let pageNumber = 1;
-    while(true){
+    while (true) {
       let eventData;
       try {
-        eventData = (await axios.get(CaligramUrls.PAGE_URL + pageNumber)).data.data;  
-        if(!eventData.length){
+        eventData = (await axios.get(CaligramUrls.PAGE_URL + pageNumber)).data.data;
+        if (!eventData.length) {
           this._loggerService.infoLogs(`no more events found on page ${pageNumber}`);
-          break
+          break;
         }
       } catch (error) {
-        Exception.internalServerError("Unable to fetch from Caligram listing URL")
+        Exception.internalServerError("Unable to fetch from Caligram listing URL");
       }
-      eventIds.push(...eventData.map(event => event.id))
+      eventIds.push(...eventData.map(event => event.id));
       pageNumber++;
     }
-    return eventIds
+    return eventIds;
   }
 
-  async formatAndPushCaligramEvents(event: any, token: any, footlightBaseUrl: string, calendarId: string, currentUserId: string, mappingFileUrl: string){
+  async formatAndPushCaligramEvents(event: any, token: any, footlightBaseUrl: string,
+                                    calendarId: string, currentUserId: string, mappingFileUrl: string) {
     let formattedEvent = new EventDTO();
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFileUrl))?.data;
-    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
-    formattedEvent.name = {fr: event.title};
-    formattedEvent.description = {fr: event.description};
+    const existingEventTypeConceptIDs =
+      this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
+    formattedEvent.name = { fr: event.title };
+    formattedEvent.description = { fr: event.description };
     formattedEvent = this._formatDatesForCaligram(formattedEvent, event.start_date, event.end_date, event.dates);
-    formattedEvent.isFeaturedEvent = event.featured == 'true'? true: false;
-    formattedEvent.url = {uri:event.url};
+    formattedEvent.isFeaturedEvent = event.featured == "true" ? true : false;
     formattedEvent.uri = event.url;
-    formattedEvent.offerConfiguration = this._formatCaligramOffers(event.price_currency, event.prices, event.price_type);
-    if(event.types || event.tags){
-      let additionalTypeNames = [] 
-      for(const type of event.types){
-        additionalTypeNames.push(type.name.trim())
+    formattedEvent.offerConfiguration =
+      this._formatCaligramOffers(event.price_currency, event.prices, event.price_type);
+    if (event.types) {
+      let additionalTypeNames = [];
+
+      for (const type of event.types) {
+        additionalTypeNames.push(type.name);
       }
-      for(const type of event.tags){
-        additionalTypeNames.push(type.name.trim())
-      }
-      formattedEvent.additionalType = await this._getConceptIdByNameForRdf(additionalTypeNames, patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE)
+      formattedEvent.additionalType = await this._getConceptIdByNameForRdf(additionalTypeNames, patternToConceptIdMapping,
+        existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE);
     }
-    formattedEvent.image = {url:{uri: event.image.sizes.original}};
+    formattedEvent.image = { url: { uri: event.image.sizes.original } };
     formattedEvent.sameAs = [{ uri: event.url, type: "ExternalSourceIdentifier" }];
-    if(event.venue){
-      const location = await this._placeService.formatAndPushCaligramPlaces(event.venue,token, footlightBaseUrl, calendarId, currentUserId);
-      formattedEvent.locationId = {place:{entityId: location}};
+    if (event.venue) {
+      const location = await this._placeService.formatAndPushCaligramPlaces(event.venue, token, footlightBaseUrl,
+        calendarId, currentUserId);
+      formattedEvent.locationId = { place: { entityId: location } };
     }
-    if(event.organization){
-      const organizer = await this._organizationService.formatAndPushCaligramOrganization(event.organization, token, calendarId, footlightBaseUrl, currentUserId);
+    if (event.organization) {
+      const organizationId = await this._organizationService.formatAndPushCaligramOrganization(event.organization, token,
+        calendarId, footlightBaseUrl, currentUserId);
+      formattedEvent.organizers = [{ entityId: organizationId, type: PersonOrganizationType.ORGANIZATION }];
     }
     await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
-  
+
   }
+
   private _formatDatesForCaligram(formattedEvent: EventDTO, start_date: any, end_date: any, dates: any): EventDTO {
-    if(dates.length === 1){
+    if (dates.length === 1) {
       formattedEvent.startDateTime = start_date;
       formattedEvent.endDateTime = end_date;
       return formattedEvent;
     }
-    if(dates){
-      let customDate = new CustomDates()
-      let customDates = []
-      for(const date of dates){
-        let dateAndTime = date.start_date.split(" ")
+    if (dates) {
+      let customDate = new CustomDates();
+      let customDates = [];
+      for (const date of dates) {
+        let dateAndTime = date.start_date.split(" ");
         customDate = {
           startDate: dateAndTime[0],
-          customTimes:[{
+          customTimes: [{
             startTime: dateAndTime[1]
           }]
-        }
-        customDates.push(customDate)
+        };
+        customDates.push(customDate);
       }
       formattedEvent.recurringEvent = {
         frequency: RecurringEventFrequency.CUSTOM,
-        customDates:customDates
-      }
-      return formattedEvent
+        customDates: customDates
+      };
+      return formattedEvent;
     }
     return formattedEvent;
   }
 
-  private _formatCaligramOffers(currency:string, prices: any, priceType: string ){
-    let priceCurrency = currency == "CAD"? PriceCurrency.CAD:currency == "USD"? PriceCurrency.USD:null
-    if(priceType == OfferCategory.FREE){
-      return { category: OfferCategory.FREE, priceCurrency: priceCurrency}
-    }
-    else{
-      let offerPrices = []
-      for (const price of prices){
-        const offerPrice = {price: price.value, name: {fr:price.description}}
-        offerPrices.push(offerPrice)
+  private _formatCaligramOffers(currency: string, prices: any, priceType: string) {
+    let priceCurrency = currency == "CAD" ? PriceCurrency.CAD : currency == "USD" ? PriceCurrency.USD : null;
+    if (priceType == OfferCategory.FREE) {
+      return { category: OfferCategory.FREE, priceCurrency: priceCurrency };
+    } else {
+      let offerPrices = [];
+      for (const price of prices) {
+        const offerPrice = { price: price.value, name: { fr: price.description } };
+        offerPrices.push(offerPrice);
       }
-      return {category: OfferCategory.PAYING, priceCurrency: priceCurrency, prices: offerPrices}
+      return { category: OfferCategory.PAYING, priceCurrency: priceCurrency, prices: offerPrices };
     }
   }
 }

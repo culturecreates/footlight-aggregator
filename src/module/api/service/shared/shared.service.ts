@@ -87,7 +87,7 @@ export class SharedService {
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
       const existingEntity = await this._getEntityFromFootlight(calendarId, token, existingEntityId, url);
-      if (!existingEntity.modifiedByUserId || existingEntity.modifiedByUserId === currentUserId) {
+      if (!existingEntity?.modifiedByUserId || existingEntity?.modifiedByUserId === currentUserId) {
         const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
         if (updateResponse.status === HttpStatus.OK) {
           this._loggerService(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
@@ -127,7 +127,7 @@ export class SharedService {
 
     const headers = this.createHeaders(token, calendarId);
     const existingEntity = await SharedService.fetchUrl(url, headers);
-    return existingEntity.data;
+    return existingEntity?.data;
   }
 
   static formatAlternateNames(alternateName: { fr: string[], en: string[] }) {
