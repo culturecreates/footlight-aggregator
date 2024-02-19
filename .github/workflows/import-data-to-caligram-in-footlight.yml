@@ -1,4 +1,4 @@
-name: Run Calligram Aggregator
+name: Run Caligram Aggregator
 
 on:
   workflow_dispatch:

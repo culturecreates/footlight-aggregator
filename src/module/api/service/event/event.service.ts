@@ -588,10 +588,6 @@ export class EventService {
         formattedEvent.collaborators = [{ entityId: participantId, type: participantType }];
       }
     }
-
-    if (url) {
-      formattedEvent.url = { uri: url["@id"] };
-    }
     formattedEvent.sameAs = [{ uri: event["@id"], type: "ExternalSourceIdentifier" }];
     formattedEvent.uri = event["@id"];
     await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
@@ -713,11 +709,13 @@ export class EventService {
     formattedEvent.uri = event.url;
     formattedEvent.offerConfiguration =
       this._formatCaligramOffers(event.price_currency, event.prices, event.price_type);
-    if (event.types) {
-      let additionalTypeNames = [];
-
-      for (const type of event.types) {
-        additionalTypeNames.push(type.name);
+    if(event.types || event.tags){
+      let additionalTypeNames = [] 
+      for(const type of event.types){
+        additionalTypeNames.push(type.name.trim())
+      }
+      for(const type of event.tags){
+        additionalTypeNames.push(type.name.trim())
       }
       formattedEvent.additionalType = await this._getConceptIdByNameForRdf(additionalTypeNames, patternToConceptIdMapping,
         existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE);
