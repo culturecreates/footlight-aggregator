@@ -708,7 +708,8 @@ export class EventService {
     formattedEvent.isFeaturedEvent = event.featured == "true" ? true : false;
     formattedEvent.uri = event.url;
     formattedEvent.offerConfiguration =
-      this._formatCaligramOffers(event.price_currency, event.prices, event.price_type);
+
+  this._formatCaligramOffers(event.ticket_url, event.price_currency, event.prices, event.price_type);
     if(event.types || event.tags){
       let additionalTypeNames = [] 
       for(const type of event.types){
@@ -764,17 +765,26 @@ export class EventService {
     return formattedEvent;
   }
 
-  private _formatCaligramOffers(currency: string, prices: any, priceType: string) {
+  private _formatCaligramOffers(tickerUrl: string, currency: string, prices: any, priceType: string) {
     let priceCurrency = currency == "CAD" ? PriceCurrency.CAD : currency == "USD" ? PriceCurrency.USD : null;
     if (priceType == OfferCategory.FREE) {
-      return { category: OfferCategory.FREE, priceCurrency: priceCurrency };
+      return {
+        url: { uri: tickerUrl },
+        category: OfferCategory.FREE,
+        priceCurrency: priceCurrency
+      };
     } else {
       let offerPrices = [];
       for (const price of prices) {
         const offerPrice = { price: price.value, name: { fr: price.description } };
         offerPrices.push(offerPrice);
       }
-      return { category: OfferCategory.PAYING, priceCurrency: priceCurrency, prices: offerPrices };
+      return {
+        url: { uri: tickerUrl },
+        category: OfferCategory.PAYING,
+        priceCurrency: priceCurrency,
+        prices: offerPrices
+      };
     }
   }
 }
