@@ -91,6 +91,8 @@ export class EventService {
         totalCount++;
         try {
           this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount})`);
+          this.checkExcludedValues(event, patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE)
+          this.checkExcludedValues(event, patternToConceptIdMapping, EventProperty.AUDIENCE)
           const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
             patternToConceptIdMapping, existingEventTypeConceptIDs, existingAudienceConceptIDs);
           await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
@@ -106,6 +108,16 @@ export class EventService {
       batch = batch + 1;
     } while (hasNext) ;
     this._loggerService.infoLogs(`Successfully synchronised ${totalCount} Events and linked entities.`);
+  }
+
+  checkExcludedValues(event: any, patternToConceptIdMapping: any, eventProperty: EventProperty){
+    const patternToConceptIdMappingForTheField = patternToConceptIdMapping.find(concept => concept.fieldName === eventProperty);
+    const eventPropertyValuesForTheField = this._getPropertyValues(patternToConceptIdMappingForTheField.inputProperty, event);
+    for(const eventPropertyValueForAdditionalType of eventPropertyValuesForTheField){
+      if(patternToConceptIdMappingForTheField.excludeValues?.some(excludedValue => excludedValue.toLowerCase() === eventPropertyValueForAdditionalType.toLowerCase())){
+        Exception.badRequest("Excluded value found")
+      }
+    }
   }
 
   async syncEntities(token: string, calendarId: string, source: string, footlightBaseUrl: string, batchSize: number,
