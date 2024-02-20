@@ -110,7 +110,10 @@
         "DEFAULT": [
           "63c84d71230627006f5655d0"
         ]
-      }
+      },
+      "excludeValues": [
+        "Boxe"
+      ]
     },
     {
       "fieldName": "audience",
