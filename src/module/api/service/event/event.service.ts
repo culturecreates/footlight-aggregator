@@ -710,7 +710,7 @@ export class EventService {
   async formatAndPushCaligramEvents(event: any, token: any, footlightBaseUrl: string,
                                     calendarId: string, currentUserId: string, mappingFileUrl: string) {
     let formattedEvent = new EventDTO();
-    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
+        await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFileUrl))?.data;
     const existingEventTypeConceptIDs =
       this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
@@ -751,8 +751,8 @@ export class EventService {
 
   private _formatDatesForCaligram(formattedEvent: EventDTO, start_date: any, end_date: any, dates: any): EventDTO {
     if (dates.length === 1) {
-      formattedEvent.startDateTime = start_date;
-      formattedEvent.endDateTime = end_date;
+      formattedEvent.startDateTime = moment.tz(start_date, 'YYYY-MM-DD HH:mm ', 'Canada/Eastern').toISOString();
+      formattedEvent.endDateTime = moment.tz(end_date, 'YYYY-MM-DD HH:mm ', 'Canada/Eastern').toISOString();
       return formattedEvent;
     }
     if (dates) {

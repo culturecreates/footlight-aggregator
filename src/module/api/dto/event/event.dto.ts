@@ -18,8 +18,8 @@ export class EventDTO {
     duration?: string;
     startDate: string;
     endDate: string;
-    startDateTime: Date;
-    endDateTime: Date;
+    startDateTime?: string;
+    endDateTime?: string;
     eventStatus?: EventStatus;
     organizers?: PersonOrganizationWithRole[];
     performers?: PersonOrganizationWithRole[];
