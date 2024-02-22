@@ -722,13 +722,10 @@ export class EventService {
     formattedEvent.offerConfiguration =
 
   this._formatCaligramOffers(event.ticket_url, event.price_currency, event.prices, event.price_type);
-    if(event.types || event.tags){
-      let additionalTypeNames = [] 
-      for(const type of event.types){
-        additionalTypeNames.push(type.name.trim())
-      }
-      for(const type of event.tags){
-        additionalTypeNames.push(type.name.trim())
+    if (event.tags) {
+      let additionalTypeNames = [];
+      for (const tag of event.tags) {
+        additionalTypeNames.push(tag.name);
       }
       formattedEvent.additionalType = await this._getConceptIdByNameForRdf(additionalTypeNames, patternToConceptIdMapping,
         existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE);
