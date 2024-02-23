@@ -6,6 +6,8 @@ import { HttpMethodsEnum } from "../../enum";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { LoggerService } from "..";
 import { HEADER } from "../../config";
+import { SameAs } from "../../model";
+import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 
 @Injectable()
 export class SharedService {
@@ -180,4 +182,28 @@ export class SharedService {
     }
   }
 
+  public static formatSameAsForRdf(data:any){
+    let sameAs: SameAs[] = [];
+    if(!data[EventPredicates.SAME_AS]){
+      sameAs = [{uri: data['@id'], type: "ExternalSourceIdentifier"}]
+      return sameAs
+    }
+    data[EventPredicates.SAME_AS] = [].concat(data[EventPredicates.SAME_AS]);
+    for(const sameAsValue of data[EventPredicates.SAME_AS]){
+      if(sameAsValue.startsWith("http://kg.artsdata.ca/resource/")){
+        sameAs.push({uri: sameAsValue, type: "ArtsdataIdentifier"})
+      }
+      else{sameAs.push({uri: sameAsValue, type: "ExternalSourceIdentifier"})}
+    }
+    return sameAs;
+  }
+
+  public static checkIfSameAsHasArtsdataIdentifier(sameAs: SameAs[]){
+    for(const sameAsValue of sameAs){
+      if(sameAsValue.type === "ArtsdataIdentifier"){
+        return sameAsValue.uri;
+      }
+    }
+    return false;
+  }
 }

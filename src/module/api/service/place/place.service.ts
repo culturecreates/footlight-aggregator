@@ -107,8 +107,15 @@ export class PlaceService {
     formattedPlace.name = JsonLdParseHelper.formatMultilingualField(place[EventPredicates.NAME]);
     formattedPlace.geo = (place[PlacePredicates.LONGITUDE] && place[PlacePredicates.LATITUDE]) ?
       { latitude: place[PlacePredicates.LATITUDE], longitude: place[PlacePredicates.LONGITUDE] } : undefined;
-    formattedPlace.sameAs = [{ uri: place["@id"], type: "ExternalSourceIdentifier" }];
-    formattedPlace.uri = place["@id"];
+    formattedPlace.sameAs = SharedService.formatSameAsForRdf(place);
+    const artsdataUri = SharedService.checkIfSameAsHasArtsdataIdentifier(formattedPlace.sameAs)
+    if(artsdataUri){
+      formattedPlace.uri = artsdataUri
+    }
+    else{
+      formattedPlace.uri = place['@id']
+
+    }
     if (place[PlacePredicates.ADDRESS]) {
       const postalAddressDetails = postalAddresses
         .find(postalAddress => postalAddress["@id"] === place[PlacePredicates.ADDRESS]["@id"]);

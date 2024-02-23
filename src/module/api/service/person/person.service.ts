@@ -21,9 +21,15 @@ export class PersonService {
   async formatAndPushJsonLdPerson(person: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string) {
     const formattedPerson = new PersonDTO();
     formattedPerson.name = JsonLdParseHelper.formatMultilingualField(person[EventPredicates.NAME]);
-    formattedPerson.sameAs = [{uri: person['@id'], type: "ExternalSourceIdentifier"}] 
-    formattedPerson.uri = person['@id']
+    formattedPerson.sameAs = SharedService.formatSameAsForRdf(person);
+    const artsdataUri = SharedService.checkIfSameAsHasArtsdataIdentifier(formattedPerson.sameAs)
+    if(artsdataUri){
+      formattedPerson.uri = artsdataUri
+    }
+    else{
+      formattedPerson.uri = person['@id']
 
+    }
     return await this._pushPersonToFootlight(footlightBaseUrl, calendarId, token, formattedPerson, currentUserId)
 
   }
