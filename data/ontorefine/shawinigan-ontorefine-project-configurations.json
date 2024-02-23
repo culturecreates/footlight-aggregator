@@ -12,25 +12,86 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "showtimes",
+      "projectName": "shawinigan api response 23 02 xml",
       "projectTags": [],
-      "fileSource": "https://api.ticketacces.net/v1/showtimes?KeyID=CULTURESHAWI&KeySecret=wMalrXUtnFEMIK7PDENGbPxRfiGY&Domains=shawinigan.ticketacces.net&Language=fr",
+      "fileSource": "shawinigan-api-response-23-02.xml",
       "archiveFileName": null
     }
   ],
   "operations": [
     {
+      "op": "core/recon",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "columnName": "record - organizationname",
+      "config": {
+        "mode": "standard-service",
+        "service": "http://api.artsdata.ca/recon",
+        "identifierSpace": "http://kg.artsdata.ca/",
+        "schemaSpace": "http://schema.org/",
+        "type": {
+          "id": "http://schema.org/Organization",
+          "name": "Organization"
+        },
+        "autoMatch": true,
+        "columnDetails": [
+          {
+            "column": "record - organizationzipcode",
+            "propertyName": "schema:address/schema:postalCode",
+            "propertyID": "schema:address/schema:postalCode"
+          }
+        ],
+        "limit": 0
+      },
+      "description": "Reconcile cells in column record - organizationname to type http://schema.org/Organization"
+    },
+    {
+      "op": "core/recon-judge-similar-cells",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "columnName": "record - organizationname",
+      "similarValue": "Culture Shawinigan",
+      "judgment": "matched",
+      "match": {
+        "id": "K16-138",
+        "name": "Culture Shawinigan (Corporation culturelle de Shawinigan)",
+        "types": [
+          "http://schema.org/Organization"
+        ],
+        "score": 5.3112416
+      },
+      "shareNewTopics": false,
+      "description": "Match item Culture Shawinigan (Corporation culturelle de Shawinigan) (K16-138) for cells containing \"Culture Shawinigan\" in column record - organizationname"
+    },
+    {
+      "op": "core/column-addition",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "baseColumnName": "record - organizationname",
+      "expression": "cell.recon.match.id",
+      "onError": "set-to-blank",
+      "newColumnName": "organization-artsdata-id",
+      "columnInsertIndex": 3,
+      "description": "Create column organization-artsdata-id at index 3 based on column record - organizationname using expression cell.recon.match.id"
+    },
+    {
       "op": "mapping-editor/save-rdf-mapping",
       "mapping": {
         "baseIRI": "http://example.com/base/",
         "namespaces": {
-          "shawinigan_events": "http://shawinigan.ticketacces.net/events/",
           "schema": "http://schema.org/",
           "xsd": "http://www.w3.org/2001/XMLSchema#",
-          "shawinigan_places": "http://shawinigan.ticketacces.net/places/",
-          "shawinigan_postal_address": "http://shawinigan.ticketacces.net/postal_address/",
-          "shawinigan_organization": "http://shawinigan.ticketacces.net/organization/",
-          "shawinigan_offers": "http://shawinigan.ticketacces.net/offers/"
+          "shawinigan_places": "http://shawinigan.ticketacces.net/data/places#",
+          "shawinigan_postal_address": "http://shawinigan.ticketacces.net/data/postalAddress#",
+          "shawinigan_organization": "http://shawinigan.ticketacces.net/data/organization#",
+          "shawinigan_offers": "http://shawinigan.ticketacces.net/data/offers#",
+          "shawinigan_event": "http://shawinigan.ticketacces.net/data/event#"
         },
         "subjectMappings": [
           {
@@ -41,7 +102,7 @@
               },
               "transformation": {
                 "language": "prefix",
-                "expression": "shawinigan_events"
+                "expression": "shawinigan_event"
               }
             },
             "typeMappings": [
@@ -239,7 +300,9 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "literal"
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
                     }
                   }
                 ]
@@ -291,7 +354,9 @@
                       "columnName": "record - eventimagelarge"
                     },
                     "valueType": {
-                      "type": "literal"
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
                     }
                   }
                 ]
@@ -310,51 +375,17 @@
                 "values": [
                   {
                     "valueSource": {
-                      "source": "row_index"
+                      "source": "column",
+                      "columnName": "record - eventid"
                     },
                     "transformation": {
-                      "language": "grel",
-                      "expression": "row"
+                      "language": "prefix",
+                      "expression": "shawinigan_offers"
                     },
                     "valueType": {
                       "type": "iri",
-                      "typeMappings": [
-                        {
-                          "valueSource": {
-                            "source": "constant",
-                            "constant": "AggregateOffer"
-                          },
-                          "transformation": {
-                            "language": "prefix",
-                            "expression": "schema"
-                          }
-                        }
-                      ],
-                      "propertyMappings": [
-                        {
-                          "property": {
-                            "valueSource": {
-                              "source": "constant",
-                              "constant": "url"
-                            },
-                            "transformation": {
-                              "language": "prefix",
-                              "expression": "schema"
-                            }
-                          },
-                          "values": [
-                            {
-                              "valueSource": {
-                                "source": "column",
-                                "columnName": "record - urlpurchase"
-                              },
-                              "valueType": {
-                                "type": "literal"
-                              }
-                            }
-                          ]
-                        }
-                      ]
+                      "typeMappings": [],
+                      "propertyMappings": []
                     }
                   }
                 ]
@@ -380,93 +411,9 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "literal"
-                    }
-                  }
-                ]
-              },
-              {
-                "property": {
-                  "valueSource": {
-                    "source": "constant",
-                    "constant": "offers"
-                  },
-                  "transformation": {
-                    "language": "prefix",
-                    "expression": "schema"
-                  }
-                },
-                "values": [
-                  {
-                    "valueSource": {
-                      "source": "row_index"
-                    },
-                    "transformation": {
-                      "language": "grel",
-                      "expression": "row "
-                    },
-                    "valueType": {
                       "type": "iri",
-                      "typeMappings": [
-                        {
-                          "valueSource": {
-                            "source": "constant",
-                            "constant": "Offer"
-                          },
-                          "transformation": {
-                            "language": "prefix",
-                            "expression": "schema"
-                          }
-                        }
-                      ],
-                      "propertyMappings": [
-                        {
-                          "property": {
-                            "valueSource": {
-                              "source": "constant",
-                              "constant": "name"
-                            },
-                            "transformation": {
-                              "language": "prefix",
-                              "expression": "schema"
-                            }
-                          },
-                          "values": [
-                            {
-                              "valueSource": {
-                                "source": "column",
-                                "columnName": "record - tickettypewebdefaultname"
-                              },
-                              "valueType": {
-                                "type": "literal"
-                              }
-                            }
-                          ]
-                        },
-                        {
-                          "property": {
-                            "valueSource": {
-                              "source": "constant",
-                              "constant": "price"
-                            },
-                            "transformation": {
-                              "language": "prefix",
-                              "expression": "schema"
-                            }
-                          },
-                          "values": [
-                            {
-                              "valueSource": {
-                                "source": "column",
-                                "columnName": "record - tickettypewebdefaultprice"
-                              },
-                              "valueType": {
-                                "type": "literal"
-                              }
-                            }
-                          ]
-                        }
-                      ]
+                      "typeMappings": [],
+                      "propertyMappings": []
                     }
                   }
                 ]
@@ -796,7 +743,1022 @@
                       "language": "raw"
                     },
                     "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "sameAs"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "row_index"
+                    },
+                    "transformation": {
+                      "language": "grel",
+                      "expression": "if(cells[\"organization-artsdata-id\"].value == null, null, \"http://kg.artsdata.ca/resource/\"+cells[\"organization-artsdata-id\"].value)"
+                    },
+                    "valueType": {
                       "type": "literal"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "record - eventid"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "shawinigan_offers"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Offer"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - tickettypewebdefaultname"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "price"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - tickettypewebdefaultprice"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "url"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - urlpurchase"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Save RDF Mapping"
+    },
+    {
+      "op": "core/recon",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "columnName": "record - venuename",
+      "config": {
+        "mode": "standard-service",
+        "service": "http://api.artsdata.ca/recon",
+        "identifierSpace": "http://kg.artsdata.ca/",
+        "schemaSpace": "http://schema.org/",
+        "type": {
+          "id": "http://schema.org/Place",
+          "name": "Place"
+        },
+        "autoMatch": true,
+        "columnDetails": [
+          {
+            "column": "record - venuezipcode",
+            "propertyName": "schema:address/schema:postalCode",
+            "propertyID": "schema:address/schema:postalCode"
+          }
+        ],
+        "limit": 0
+      },
+      "description": "Reconcile cells in column record - venuename to type http://schema.org/Place"
+    },
+    {
+      "op": "core/column-addition",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "baseColumnName": "record - venuename",
+      "expression": "cell.recon.match.id",
+      "onError": "set-to-blank",
+      "newColumnName": "place-artsdata-id",
+      "columnInsertIndex": 30,
+      "description": "Create column place-artsdata-id at index 30 based on column record - venuename using expression cell.recon.match.id"
+    },
+    {
+      "op": "mapping-editor/save-rdf-mapping",
+      "mapping": {
+        "baseIRI": "http://example.com/base/",
+        "namespaces": {
+          "schema": "http://schema.org/",
+          "xsd": "http://www.w3.org/2001/XMLSchema#",
+          "shawinigan_places": "http://shawinigan.ticketacces.net/data/places#",
+          "shawinigan_postal_address": "http://shawinigan.ticketacces.net/data/postalAddress#",
+          "shawinigan_organization": "http://shawinigan.ticketacces.net/data/organization#",
+          "shawinigan_offers": "http://shawinigan.ticketacces.net/data/offers#",
+          "shawinigan_event": "http://shawinigan.ticketacces.net/data/event#"
+        },
+        "subjectMappings": [
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "record - eventid"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "shawinigan_event"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Event"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventname"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "description"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventdescription"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "additionalType"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventsubgenrename"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  },
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventgenrename"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  },
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - showtimemaincategoryname"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "startDate"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - showtimedatetime"
+                    },
+                    "valueType": {
+                      "type": "datatype_literal",
+                      "datatype": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "dateTime"
+                        },
+                        "transformation": {
+                          "language": "prefix",
+                          "expression": "xsd"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "location"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - venueid"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "shawinigan_places"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "url"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - urldetails"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "organizer"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - organizationid"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "shawinigan_organization"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "image"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventimagelarge"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "offers"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventid"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "shawinigan_offers"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "recordedIn"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - eventtrailer"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "record - venueid"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "shawinigan_places"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Place"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - venuename"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "address"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - venueid"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "shawinigan_postal_address"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "sameAs"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "row_index"
+                    },
+                    "transformation": {
+                      "language": "grel",
+                      "expression": "if(cells[\"place-artsdata-id\"].value == null, null, \"http://kg.artsdata.ca/resource/\"+cells[\"place-artsdata-id\"].value)"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "record - venueid"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "shawinigan_postal_address"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "PostalAddress"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "streetAddress"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - venueaddress"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "postalCode"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - venuezipcode"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "addressLocality"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - venuecity"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "addressRegion"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "constant",
+                      "constant": "Québec"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "addressCountry"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "constant",
+                      "constant": "Canada"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "record - organizationid"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "shawinigan_organization"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Organization"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - organizationname"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "url"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - organizationdomain"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "sameAs"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "row_index"
+                    },
+                    "transformation": {
+                      "language": "grel",
+                      "expression": "if(cells[\"organization-artsdata-id\"].value == null, null, \"http://kg.artsdata.ca/resource/\"+cells[\"organization-artsdata-id\"].value)"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "record - eventid"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "shawinigan_offers"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Offer"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - tickettypewebdefaultname"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "price"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - tickettypewebdefaultprice"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "url"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "record - urlpurchase"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
                     }
                   }
                 ]
