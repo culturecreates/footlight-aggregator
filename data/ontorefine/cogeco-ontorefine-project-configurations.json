@@ -12,9 +12,9 @@
       "includeFileSources": false,
       "includeArchiveFileName": false,
       "disableAutoPreview": false,
-      "projectName": "cogeco api response json",
+      "projectName": "cogeco api response 23 02 json",
       "projectTags": [],
-      "fileSource": "cogeco-api-response.json",
+      "fileSource": "cogeco-api-response-23-02.json",
       "archiveFileName": null
     }
   ],
@@ -25,11 +25,694 @@
         "baseIRI": "http://example.com/base/",
         "namespaces": {
           "xsd": "http://www.w3.org/2001/XMLSchema#",
-          "cogeco_events": "https://www.amphitheatrecogeco.com/events/",
+          "cogeco_events": "https://www.amphitheatrecogeco.com/data/event#",
           "cogeco_places": "https://www.amphitheatrecogeco.com/places/",
           "schema": "https://schema.org/",
-          "cogeco_postal_address": "https://www.amphitheatrecogeco.com/postal_address/",
-          "cogeco_offers": "https://www.amphitheatrecogeco.com/offers/"
+          "cogeco_postal_address": "https://www.amphitheatrecogeco.com/data/postalAddress#",
+          "cogeco_offers": "https://www.amphitheatrecogeco.com/data/offer#"
+        },
+        "subjectMappings": [
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - external_id"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "cogeco_events"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Event"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - title"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "description"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - description"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "startDate"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - start_date"
+                    },
+                    "valueType": {
+                      "type": "datatype_literal",
+                      "datatype": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "dateTime"
+                        },
+                        "transformation": {
+                          "language": "prefix",
+                          "expression": "xsd"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "endDate"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - end_date"
+                    },
+                    "valueType": {
+                      "type": "datatype_literal",
+                      "datatype": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "dateTime"
+                        },
+                        "transformation": {
+                          "language": "prefix",
+                          "expression": "xsd"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "location"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - name"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "cogeco_places"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "additionalType"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - category - _ - name"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "image"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - images - _ - url"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "offers"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - ticket_url"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "recordedIn"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - video_url"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - venue - name"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "cogeco_places"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Place"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - name"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "address"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - zip"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "cogeco_postal_address"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - venue - zip"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "cogeco_postal_address"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "PostalAddress"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "postalCode"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - zip"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "streetAdress"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - address"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "addressLocality"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - city"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "addressRegion"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "constant",
+                      "constant": "Québec"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "addressCountry"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "constant",
+                      "constant": "Canada"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - ticket_url"
+              },
+              "transformation": {
+                "language": "raw"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Offer"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "url"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - ticket_url"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Save RDF Mapping"
+    },
+    {
+      "op": "core/recon",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "columnName": "_ - venue - name",
+      "config": {
+        "mode": "standard-service",
+        "service": "http://api.artsdata.ca/recon",
+        "identifierSpace": "http://kg.artsdata.ca/",
+        "schemaSpace": "http://schema.org/",
+        "type": {
+          "id": "http://schema.org/Place",
+          "name": "Place"
+        },
+        "autoMatch": true,
+        "columnDetails": [
+          {
+            "column": "_ - venue - zip",
+            "propertyName": "schema:address/schema:postalCode",
+            "propertyID": "schema:address/schema:postalCode"
+          }
+        ],
+        "limit": 0
+      },
+      "description": "Reconcile cells in column _ - venue - name to type http://schema.org/Place"
+    },
+    {
+      "op": "core/recon-judge-similar-cells",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "columnName": "_ - venue - name",
+      "similarValue": "Cabaret",
+      "judgment": "matched",
+      "match": {
+        "id": "K5-462",
+        "name": "Amphithéâtre Cogeco - Cabaret",
+        "types": [
+          "http://schema.org/Place"
+        ],
+        "score": 4.1788554
+      },
+      "shareNewTopics": false,
+      "description": "Match item Amphithéâtre Cogeco - Cabaret (K5-462) for cells containing \"Cabaret\" in column _ - venue - name"
+    },
+    {
+      "op": "core/column-addition",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "baseColumnName": "_ - venue - name",
+      "expression": "cell.recon.match.id",
+      "onError": "set-to-blank",
+      "newColumnName": "place-artsdata-id",
+      "columnInsertIndex": 12,
+      "description": "Create column place-artsdata-id at index 12 based on column _ - venue - name using expression cell.recon.match.id"
+    },
+    {
+      "op": "core/recon-judge-similar-cells",
+      "engineConfig": {
+        "facets": [],
+        "mode": "row-based"
+      },
+      "columnName": "_ - venue - name",
+      "similarValue": "Amphithéâtre",
+      "judgment": "matched",
+      "match": {
+        "id": "K5-463",
+        "name": "Amphithéâtre Cogeco",
+        "types": [
+          "http://schema.org/Place"
+        ],
+        "score": 6.6677327
+      },
+      "shareNewTopics": false,
+      "description": "Match item Amphithéâtre Cogeco (K5-463) for cells containing \"Amphithéâtre\" in column _ - venue - name"
+    },
+    {
+      "op": "mapping-editor/save-rdf-mapping",
+      "mapping": {
+        "baseIRI": "http://example.com/base/",
+        "namespaces": {
+          "xsd": "http://www.w3.org/2001/XMLSchema#",
+          "cogeco_events": "https://www.amphitheatrecogeco.com/data/event#",
+          "cogeco_places": "https://www.amphitheatrecogeco.com/places/",
+          "schema": "https://schema.org/",
+          "cogeco_postal_address": "https://www.amphitheatrecogeco.com/data/postalAddress#",
+          "cogeco_offers": "https://www.amphitheatrecogeco.com/data/offer#"
         },
         "subjectMappings": [
           {
@@ -304,7 +987,9 @@
                       "language": "raw"
                     },
                     "valueType": {
-                      "type": "literal"
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
                     }
                   }
                 ]
@@ -389,6 +1074,32 @@
                       "type": "iri",
                       "typeMappings": [],
                       "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "sameAs"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "row_index"
+                    },
+                    "transformation": {
+                      "language": "grel",
+                      "expression": "if(cells[\"place-artsdata-id\"].value == null, null, \"http://kg.artsdata.ca/resource/\"+cells[\"place-artsdata-id\"].value)"
+                    },
+                    "valueType": {
+                      "type": "literal"
                     }
                   }
                 ]
@@ -574,7 +1285,631 @@
               {
                 "valueSource": {
                   "source": "constant",
-                  "constant": "AggregateOffer"
+                  "constant": "Offer"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "url"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - ticket_url"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "description": "Save RDF Mapping"
+    },
+    {
+      "op": "mapping-editor/save-rdf-mapping",
+      "mapping": {
+        "baseIRI": "http://example.com/base/",
+        "namespaces": {
+          "xsd": "http://www.w3.org/2001/XMLSchema#",
+          "cogeco_events": "https://www.amphitheatrecogeco.com/data/event#",
+          "cogeco_places": "https://www.amphitheatrecogeco.com/places/",
+          "schema": "https://schema.org/",
+          "cogeco_postal_address": "https://www.amphitheatrecogeco.com/data/postalAddress#",
+          "cogeco_offers": "https://www.amphitheatrecogeco.com/data/offer#"
+        },
+        "subjectMappings": [
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - external_id"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "cogeco_events"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Event"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - title"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "description"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - description"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "startDate"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - start_date"
+                    },
+                    "valueType": {
+                      "type": "datatype_literal",
+                      "datatype": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "dateTime"
+                        },
+                        "transformation": {
+                          "language": "prefix",
+                          "expression": "xsd"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "endDate"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - end_date"
+                    },
+                    "valueType": {
+                      "type": "datatype_literal",
+                      "datatype": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "dateTime"
+                        },
+                        "transformation": {
+                          "language": "prefix",
+                          "expression": "xsd"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "location"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - name"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "cogeco_places"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "additionalType"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - category - _ - name"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "image"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - images - _ - url"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "offers"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - external_id"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "cogeco_offers"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "recordedIn"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - video_url"
+                    },
+                    "transformation": {
+                      "language": "raw"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - venue - name"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "cogeco_places"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Place"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "name"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - name"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "address"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - name"
+                    },
+                    "transformation": {
+                      "language": "prefix",
+                      "expression": "cogeco_postal_address"
+                    },
+                    "valueType": {
+                      "type": "iri",
+                      "typeMappings": [],
+                      "propertyMappings": []
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "sameAs"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "row_index"
+                    },
+                    "transformation": {
+                      "language": "grel",
+                      "expression": "if(cells[\"place-artsdata-id\"].value == null, null, \"http://kg.artsdata.ca/resource/\"+cells[\"place-artsdata-id\"].value)"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - venue - name"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "cogeco_postal_address"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "PostalAddress"
+                },
+                "transformation": {
+                  "language": "prefix",
+                  "expression": "schema"
+                }
+              }
+            ],
+            "propertyMappings": [
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "postalCode"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - zip"
+                    },
+                    "valueType": {
+                      "type": "literal"
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "streetAdress"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - address"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "addressLocality"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "column",
+                      "columnName": "_ - venue - city"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "addressRegion"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "constant",
+                      "constant": "Québec"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "property": {
+                  "valueSource": {
+                    "source": "constant",
+                    "constant": "addressCountry"
+                  },
+                  "transformation": {
+                    "language": "prefix",
+                    "expression": "schema"
+                  }
+                },
+                "values": [
+                  {
+                    "valueSource": {
+                      "source": "constant",
+                      "constant": "Canada"
+                    },
+                    "valueType": {
+                      "type": "language_literal",
+                      "language": {
+                        "valueSource": {
+                          "source": "constant",
+                          "constant": "fr"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "subject": {
+              "valueSource": {
+                "source": "column",
+                "columnName": "_ - external_id"
+              },
+              "transformation": {
+                "language": "prefix",
+                "expression": "cogeco_offers"
+              }
+            },
+            "typeMappings": [
+              {
+                "valueSource": {
+                  "source": "constant",
+                  "constant": "Offer"
                 },
                 "transformation": {
                   "language": "prefix",
