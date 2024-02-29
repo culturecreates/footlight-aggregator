@@ -24,8 +24,5 @@ def reconcile_entities(client):
             update_result = collection.update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}}, {"$addToSet": {"sameAs": {"uri": artsdata_url, "type": "ArtsdataIdentifier"}}})
             print(update_result)
 
-# client = MongoClient('mongodb://footlight:footdsfdscalendar@3.96.80.223:27019/footlight-calendar')
-client = MongoClient('mongodb://footlight:fottlightdshoi@15.156.34.23:27018/footlight-calendar')
-
-# client = MongoClient('mongodb://localhost:27017')
+client = MongoClient('mongodb://localhost:27017')
 reconcile_entities(client)
