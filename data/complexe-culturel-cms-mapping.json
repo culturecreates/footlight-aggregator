@@ -11,5 +11,14 @@
         "Conte": ["65ba04108468f40064841b2b"],
         "Variétés": ["65b214428468f40064830346"]
       }
+    },
+    {
+      "fieldName": "audience",
+      "inputProperty":[
+        "audience"
+      ],
+      "mapping":{
+        "Indéterminé": ["65b0bc668252ed00a6ca0925"]
+      }
     }
   ]

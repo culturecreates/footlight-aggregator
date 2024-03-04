@@ -16,5 +16,14 @@
         "Variétés": ["65b214428468f40064830346"],
         "Formations": ["6571a0c1a5ac3d006314ee10"]
       }
-    }
+    },
+    {
+        "fieldName": "audience",
+        "inputProperty":[
+          "audience"
+        ],
+        "mapping":{
+          "Indéterminé": ["65b0bc668252ed00a6ca0925"]
+        }
+      }
   ]
