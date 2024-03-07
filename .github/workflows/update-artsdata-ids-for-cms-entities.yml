@@ -1,0 +1,18 @@
+name: Update artsdata ids for CMS entities
+
+on:
+  workflow_dispatch:
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run reconcile-entities-in-cms.py
+        env:
+          PRIVATE_KEY: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY_PRODUCTION}}
+          HOSTNAME : ${{ vars.PRODUCTION_SERVER_7_IP}}
+          USER_NAME : ${{ vars.PRODUCTION_SERVER_7_USER_NAME }}
+          PRODUCTION_DATABASE_URL : ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "python3 ./application/scripts/reconcile-entities-in-cms.py ${PRODUCTION_DATABASE_URL}"

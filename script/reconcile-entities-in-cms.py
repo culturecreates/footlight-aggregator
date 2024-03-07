@@ -1,28 +1,76 @@
 from pymongo import MongoClient
-from requests import get
+from requests import post
+import json
+import urllib.parse
+import sys
 from bson import ObjectId
 
 def reconcile_entities(client):
     db = client['footlight-calendar']
 
-    response = get('https://db.artsdata.ca/repositories/artsdata?query=PREFIX%20schema%3A%20%3Chttp%3A%2F%2Fschema.org%2F%3E%20select%20DISTINCT%20%3Fentity%20%3FsameAs%20where%20%7B%20VALUES%20%3FGRAPHS%20%7B%20%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Fartsdata-planet-footlight%2Fsigne-laval-cms-people%3E%20%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Fartsdata-planet-footlight%2Fsigne-laval-cms-organizations%3E%20%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Fartsdata-planet-footlight%2Fsigne-laval-cms-places%3E%20%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Fartsdata-planet-footlight%2Ftout-culture-cms-people%3E%20%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Fartsdata-planet-footlight%2Ftout-culture-cms-organizations%3E%20%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Fartsdata-planet-footlight%2Ftout-culture-cms-places%3E%20%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Fartsdata-planet-footlight%2Fculture-mauricie-cms-people%3E%20%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Fartsdata-planet-footlight%2Fculture-mauricie-cms-organizations%3E%20%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fculture-creates%2Fartsdata-planet-footlight%2Fculture-mauricie-cms-places%3E%20%7D%20graph%20%3FGRAPHS%20%7B%20%3Fentity%20a%20%3Fo%3B%20filter(strstarts(str(%3Fentity)%2C%27http%3A%2F%2Fapi.footlight.io%2F%27))%20%7D%20optional%20%7B%20%3Fentity%20%5Eschema%3AsameAs%20%3FsameAsReverse%20.%20filter(strstarts(str(%3FsameAsReverse)%2C%27http%3A%2F%2Fkg.artsdata.ca%2Fresource%2FK%27))%20%7D%20optional%20%7B%20%3Fentity%20schema%3AsameAs%20%3FsameAsForward.%20filter(strstarts(str(%3FsameAsForward)%2C%27http%3A%2F%2Fkg.artsdata.ca%2Fresource%2FK%27))%20%7D%20BIND%20(COALESCE(%3FsameAsReverse%2C%3FsameAsForward)%20AS%20%3FsameAs)%20%7D&infer=true&sameAs=true&offset=0')
-    response = response.text[len("entity,sameAs"):].split("\r\n")[1:-1]
+    headers = {
+        'Accept': 'application/x-sparqlstar-results+json, application/sparql-results+json;q=0.9, */*;q=0.8',
+        'Accept-Language': 'en-GB,en-US;q=0.9,en;q=0.8',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Origin': 'https://db.artsdata.ca',
+        'Referer': 'https://db.artsdata.ca/',
+    }
+    data = {'query' : """PREFIX schema: <http://schema.org/>
+                        select DISTINCT ?entity ?sameAs 
+                        where {
+                        VALUES ?GRAPHS {
+                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-people>
+                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-organizations>
+                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-places>
+                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-people>
+                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-organizations>
+                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-places>
+                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-people>
+                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-organizations>
+                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-places>
+                        }
+                        graph ?GRAPHS
+                        {
+                            ?entity a ?o;
+                            filter(strstarts(str(?entity),'http://api.footlight.io/'))
+                        }
+                        optional {
+                            ?entity ^schema:sameAs ?sameAsReverse .
+                        }
+                        optional {
+                            ?entity schema:sameAs ?sameAsForward.
+                        }
+                        BIND (COALESCE(?sameAsReverse,?sameAsForward) AS ?sameAs)
+                            filter(strstarts(str(?sameAs),'http://kg.artsdata.ca/resource/K'))
+                        }"""
+            }
+    data_encoded = urllib.parse.urlencode(data)
+
+    response = post('https://db.artsdata.ca/repositories/artsdata', headers=headers, data=data_encoded)
+    result = json.loads(response.text)
+
+
+    data_dict = result['results']['bindings']
+    result_dict = {}
+    for item in data_dict:
+        entity_value = item['entity']['value']
+        sameAs_value = item['sameAs']['value']
+
+        result_dict[entity_value] = sameAs_value
 
     collection = None
     
-    for line in response:
-        if line.split(",")[1] != "":
-            repository = line.split(",")[0].split("/")[-2]
-            id = ObjectId(line.split(",")[0].split("/")[-1])
-            artsdata_url = line.split(",")[1]
-            if(repository == "organizations"):
-                collection = db.organizations
-            elif(repository == "person"):
-                collection = db.people
-            elif(repository == "places"):
-                collection = db.places
-            update_result = collection.update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}}, {"$addToSet": {"sameAs": {"uri": artsdata_url, "type": "ArtsdataIdentifier"}}})
-            print(update_result)
+    for key, value in result_dict.items():
+        repository = key.split(",")[0].split("/")[-2]
+        id = ObjectId(key.split(",")[0].split("/")[-1])
+        if(repository == "organizations"):
+            collection = db.organizations
+        elif(repository == "person"):
+            collection = db.people
+        elif(repository == "places"):
+            collection = db.places
+        update_result = collection.update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}}, {"$addToSet": {"sameAs": {"uri": value, "type": "ArtsdataIdentifier"}}})
+        print(update_result)
 
-client = MongoClient('mongodb://localhost:27017')
+client = MongoClient(sys.argv[1])
 reconcile_entities(client)
