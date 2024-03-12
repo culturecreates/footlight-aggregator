@@ -1,4 +1,4 @@
-name: Import RDF data to footlight
+  name: Import RDF to footlight CMS
 
 on:
   workflow_dispatch:
