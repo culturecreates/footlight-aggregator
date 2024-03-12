@@ -74,6 +74,8 @@ def reconcile_entities(client):
             collection = db.people
         elif(repository == "places"):
             collection = db.places
+        elif(repository == "events"):
+            collection = db.events
         update_result = collection.update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}}, {"$addToSet": {"sameAs": {"uri": value, "type": "ArtsdataIdentifier"}}})
         print(update_result)
 
