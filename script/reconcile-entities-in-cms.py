@@ -16,33 +16,38 @@ def reconcile_entities(client):
         'Referer': 'https://db.artsdata.ca/',
     }
     data = {'query' : """PREFIX schema: <http://schema.org/>
-                        select DISTINCT ?entity ?sameAs 
-                        where {
-                        VALUES ?GRAPHS {
-                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-people>
-                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-organizations>
-                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-places>
-                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-people>
-                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-organizations>
-                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-places>
-                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-people>
-                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-organizations>
-                            <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-places>
+                         SELECT DISTINCT ?entity ?sameAs 
+                         WHERE {
+	                           VALUES ?GRAPHS {
+	                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-events>
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-people>
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-organizations>
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-places>
+
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-events>
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-people>
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-organizations>
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-places>
+
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-events>
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-people>
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-organizations>
+		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-places>
+                                }
+	                    GRAPH ?GRAPHS
+	                    {
+		                   ?entity a ?o;
+                           FILTER(STRSTARTS(STR(?entity),'http://api.footlight.io/'))
                         }
-                        graph ?GRAPHS
-                        {
-                            ?entity a ?o;
-                            filter(strstarts(str(?entity),'http://api.footlight.io/'))
+                        OPTIONAL {
+                           ?entity ^schema:sameAs ?sameAsReverse .
                         }
-                        optional {
-                            ?entity ^schema:sameAs ?sameAsReverse .
-                        }
-                        optional {
+                         OPTIONAL {
                             ?entity schema:sameAs ?sameAsForward.
                         }
-                        BIND (COALESCE(?sameAsReverse,?sameAsForward) AS ?sameAs)
-                            filter(strstarts(str(?sameAs),'http://kg.artsdata.ca/resource/K'))
-                        }"""
+                       BIND (COALESCE(?sameAsReverse,?sameAsForward) AS ?sameAs)
+                       FILTER(STRSTARTS(STR(?sameAs),'http://kg.artsdata.ca/resource/K'))
+                       }"""
             }
     data_encoded = urllib.parse.urlencode(data)
 
