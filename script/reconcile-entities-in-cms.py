@@ -5,7 +5,24 @@ import urllib.parse
 import sys
 from bson import ObjectId
 
-def reconcile_entities(client):
+def append_ids(ids, results, collection):
+    for result in results:
+        ids = ids + collection + ":" + str(result['_id']) + "\n"
+    return ids
+
+def get_entity_ids(client):
+    db = client['footlight-calendar']
+    ids = ''
+    collections = ["organizations", "places", "events", "people"]
+    for collection in collections:
+        results = db[collection].aggregate([
+            {"$match": {"sameAs.type": {"$ne": "ArtsdataIdentifier"}}},
+            {"$project": {"_id": 1}}
+        ])
+        ids = append_ids(ids, results, collection)
+    return ids
+
+def reconcile_entities(client, ids):
     db = client['footlight-calendar']
 
     headers = {
@@ -15,30 +32,18 @@ def reconcile_entities(client):
         'Origin': 'https://db.artsdata.ca',
         'Referer': 'https://db.artsdata.ca/',
     }
-    data = {'query' : """PREFIX schema: <http://schema.org/>
-                         SELECT DISTINCT ?entity ?sameAs 
+
+    query = """PREFIX schema: <http://schema.org/>
+                         PREFIX events: <http://api.footlight.io/events/>
+                         PREFIX places: <http://api.footlight.io/places/>
+                         PREFIX people: <http://api.footlight.io/people/>
+                         PREFIX organizations: <http://api.footlight.io/organizations/>
+                         PREFIX concepts: <http://api.footlight.io/concepts/>
+                         SELECT DISTINCT ?entity ?sameAs
                          WHERE {
-	                           VALUES ?GRAPHS {
-	                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-events>
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-people>
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-organizations>
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/tout-culture-cms-places>
-
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-events>
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-people>
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-organizations>
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/signe-laval-cms-places>
-
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-events>
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-people>
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-organizations>
-		                                 <http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie-cms-places>
+	                           VALUES ?entity {
+	                                 <entity-ids-placeholder>
                                 }
-	                    GRAPH ?GRAPHS
-	                    {
-		                   ?entity a ?o;
-                           FILTER(STRSTARTS(STR(?entity),'http://api.footlight.io/'))
-                        }
                         OPTIONAL {
                            ?entity ^schema:sameAs ?sameAsReverse .
                         }
@@ -48,7 +53,8 @@ def reconcile_entities(client):
                        BIND (COALESCE(?sameAsReverse,?sameAsForward) AS ?sameAs)
                        FILTER(STRSTARTS(STR(?sameAs),'http://kg.artsdata.ca/resource/K'))
                        }"""
-            }
+    query = query.replace("<entity-ids-placeholder>", ids)
+    data = {'query' : query}
     data_encoded = urllib.parse.urlencode(data)
 
     response = post('https://db.artsdata.ca/repositories/artsdata', headers=headers, data=data_encoded)
@@ -62,22 +68,17 @@ def reconcile_entities(client):
         sameAs_value = item['sameAs']['value']
 
         result_dict[entity_value] = sameAs_value
-
-    collection = None
     
     for key, value in result_dict.items():
         repository = key.split(",")[0].split("/")[-2]
         id = ObjectId(key.split(",")[0].split("/")[-1])
-        if(repository == "organizations"):
-            collection = db.organizations
-        elif(repository == "person"):
-            collection = db.people
-        elif(repository == "places"):
-            collection = db.places
-        elif(repository == "events"):
-            collection = db.events
-        update_result = collection.update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}}, {"$addToSet": {"sameAs": {"uri": value, "type": "ArtsdataIdentifier"}}})
+        update_result = db[repository].update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}}, {"$addToSet": {"sameAs": {"uri": value, "type": "ArtsdataIdentifier"}}})
         print(update_result)
 
-client = MongoClient(sys.argv[1])
-reconcile_entities(client)
+if len(sys.argv) > 1:
+    client = MongoClient(sys.argv[1])
+else:
+    client = MongoClient("mongodb://localhost:27017")
+
+ids = get_entity_ids(client)
+reconcile_entities(client, ids)
