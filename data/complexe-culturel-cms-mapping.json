@@ -5,11 +5,11 @@
         "additionalType"
       ],
       "mapping": {
-        "http://kg.artsdata.ca/resource/Chanson":["65719e94a5ac3d006314ed94"],
-        "http://kg.artsdata.ca/resource/ComedyPerformance": ["659eef9550bec800641d67e4"],
-        "http://kg.artsdata.ca/resource/MusicPerformance": ["6571a0c1a5ac3d006314ee17"],
-        "http://kg.artsdata.ca/resource/Storytelling": ["65ba04108468f40064841b2b"],
-        "http://kg.artsdata.ca/resource/VarietyShow": ["65b214428468f40064830346"]
+        "http://kg.artsdata.ca/resource/chanson":["65719e94a5ac3d006314ed94"],
+        "http://kg.artsdata.ca/resource/comedyperformance": ["659eef9550bec800641d67e4"],
+        "http://kg.artsdata.ca/resource/musicperformance": ["6571a0c1a5ac3d006314ee17"],
+        "http://kg.artsdata.ca/resource/storytelling": ["65ba04108468f40064841b2b"],
+        "http://kg.artsdata.ca/resource/varietyShow": ["65b214428468f40064830346"]
       }
     },
     {

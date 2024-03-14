@@ -5,16 +5,16 @@
         "additionalType"
       ],
       "mapping": {
-        "http://kg.artsdata.ca/resource/Chanson":["65719e94a5ac3d006314ed94"],
-        "http://kg.artsdata.ca/resource/ComedyPerformance": ["659eef9550bec800641d67e4"],
-        "http://kg.artsdata.ca/resource/DancePerformance": ["6571a0c1a5ac3d006314ee19"],
-        "http://kg.artsdata.ca/resource/Event": ["65b2575b8468f40064831053"],
-        "http://kg.artsdata.ca/resource/ExhibitionEvent": ["65b2575b8468f40064831051"],
-        "http://kg.artsdata.ca/resource/MusicPerformance": ["6571a0c1a5ac3d006314ee17"],
-        "http://kg.artsdata.ca/resource/ScreeningEvent": ["65ba04108468f40064841b29"],
-        "http://kg.artsdata.ca/resource/TheatrePerformance": ["65b214428468f40064830340"],
-        "http://kg.artsdata.ca/resource/VarietyShow": ["65b214428468f40064830346"],
-        "http://kg.artsdata.ca/resource/WorkshopEvent": ["6571a0c1a5ac3d006314ee10"]
+        "http://kg.artsdata.ca/resource/chanson":["65719e94a5ac3d006314ed94"],
+        "http://kg.artsdata.ca/resource/comedyperformance": ["659eef9550bec800641d67e4"],
+        "http://kg.artsdata.ca/resource/danceperformance": ["6571a0c1a5ac3d006314ee19"],
+        "http://kg.artsdata.ca/resource/event": ["65b2575b8468f40064831053"],
+        "http://kg.artsdata.ca/resource/exhibitionevent": ["65b2575b8468f40064831051"],
+        "http://kg.artsdata.ca/resource/musicperformance": ["6571a0c1a5ac3d006314ee17"],
+        "http://kg.artsdata.ca/resource/screeningevent": ["65ba04108468f40064841b29"],
+        "http://kg.artsdata.ca/resource/theatreperformance": ["65b214428468f40064830340"],
+        "http://kg.artsdata.ca/resource/varietyshow": ["65b214428468f40064830346"],
+        "http://kg.artsdata.ca/resource/workshopevent": ["6571a0c1a5ac3d006314ee10"]
       }
     },
     {
