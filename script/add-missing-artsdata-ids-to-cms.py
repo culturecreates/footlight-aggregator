@@ -76,8 +76,7 @@ def reconcile_entities(client, ids):
     for key, value in result_dict.items():
         repository = key.split(",")[0].split("/")[-2]
         id = ObjectId(key.split(",")[0].split("/")[-1])
-        update_result = db[repository]
-        .update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}},
+        update_result = db[repository].update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}},
         {"$addToSet": {"sameAs": {"uri": value, "type": "ArtsdataIdentifier"}}})
         print(update_result)
 
