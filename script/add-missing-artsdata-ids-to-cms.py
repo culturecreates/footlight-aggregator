@@ -33,17 +33,18 @@ def reconcile_entities(client, ids):
         'Referer': 'https://db.artsdata.ca/',
     }
 
-    query = """PREFIX schema: <http://schema.org/>
-                         PREFIX events: <http://api.footlight.io/events/>
-                         PREFIX places: <http://api.footlight.io/places/>
-                         PREFIX people: <http://api.footlight.io/people/>
-                         PREFIX organizations: <http://api.footlight.io/organizations/>
-                         PREFIX concepts: <http://api.footlight.io/concepts/>
-                         SELECT DISTINCT ?entity ?sameAs
-                         WHERE {
-	                           VALUES ?entity {
-	                                 <entity-ids-placeholder>
-                                }
+    query = """
+               PREFIX schema: <http://schema.org/>
+               PREFIX events: <http://api.footlight.io/events/>
+               PREFIX places: <http://api.footlight.io/places/>
+               PREFIX people: <http://api.footlight.io/people/>
+               PREFIX organizations: <http://api.footlight.io/organizations/>
+               PREFIX concepts: <http://api.footlight.io/concepts/>
+               SELECT DISTINCT ?entity ?sameAs
+                 WHERE {
+	                   VALUES ?entity {
+	                           <entity-ids-placeholder>
+                       }
                         OPTIONAL {
                            ?entity ^schema:sameAs ?sameAsReverse .
                         }
@@ -52,7 +53,10 @@ def reconcile_entities(client, ids):
                         }
                        BIND (COALESCE(?sameAsReverse,?sameAsForward) AS ?sameAs)
                        FILTER(STRSTARTS(STR(?sameAs),'http://kg.artsdata.ca/resource/K'))
-                       }"""
+                       }
+               """
+
+
     query = query.replace("<entity-ids-placeholder>", ids)
     data = {'query' : query}
     data_encoded = urllib.parse.urlencode(data)
@@ -72,7 +76,8 @@ def reconcile_entities(client, ids):
     for key, value in result_dict.items():
         repository = key.split(",")[0].split("/")[-2]
         id = ObjectId(key.split(",")[0].split("/")[-1])
-        update_result = db[repository].update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}}, {"$addToSet": {"sameAs": {"uri": value, "type": "ArtsdataIdentifier"}}})
+        update_result = db[repository].update_one({"_id": id, "sameAs.type":{"$ne":"ArtsdataIdentifier"}},
+        {"$addToSet": {"sameAs": {"uri": value, "type": "ArtsdataIdentifier"}}})
         print(update_result)
 
 if len(sys.argv) > 1:
