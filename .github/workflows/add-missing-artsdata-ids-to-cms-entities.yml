@@ -1,4 +1,4 @@
-name: Add missing artsdata ids for CMS entities
+name: Add missing Artsdata ids to CMS entities
 
 on:
   workflow_dispatch:
