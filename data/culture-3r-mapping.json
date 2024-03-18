@@ -15,7 +15,9 @@
         "http://kg.artsdata.ca/resource/theatreperformance": ["65b214428468f40064830340"],
         "http://kg.artsdata.ca/resource/varietyshow": ["65b214428468f40064830346"],
         "http://kg.artsdata.ca/resource/storytelling": ["65ba04108468f40064841b2b"],
-        "http://kg.artsdata.ca/resource/workshopevent": ["6571a0c1a5ac3d006314ee10"]
+        "http://kg.artsdata.ca/resource/workshopevent": ["6571a0c1a5ac3d006314ee10"],
+        "http://kg.artsdata.ca/resource/conference": ["65ba04108468f40064841b19"],
+        "http://kg.artsdata.ca/resource/childrensevent": ["65b2575b8468f40064831053"]
       }
     },
     {
