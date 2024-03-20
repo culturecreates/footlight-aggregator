@@ -3,6 +3,7 @@ name: Run Complexe Culturel Aggregator
 on:
   workflow_dispatch:
   schedule:
+    - cron: "0 8 * * 1" # Run at 4:00 AM ET every Monday
     - cron: "0 8 * * 4" # Run at 4:00 AM ET every Thursday
 
 jobs:
