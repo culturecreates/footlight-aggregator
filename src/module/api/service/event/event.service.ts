@@ -543,12 +543,12 @@ export class EventService {
       formattedEvent.eventAttendanceMode = attendanceMode["@id"].replace("schema:", "");
     }
     if (startDate) {
-      formattedEvent.startDateTime = startDate["@value"]
-        || startDate[0]["@value"];
+      formattedEvent.startDateTime = this.convertDateToISO(startDate["@value"])
+        || this.convertDateToISO(startDate[0]["@value"])
     }
     if (endDate) {
-      formattedEvent.endDateTime = endDate["@value"]
-        || endDate[0]["@value"];
+      formattedEvent.endDateTime = this.convertDateToISO(endDate["@value"])
+        || this.convertDateToISO(endDate[0]["@value"])
     }
     if (image) {
       formattedEvent.image = { url: { uri: image } };
@@ -665,6 +665,10 @@ export class EventService {
     }
   }
 
+  private convertDateToISO(date: string) {
+    return moment.tz(date, 'YYYY-MM-DD HH:mm ', 'Canada/Eastern').toISOString();
+  }
+
   async importCaligram(token: any, footlightBaseUrl: string, calendarId: string, mappingFileUrl: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const currentUserId = currentUser.id;
@@ -748,8 +752,8 @@ export class EventService {
 
   private _formatDatesForCaligram(formattedEvent: EventDTO, start_date: any, end_date: any, dates: any): EventDTO {
     if (dates.length === 1) {
-      formattedEvent.startDateTime = moment.tz(start_date, 'YYYY-MM-DD HH:mm ', 'Canada/Eastern').toISOString();
-      formattedEvent.endDateTime = moment.tz(end_date, 'YYYY-MM-DD HH:mm ', 'Canada/Eastern').toISOString();
+      formattedEvent.startDateTime = this.convertDateToISO(start_date);
+      formattedEvent.endDateTime = this.convertDateToISO(end_date);
       return formattedEvent;
     }
     if (dates) {
