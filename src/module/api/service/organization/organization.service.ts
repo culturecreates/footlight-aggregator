@@ -65,16 +65,17 @@ export class OrganizationService {
     });
   }
 
-  async formatAndPushJsonLdOrganization(organization: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string) {
+  async formatAndPushJsonLdOrganization(organization: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string, context: any) {
     const formattedOrganization = new OrganizationDTO();
     formattedOrganization.name = JsonLdParseHelper.formatMultilingualField(organization[EventPredicates.NAME]);
     formattedOrganization.sameAs = SharedService.formatSameAsForRdf(organization);
     const artsdataUri = SharedService.checkIfSameAsHasArtsdataIdentifier(formattedOrganization.sameAs)
+    const uri = JsonLdParseHelper.formatEntityUri(context, organization['@id']);
     if(artsdataUri){
       formattedOrganization.uri = artsdataUri
     }
     else{
-      formattedOrganization.uri = organization['@id']
+      formattedOrganization.uri = uri
 
     }
     return await this._pushOrganizationToFootlight(footlightBaseUrl, calendarId, token, formattedOrganization, currentUserId)

@@ -26,6 +26,11 @@ export class JsonLdParseHelper{
         }
     }
 
+    static formatEntityUri(context: any, entityId: any){
+        const contextFromEntityId = entityId.split(":")[0];
+        const contextUrl = context[contextFromEntityId] + entityId.split(":")[1];
+        return contextUrl;
+    }
 
 
 }

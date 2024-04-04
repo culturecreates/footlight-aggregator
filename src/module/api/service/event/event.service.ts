@@ -492,10 +492,12 @@ export class EventService {
     let rdfData = fs.readFileSync(rdfFilePath, "utf8");
 
     const jsonldData = parse(rdfData);
-    await this.exportJsonLdData(jsonldData["@graph"], token, calendarId, footlightBaseUrl, currentUserId, mappingFileUrl);
+    await this.exportJsonLdData(jsonldData, token, calendarId, footlightBaseUrl, currentUserId, mappingFileUrl);
   }
 
-  async exportJsonLdData(data: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string, mappingFiles: any) {
+  async exportJsonLdData(jsonLd: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string, mappingFiles: any) {
+    const data = jsonLd["@graph"]
+    const context = jsonLd["@context"];
     let jsonLdPlaces = data.filter(item => item["@type"] === EntityPredicates.PLACE);
     let jsonLdPostalAddresses = data.filter(item => item["@type"] === EntityPredicates.POSTAL_ADDRESS);
     let jsonLdOrganizations = data.filter(item => item["@type"] === EntityPredicates.ORGANIZATION);
@@ -507,7 +509,7 @@ export class EventService {
     for (const node of data) {
       if (node["@type"] == EntityPredicates.EVENT) {
         await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl,
-          currentUserId, jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople, jsonLdOffers, jsonLdContactPoints, mappingFiles);
+          currentUserId, jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople, jsonLdOffers, jsonLdContactPoints, mappingFiles, context);
       }
     }
     return events;
@@ -516,7 +518,7 @@ export class EventService {
 
   async formatAndPushJsonLdEvents(event: any, places: Object[], token: string, calendarId: string,
                                   footlightBaseUrl: string, currentUserId: string, jsonLdPostalAddresses: any, jsonLdOrganizations: any,
-                                  jsonLdPeople: any, jsonLdOffers: any, jsonLdContactPoints, mappingFiles: any) {
+                                  jsonLdPeople: any, jsonLdOffers: any, jsonLdContactPoints, mappingFiles: any, context: any) {
     const formattedEvent = new EventDTO();
 
     const [name, description, eventStatus, attendanceMode, startDate, endDate, additionalType, videoUrl, location,
@@ -565,7 +567,7 @@ export class EventService {
     }
     if (location) {
       let placeDetails = places.find(place => place["@id"] === location["@id"]);
-      let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses);
+      let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses, context);
       formattedEvent.locationId = { place: { entityId: placeEntityId } };
     }
     if (offer) {
@@ -578,7 +580,7 @@ export class EventService {
           participantId,
           participantType
         } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl,
-          currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.ORGANIZER);
+          currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.ORGANIZER, context);
         formattedEvent.organizers = [{ entityId: participantId, type: participantType }];
       }
 
@@ -587,7 +589,7 @@ export class EventService {
           participantId,
           participantType
         } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl,
-          currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.PERFORMER);
+          currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.PERFORMER, context);
         formattedEvent.performers = [{ entityId: participantId, type: participantType }];
       }
 
@@ -596,12 +598,13 @@ export class EventService {
           participantId,
           participantType
         } = await this._personOrganizationService.formatAndPushPersonOrganization(token, calendarId, footlightBaseUrl,
-          currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.COLLABORATOR);
+          currentUserId, jsonLdOrganizations, jsonLdPeople, event, EventPredicates.COLLABORATOR, context);
         formattedEvent.collaborators = [{ entityId: participantId, type: participantType }];
       }
     }
-    formattedEvent.sameAs = [{ uri: event["@id"], type: "ExternalSourceIdentifier" }];
-    formattedEvent.uri = event["@id"];
+    const uri = JsonLdParseHelper.formatEntityUri(context, event["@id"])
+    formattedEvent.sameAs = [{ uri: uri, type: "ExternalSourceIdentifier" }];
+    formattedEvent.uri = uri;
     await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
   }
 

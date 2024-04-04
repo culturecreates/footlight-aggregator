@@ -102,18 +102,19 @@ export class PlaceService {
   }
 
   async formatAndPushJsonLdPlaces(place: any, token: string, calendarId: string, footlightBaseUrl: string,
-                                  currentUserId: string, postalAddresses: any) {
+                                  currentUserId: string, postalAddresses: any, context: any) {
     const formattedPlace = new PlaceDTO();
     formattedPlace.name = JsonLdParseHelper.formatMultilingualField(place[EventPredicates.NAME]);
     formattedPlace.geo = (place[PlacePredicates.LONGITUDE] && place[PlacePredicates.LATITUDE]) ?
       { latitude: place[PlacePredicates.LATITUDE], longitude: place[PlacePredicates.LONGITUDE] } : undefined;
     formattedPlace.sameAs = SharedService.formatSameAsForRdf(place);
     const artsdataUri = SharedService.checkIfSameAsHasArtsdataIdentifier(formattedPlace.sameAs)
+    const uri = JsonLdParseHelper.formatEntityUri(context, place['@id']);
     if(artsdataUri){
       formattedPlace.uri = artsdataUri
     }
     else{
-      formattedPlace.uri = place['@id']
+      formattedPlace.uri = uri
 
     }
     if (place[PlacePredicates.ADDRESS]) {

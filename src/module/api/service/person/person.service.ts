@@ -18,16 +18,17 @@ export class PersonService {
     return await SharedService.syncEntityWithFootlight(calendarId, token, url, personToAdd, currentUserId);
   }
 
-  async formatAndPushJsonLdPerson(person: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string) {
+  async formatAndPushJsonLdPerson(person: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string, context: any) {
     const formattedPerson = new PersonDTO();
     formattedPerson.name = JsonLdParseHelper.formatMultilingualField(person[EventPredicates.NAME]);
     formattedPerson.sameAs = SharedService.formatSameAsForRdf(person);
     const artsdataUri = SharedService.checkIfSameAsHasArtsdataIdentifier(formattedPerson.sameAs)
+    const uri = JsonLdParseHelper.formatEntityUri(context, person['@id']);
     if(artsdataUri){
       formattedPerson.uri = artsdataUri
     }
     else{
-      formattedPerson.uri = person['@id']
+      formattedPerson.uri = uri
 
     }
     return await this._pushPersonToFootlight(footlightBaseUrl, calendarId, token, formattedPerson, currentUserId)
