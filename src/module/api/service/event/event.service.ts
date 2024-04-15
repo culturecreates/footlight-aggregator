@@ -443,6 +443,9 @@ export class EventService {
     offers = [].concat(offers);
 
     const aggregateOffer = offers.find(offer => offer.type === OfferConstants.AGGREGATE_OFFER);
+    if(typeof aggregateOffer.name.fr == 'object'){
+      aggregateOffer.name.fr = aggregateOffer.name.fr[0];
+    }
     const offerConfiguration = {
       name: aggregateOffer?.name,
       description: aggregateOffer?.description,
