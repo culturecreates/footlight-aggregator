@@ -24,4 +24,10 @@ jobs:
         run: npm run build
       - name: Import entities to footlight
         run: |
-          node ./dist/main-commander.js import:entities -u ${{vars.AGGREGATOR_USER_COMPLEXE_CULTUREL}} -p ${{secrets.AGGREGATOR_PASSWORD_COMPLEXE_CULTUREL}} -s http://kg.artsdata.ca/culture-creates/footlight/complexeculturelfelixleclerc-com -i https://api.cms.footlight.io -c 657199fea5ac3d006314ea92 -b 5 -m https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/complexe-culturel-cms-mapping.json
+          node ./dist/main-commander.js \
+          import:entities -u ${{vars.AGGREGATOR_USER_COMPLEXE_CULTUREL}} -p ${{secrets.AGGREGATOR_PASSWORD_COMPLEXE_CULTUREL}} \
+          -s http://kg.artsdata.ca/culture-creates/footlight/complexeculturelfelixleclerc-com \
+          -i https://api.cms.footlight.io \
+          -c 657199fea5ac3d006314ea92 \
+          -b 5 \
+          -m https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/complexe-culturel-cms-mapping.json
