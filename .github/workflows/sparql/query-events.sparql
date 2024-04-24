@@ -1,0 +1,209 @@
+# Used to view a list of event data as seen by Footlight CMS aggregator
+# Same as query_footlight_event_uri.sparql but this one is for a list of events
+
+PREFIX schema: <http://schema.org/>
+
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+construct {
+    ?event_adid a ?event_type .
+    ?event_adid schema:name ?name ;
+                schema:description ?description ;
+                schema:location ?place_coalesced ;
+                schema:startDate ?startDate ;
+                schema:endDate ?endDate ;
+                schema:offers ?offer, ?aggregate_offer ;
+                schema:organizer ?organizer_coalesced ;
+                schema:performer ?performer_coalesced ;
+                schema:url ?url_uri ;
+                schema:keywords ?keywords ;
+                schema:additionalType ?additionalType;
+                schema:recordedIn ?recordedIn_str ;
+                schema:audience ?audience ;
+                schema:sameAs ?self_adid , ?event , ?social_uri ;
+                schema:subEvent ?subEvent ;
+                schema:contactPoint ?contact_point .
+    ?place_coalesced a schema:Place .
+    ?subEvent  schema:startDate ?subEventStartDate ;
+               schema:endDate ?subEventEndDate .
+    ?contact_point  schema:name ?contact_name ;
+                    schema:url ?contact_url_uri ;
+                    schema:telephone ?contact_telephone ;
+                    schema:email ?contact_email .
+    ?offer ?offer_p ?offer_o .
+    ?aggregate_offer a schema:AggregateOffer ;
+        schema:additionalType ?aggregate_offer_type  ;
+        schema:name ?aggregate_offer_name ;
+        schema:url ?aggregate_offer_url_uri .
+    ?event_adid schema:image ?id_imageObject .
+    ?id_imageObject schema:url ?image_uri .
+
+    ?event_adid schema:location ?virtual_location .
+    ?virtual_location  ?virtual_location_prop ?virtual_location_obj .
+}
+where {
+    {
+        select ?event_adid (sample(?event) as ?event) where {
+            {  # Events with an ADID
+                select  ?event_adid ?event where {
+                    graph <source_placeholder> {
+                        ?event a schema:Event .
+                    }
+                    ?event_adid schema:sameAs ?event .
+                    filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
+                } 
+            }
+            UNION 
+            {  # Event Series with an ADID
+                select  ?event_adid ?event where {
+                    graph <source_placeholder> {
+                        ?event a schema:EventSeries .
+                    }
+                    ?event_adid schema:sameAs ?event .
+                    filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
+                } 
+            }
+            MINUS
+            { # Event series with subevents because we only want subevents
+                select ?event
+                    where {
+                        graph <source_placeholder> {
+                            ?event schema:subEvent ?subEvent  .
+                        } 
+                   } 
+            }
+        } 
+        group by ?event_adid
+        limit 10 offset 0
+    }
+    graph <source_placeholder> {
+        ?event a ?event_type ;
+            schema:name ?name ;
+            schema:startDate ?startDate .
+        optional {
+            ?event schema:endDate ?endDate .
+        }
+        optional {
+            ?event ^schema:subEvent*/schema:description ?description .
+        }
+        
+        optional {
+            ?event ^schema:subEvent*/schema:keywords ?keywords .
+        }
+        optional {
+            ?event ^schema:subEvent*/schema:additionalType ?additionalType .
+        }
+        optional {
+            ?event ^schema:subEvent*/schema:audience ?audience .
+        }
+        optional {
+            ?event ^schema:subEvent*/schema:url ?url_str .
+            bind(URI(str(?url_str)) as ?url_uri)
+        }
+        optional {
+            ?event ^schema:subEvent*/schema:image ?image .
+            bind(URI(concat(str(?event),"#imageObject")) as ?id_imageObject) 
+            bind(URI(?image) as ?image_uri)
+        } 
+        optional {
+            ?event ^schema:subEvent*/schema:offers ?offer .
+            ?offer a schema:Offer ;
+               ?offer_p ?offer_o .
+        }
+        optional {
+            ?event ^schema:subEvent*/schema:offers ?aggregate_offer .
+            ?aggregate_offer a schema:AggregateOffer .
+            OPTIONAL {
+                ?aggregate_offer schema:additionalType ?aggregate_offer_type_string .
+                bind(URI(CONCAT("http://schema.org/",?aggregate_offer_type_string)) as ?aggregate_offer_type)
+            }
+            OPTIONAL {
+                ?aggregate_offer schema:name ?aggregate_offer_name .
+            }
+            OPTIONAL {
+                ?aggregate_offer    schema:url ?aggregate_offer_url .
+                bind (URI(?aggregate_offer_url) as ?aggregate_offer_url_uri)
+            }
+        }
+        optional {
+            ?event ^schema:subEvent*/schema:sameAs ?social .
+            bind(URI(?social) as ?social_uri)
+        }
+        optional {
+            ?event ^schema:subEvent*/schema:recordedIn ?recordedIn .
+            bind(str(?recordedIn) as ?recordedIn_str)
+        }
+        
+        optional {
+            ?event ^schema:subEvent*/schema:contactPoint ?contact_point .
+            OPTIONAL {
+                ?contact_point schema:email ?contact_email .
+            }
+            OPTIONAL {
+                ?contact_point schema:telephone ?contact_telephone .
+            }
+            OPTIONAL {
+                ?contact_point schema:name ?contact_name .
+            }
+            OPTIONAL {
+                ?contact_point schema:url ?contact_url .
+                bind(URI(?contact_url) as ?contact_url_uri)
+            }
+        }
+         # Virtual Location
+        optional {
+            ?event schema:location ?virtual_location .
+            ?virtual_location a schema:VirtualLocation .
+            ?virtual_location ?virtual_location_prop ?virtual_location_obj .
+        }
+    }
+
+    # Add location
+    ?event_adid schema:sameAs/schema:location ?place  .
+    optional {
+        ?place_adid schema:sameAs ?place .
+        filter(contains(str(?place_adid),"kg.artsdata.ca/resource/K"))
+    }
+    optional {
+        ?place schema:sameAs ?place_adid2 .
+        filter(contains(str(?place_adid2),"kg.artsdata.ca/resource/K"))
+        bind(URI(?place_adid2) as ?place_adid2_uri)
+    } 
+    bind(coalesce(?place_adid, ?place_adid2_uri, ?place) as ?place_coalesced) 
+    filter(contains(str(?place_coalesced),"kg.artsdata.ca/resource/K"))
+
+
+    optional {
+        ?event_adid schema:sameAs/^schema:subEvent*/schema:organizer ?organizer .
+        filter(contains(str(?organizer),"kg.artsdata.ca/resource/K"))
+    }
+    optional {
+        ?event_adid schema:sameAs/^schema:subEvent*/schema:organizer ?organizer  .
+        ?organizer_adid schema:sameAs ?organizer .
+        filter(contains(str(?organizer_adid),"kg.artsdata.ca/resource/K"))
+    }
+    optional {
+        ?event_adid schema:sameAs/^schema:subEvent*/schema:organizer ?organizer  .
+        ?organizer schema:sameAs ?organizer_adid .
+        filter(contains(str(?organizer_adid),"kg.artsdata.ca/resource/K"))
+        bind(URI(?organizer_adid) as ?organizer_adid_uri)
+    }
+    bind(URI(coalesce(?organizer_adid, ?organizer_adid_uri, ?organizer)) as ?organizer_coalesced)
+    optional {
+        ?event_adid schema:sameAs/^schema:subEvent*/schema:performer ?performer .
+        filter(contains(str(?performer),"kg.artsdata.ca/resource/K"))
+    }
+    optional {
+        ?event_adid schema:sameAs/^schema:subEvent*/schema:performer ?performer .
+        ?performer_adid schema:sameAs ?performer .
+        filter(contains(str(?performer_adid),"kg.artsdata.ca/resource/K"))
+    }
+    optional {
+        ?event_adid schema:sameAs/^schema:subEvent*/schema:performer ?performer .
+        ?performer schema:sameAs ?performer_adid .
+        bind(URI(?performer_adid) as ?performer_adid_uri)
+        filter(contains(str(?performer_adid),"kg.artsdata.ca/resource/K"))
+    }
+    bind(URI(coalesce( ?performer_adid, ?performer_adid_uri, ?performer)) as ?performer_coalesced)
+
+    bind(?event_adid as ?self_adid)
+}
