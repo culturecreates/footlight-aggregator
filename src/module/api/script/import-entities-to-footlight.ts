@@ -9,7 +9,7 @@ interface BasicCommandOptions {
   calendar: string;
   footlightBaseUrl: string;
   batchSize: number;
-  mappingUrl:string;
+  mappingUrl?:string;
 }
 
 @Command({ name: "import:entities", description: "Import entities to footlight-calendar" })
@@ -105,7 +105,7 @@ export class ImportEntities extends CommandRunner {
   @Option({
     flags: "-m, --mapping-url [string]",
     description: "Mapping Url",
-    required: true
+    required: false
   })
   parseMappingUrl(val: string): string {
     return val;

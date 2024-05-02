@@ -110,6 +110,52 @@ export class EventService {
     this._loggerService.infoLogs(`Successfully synchronised ${totalCount} Events and linked entities.`);
   }
 
+  async syncEventSeries(calendarId: string, token: string, source: string, footlightBaseUrl: string, batchSize: number){
+    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
+    let offset = 0, hasNext = true, batch = 1, totalCount = 0, tries = 0, maxTry = 3;
+    do {
+      let events = await this._fetchEventSeriesFromArtsData(source, batchSize, offset);
+      if (events === null) {
+        if (tries !== maxTry) {
+          this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
+          tries++;
+          offset = offset + batchSize;
+          batch = batch + 1;
+          continue;
+        }
+        if (tries === maxTry) {
+          this._loggerService.errorLogs(`Reached Maximum tries fetching Events from Arts Data`);
+          break;
+        }
+      }
+      if (!events?.length) {
+        hasNext = false;
+      }
+      tries = 0;
+      const fetchedEventCount = events.length;
+      let syncCount = 0;
+      for (const event of events) {
+        syncCount++;
+        totalCount++;
+        try {
+          this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount})`);
+          const eventFormatted = await this.formatEventSeries(calendarId, token, event, footlightBaseUrl, currentUser.id)
+          await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
+          this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
+          ${JSON.stringify(eventFormatted.sameAs)}\n`);
+        } catch (e) {
+          this._loggerService
+            .errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). Error while adding Event 
+            ${JSON.stringify(event.url)}` + e);
+        }
+      }
+      offset = offset + batchSize;
+      batch = batch + 1;
+    } while (hasNext) ;
+    this._loggerService.infoLogs(`Successfully synchronised ${totalCount} Events and linked entities.`);
+
+  }
+
   checkExcludedValues(event: any, patternToConceptIdMapping: any, eventProperty: EventProperty){
     const patternToConceptIdMappingForTheField = patternToConceptIdMapping.find(concept => concept.fieldName === eventProperty);
     const eventPropertyValuesForTheField = this._getPropertyValues(patternToConceptIdMappingForTheField.inputProperty, event);
@@ -126,7 +172,7 @@ export class EventService {
   }
 
   async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string,
-                    patternToConceptIdMapping: any, existingEventTypeConceptIDs: any, existingAudienceConceptIDs: any) {
+                    patternToConceptIdMapping?: any, existingEventTypeConceptIDs?: any, existingAudienceConceptIDs?: any) {
     const {
       location: locations, performer, organizer, sponsor, alternateName, keywords, startDate, startDateTime, endDate,
       endDateTime, sameAs, subEvent, offers, contactPoint
@@ -197,9 +243,90 @@ export class EventService {
     return eventToAdd;
   }
 
+
+  async formatEventSeries(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string){
+    const {
+      location: locations, performer, organizer, sponsor, alternateName, keywords, startDate, startDateTime, endDate,
+      endDateTime, sameAs, subEvent, offers, contactPoint
+    } = event;
+
+    const location = locations?.Place;
+    const virtualLocation = locations?.VirtualLocation;
+    const virtualLocationName = virtualLocation ? virtualLocation.name : null;
+    const virtualLocationDescription = virtualLocation ? virtualLocation.description : null;
+    const virtualLocationUrl = virtualLocation ? virtualLocation.url : null;
+
+    const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
+      footlightBaseUrl, location, currentUserId) : undefined;
+    const performers = performer?.length ? await this._personOrganizationService
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer, currentUserId) : undefined;
+    const organizers = organizer?.length ? await this._personOrganizationService
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer, currentUserId) : undefined;
+    const collaborators = sponsor?.length ? await this._personOrganizationService
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId) : undefined;
+    delete event?.image?.uri;
+    const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
+
+    const eventToAdd = event;
+    delete eventToAdd.location;
+    eventToAdd.locationId = locationId ? { place: { entityId: locationId } } : locationId;
+    if (virtualLocation) {
+      eventToAdd.locationId.virtualLocation = {
+        name: virtualLocationName,
+        description: virtualLocationDescription,
+        url: {
+          uri: virtualLocationUrl
+        }
+      };
+    }
+
+    if(subEvent){
+      const subEvents = []
+      for (const sub of subEvent){
+        let subEventToAdd = {
+          startDateTime: sub.startDateTime,
+          endDateTime: sub.endDateTime,
+          name: sub.name,
+          description: sub.description,
+          sameAs: {uri: sub.uri, type: "ArtsdataIdentifier"},
+          locationId: sub.location? {place: {entityId: await this._placeService.getFootlightIdentifier(calendarId, token, footlightBaseUrl, sub.location.Place, currentUserId)}} : undefined
+        }
+        subEvents.push(subEventToAdd)
+      }
+      eventToAdd.subEvent = subEvents;
+    }
+
+    eventToAdd.performers = performers;
+    eventToAdd.organizers = organizers;
+    eventToAdd.collaborators = collaborators;
+    eventToAdd.keywords = this._formattedValues(keywords);
+    eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
+    eventToAdd.offerConfiguration = offers ? this._formatOffers(offers) : undefined;
+    eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
+    if (contactPoint) {
+      eventToAdd.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint;
+    }
+    if (isSingleDayEvent) {
+      delete eventToAdd.endDate;
+      delete eventToAdd.endDateTime;
+    }
+    return eventToAdd;
+  }
+
   private async _fetchEventsFromArtsData(source: string, batchSize: number, offset: number) {
     const limit = batchSize ? batchSize : 300;
     const url = ArtsDataUrls.EVENTS + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
+    this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
+    const artsDataResponse = await SharedService.fetchUrl(url);
+    if (artsDataResponse.status !== HttpStatus.OK) {
+      return null;
+    }
+    return artsDataResponse.data.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
+  }
+
+  private async _fetchEventSeriesFromArtsData(source: string, batchSize: number, offset: number) {
+    const limit = batchSize ? batchSize : 300;
+    const url = ArtsDataUrls.EVENT_SERIES + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
     this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
     if (artsDataResponse.status !== HttpStatus.OK) {
@@ -443,7 +570,7 @@ export class EventService {
     offers = [].concat(offers);
 
     const aggregateOffer = offers.find(offer => offer.type === OfferConstants.AGGREGATE_OFFER);
-    if(typeof aggregateOffer.name.fr == 'object'){
+    if(typeof aggregateOffer?.name?.fr == 'object'){
       aggregateOffer.name.fr = aggregateOffer.name.fr[0];
     }
     const offerConfiguration = {

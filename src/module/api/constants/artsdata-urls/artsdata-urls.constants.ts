@@ -1,5 +1,6 @@
 export const ArtsDataUrls = {
   EVENTS: "http://api.artsdata.ca/query?sparql=query_footlight_events&frame=event_footlight&format=json",
+  EVENT_SERIES: "https://api.artsdata.ca/query?sparql=https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/sparql/query-event-series.sparql&frame=event_footlight&format=json",
   PLACE_BY_ID: "http://api.artsdata.ca/query?adid=ARTS_DATA_ID&format=json&frame=ranked_place_footlight&sparql=ranked_place_footlight",
   PERSON_ORGANIZATION_BY_ID: "http://api.artsdata.ca/query?adid=ARTS_DATA_ID&format=json&frame=ranked_org_person_footlight&sparql=ranked_org_person_footlight",
 

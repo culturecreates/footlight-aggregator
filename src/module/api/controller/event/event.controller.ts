@@ -55,6 +55,39 @@ export class EventController {
     return { status: ApiStatusCode.SUCCESS, message: "Syncing Events and related entities completed." };
   }
 
+  @Put("sync-series")
+  @ApiOperation({ summary: "Sync event from Arts data to footlight." })
+  @ApiQuery({
+    name: "footlight-base-url",
+    description: "Select the environment",
+    required: true,
+    enum: Object.values(Environment)
+  })
+  @ApiQuery({
+    name: "calendar-id",
+    description: "**calendar-id (The calendar identifier)**",
+    required: true,
+    explode: true
+  })
+  @ApiQuery({
+    name: "source",
+    description: "**source (Graph)**",
+    required: true,
+    explode: true,
+    example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
+  })
+  async syncEventSeries(
+    @Req() request: Request,
+    @Query("footlight-base-url") footlightBaseUrl?: string,
+    @Query("calendar-id") calendarId?: string,
+    @Query("source") source?: string,
+    @Query("batch-size", ParseIntPipe) batchSize?: number
+  ) {
+    const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
+    await this._eventService.syncEventSeries(calendarId, token, source, footlightBaseUrl, batchSize);
+    return { status: ApiStatusCode.SUCCESS, message: "Syncing Event Series completed." };
+  }
+
 
   @Put(":id/sync")
   @ApiOperation({ summary: "Re-sync an event by id." })
