@@ -293,7 +293,7 @@ export class EventService {
         }
         subEvents.push(subEventToAdd)
       }
-      eventToAdd.subEvent = subEvents;
+      eventToAdd.subEventConfiguration = subEvents;
     }
 
     eventToAdd.performers = performers;
