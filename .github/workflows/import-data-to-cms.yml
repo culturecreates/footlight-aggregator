@@ -1,0 +1,61 @@
+name: Import data to CMS
+
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+        cms_referer_header:
+            required: true
+            type: string
+        aggregator_username:
+            required: true
+            type: string
+        aggregator_password:
+            required: true
+            type: string
+        source_url:
+            required: true
+            type: string
+        footlight_base_url:
+            required: true
+            type: string
+        footlight_calendar_id:
+            required: true
+            type: string
+        batch_size:
+            required: false
+            type: number
+            default: 5
+        mapping_file_url:
+            required: true
+            type: string
+    secrets:
+        datadog_token:
+            required: true
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+      - name: Make envfile
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.datadog_token }} 
+          envkey_ENABLING_LOG_TO_DATA_DOG: true 
+          envkey_CMS_REFERER_HEADER: ${{ vars.CMS_REFERER_HEADER }} 
+          file_name: .env 
+          fail_on_empty: false
+      - name: Build Footlight Aggregator
+        run: npm run build
+      - name: Import entities to footlight
+        run: |
+          node ./dist/main-commander.js  \
+            import:entities -u ${{inputs.aggregator_username}} -p ${{inputs.aggregator_password}} \
+            -s ${{inputs.source_url}} \
+            -i ${{inputs.footlight_base_url}} \
+            -c ${{inputs.footlight_calendar_id}} \
+            -b ${{inputs.batch_size}} \
+            -m ${{inputs.mapping_file_url}}
+   
