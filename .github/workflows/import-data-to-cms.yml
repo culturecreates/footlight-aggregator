@@ -10,9 +10,6 @@ on:
         aggregator_username:
             required: true
             type: string
-        aggregator_password:
-            required: true
-            type: string
         source_url:
             required: true
             type: string
@@ -30,6 +27,8 @@ on:
             required: true
             type: string
     secrets:
+        aggregator_password:
+          required: true
         datadog_token:
             required: true
 jobs:
@@ -52,7 +51,7 @@ jobs:
       - name: Import entities to footlight
         run: |
           node ./dist/main-commander.js  \
-            import:entities -u ${{inputs.aggregator_username}} -p ${{inputs.aggregator_password}} \
+            import:entities -u ${{inputs.aggregator_username}} -p ${{secrets.aggregator_password}} \
             -s ${{inputs.source_url}} \
             -i ${{inputs.footlight_base_url}} \
             -c ${{inputs.footlight_calendar_id}} \
