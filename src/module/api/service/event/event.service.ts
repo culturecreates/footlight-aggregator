@@ -284,8 +284,10 @@ export class EventService {
       const subEvents = []
       for (const sub of subEvent){
         let subEventToAdd = {
-          startDateTime: sub.startDateTime,
-          endDateTime: sub.endDateTime,
+          startDate: sub?.startDateTime?.split("T")[0],
+          startTime: sub?.startDateTime?.split("T")[1]?.slice(0,5),
+          endDate: sub?.endDateTime?.split("T")[0],
+          endTime: sub?.endDateTime?.split("T")[1]?.slice(0,5),
           name: sub.name,
           description: sub.description,
           sameAs: {uri: sub.uri, type: "ArtsdataIdentifier"},

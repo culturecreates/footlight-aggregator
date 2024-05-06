@@ -56,7 +56,7 @@ export class EventController {
   }
 
   @Put("sync-series")
-  @ApiOperation({ summary: "Sync event from Arts data to footlight." })
+  @ApiOperation({ summary: "Sync event series from Arts data to footlight." })
   @ApiQuery({
     name: "footlight-base-url",
     description: "Select the environment",
