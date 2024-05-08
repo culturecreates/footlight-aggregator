@@ -22,10 +22,10 @@ construct {
     ?id_geo schema:latitude ?latitude .
     ?id_geo a schema:GeoCoordinates .
     ?id schema:address ?address .
-    ?address schema:addressLocality ?addressLocality_en ,  ?addressLocality_fr .
-    ?address schema:addressCountry  ?addressCountry_en ,  ?addressCountry_fr .
-    ?address schema:addressRegion ?addressRegion_en , ?addressRegion_fr .
-    ?address schema:streetAddress ?streetAddress_en , ?streetAddress_fr .
+    ?address schema:addressLocality ?addressLocality .
+    ?address schema:addressCountry  ?addressCountry .
+    ?address schema:addressRegion ?addressRegion .
+    ?address schema:streetAddress ?streetAddress .
     ?address schema:postalCode ?postalCode .
     ?id schema:image ?id_imageObject .
     ?id_imageObject schema:url ?image_uri .
@@ -46,37 +46,25 @@ where {
         ?id ?p ?o .
         ?id schema:address ?address .
         OPTIONAL {
-            ?address schema:addressLocality ?addressLocality_en .
-            filter(lang(?addressLocality_en) = "en") 
+            ?address schema:addressLocality ?addressLocality .
+
         }
+       
         OPTIONAL {
-            ?address schema:addressLocality ?addressLocality_fr .
-            filter(lang(?addressLocality_fr) = "fr") 
-        }
-        OPTIONAL {
-            ?address schema:addressCountry ?addressCountry_en .
-            filter(lang(?addressCountry_en) = "en" ) 
+            ?address schema:addressCountry ?addressCountry .
+           
         } 
+       
         OPTIONAL {
-            ?address schema:addressCountry ?addressCountry_fr .
-            filter(lang(?addressCountry_fr) = "fr" )  
-        } 
-        OPTIONAL {
-            ?address schema:addressRegion ?addressRegion_en .
-            filter(lang(?addressRegion_en) = "en") 
+            ?address schema:addressRegion ?addressRegion .
+           
         }
+      
         OPTIONAL {
-            ?address schema:addressRegion ?addressRegion_fr .
-            filter(lang(?addressRegion_fr) = "fr") 
+            ?address schema:streetAddress ?streetAddress .
+           
         }
-        OPTIONAL {
-            ?address schema:streetAddress ?streetAddress_en .
-            filter(lang(?streetAddress_en) = "en")
-        }
-        OPTIONAL {
-            ?address schema:streetAddress ?streetAddress_fr .
-            filter(lang(?streetAddress_fr) = "fr") 
-        } 
+       
         OPTIONAL {
             ?address schema:postalCode ?postalCode .
         } 
