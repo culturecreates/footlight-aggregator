@@ -14,6 +14,8 @@
 PREFIX adr: <http://kg.artsdata.ca/resource/> 
 PREFIX schema: <http://schema.org/> 
 PREFIX ado: <http://kg.artsdata.ca/ontology/> 
+PREFIX onto: <http://www.ontotext.com/>
+
 construct {
     ?id ?p ?o .
     ?id a schema:Place .
@@ -30,53 +32,53 @@ construct {
     ?id schema:image ?id_imageObject .
     ?id_imageObject schema:url ?image_uri .
 }
+from  onto:explicit
 where {
-    graph ?g {
-        values ?p {
-            schema:name 
-            schema:description 
-            schema:alternateName 
-            schema:disambiguatingDescription
-            schema:sameAs
-            schema:url
-        }
-        values ?id {
-            <uri_placeholder>
-        }
-        ?id ?p ?o .
-        ?id schema:address ?address .
-        OPTIONAL {
-            ?address schema:addressLocality ?addressLocality .
-
-        }
-       
-        OPTIONAL {
-            ?address schema:addressCountry ?addressCountry .
-           
-        } 
-       
-        OPTIONAL {
-            ?address schema:addressRegion ?addressRegion .
-           
-        }
-      
-        OPTIONAL {
-            ?address schema:streetAddress ?streetAddress .
-           
-        }
-       
-        OPTIONAL {
-            ?address schema:postalCode ?postalCode .
-        } 
-        OPTIONAL {
-            ?id schema:longitude ?longitude ;
-                schema:latitude ?latitude .
-            bind(URI(concat(str(?id),"#GeoCoordinates")) as ?id_geo) 
-        } 
-        OPTIONAL {
-            ?id schema:image ?image  .
-            bind(URI(concat(str(?id),"#imageObject")) as ?id_imageObject) 
-            bind(URI(?image) as ?image_uri)
-        } 
+    values ?p {
+        schema:name 
+        schema:description 
+        schema:alternateName 
+        schema:disambiguatingDescription
+        schema:sameAs
+        schema:url
     }
+    values ?id {
+        <uri_placeholder>
+    }
+    ?id ?p ?o .
+    ?id schema:address ?address .
+    OPTIONAL {
+        ?address schema:addressLocality ?addressLocality .
+
+    }
+    
+    OPTIONAL {
+        ?address schema:addressCountry ?addressCountry .
+        
+    } 
+    
+    OPTIONAL {
+        ?address schema:addressRegion ?addressRegion .
+        
+    }
+    
+    OPTIONAL {
+        ?address schema:streetAddress ?streetAddress .
+        
+    }
+    
+    OPTIONAL {
+        ?address schema:postalCode ?postalCode .
+    } 
+    OPTIONAL {
+        ?id schema:longitude ?longitude ;
+            schema:latitude ?latitude .
+        bind(URI(concat(str(?id),"#GeoCoordinates")) as ?id_geo) 
+    } 
+    OPTIONAL {
+        ?id schema:image ?image  .
+        bind(URI(concat(str(?id),"#imageObject")) as ?id_imageObject) 
+        bind(URI(?image) as ?image_uri)
+    } 
+   
 }
