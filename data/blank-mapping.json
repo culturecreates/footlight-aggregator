@@ -3,5 +3,13 @@
       "inputProperty": [
         "additionalType"
       ],
-      "mapping": { "Exposition": ["65b2575b8468f40064831051"]}
+      "mapping": {},
+    {
+      "fieldName": "audience",
+      "inputProperty":[
+        "audience"
+      ],
+      "mapping":{
+      }
+    }
 } ]
