@@ -1,6 +1,16 @@
-# Used to view a list of event data as seen by Footlight CMS aggregator
-# Change to v2 is to allow external uri for Place
-# Same as query-footlight-event-uri-2.sparql but this one is for a list of events
+# Used to debug a single event as seen by Footlight CMS aggregator
+#
+# INPUTS: 
+#   uri_placeholder: URI of the event to debug  
+#   source_placeholder: Graph where the event is stored
+# 
+# CHANGE LOG: 
+# - v2 is to allow external uri for Place
+#
+# NOTES:
+# - Not used in production
+# - Used in Footlight console to debug
+# - Same logic as query-events-2.sparql except for a single uri
 
 PREFIX schema: <http://schema.org/>
 
@@ -16,7 +26,6 @@ construct {
                 schema:performer ?performer_coalesced ;
                 schema:url ?url_uri ;
                 schema:keywords ?keywords ;
-                schema:additionalType ?additionalType;
                 schema:recordedIn ?recordedIn_str ;
                 schema:audience ?audience ;
                 schema:sameAs ?self_adid , ?event , ?social_uri ;
@@ -42,70 +51,26 @@ construct {
 }
 where {
     {
-        select ?event_adid (sample(?event) as ?event) where {
-            {
-                select  ?event_adid ?event where {
-                    graph <source_placeholder> {
-                        ?event a schema:Event .
-                    }
-                    ?event_adid schema:sameAs ?event .
-                    filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
-                } 
+        select ?event_adid  ?event where {
+            values ?event {
+                <uri_placeholder> 
             }
-            UNION 
-            {
-                select  ?event_adid ?event where {
-                    graph <source_placeholder> {
-                        ?event a schema:EventSeries .
-                    }
-                    ?event_adid schema:sameAs ?event .
-                    filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
-                } 
-            }
-            MINUS
-            {
-                select ?event
-                    where {
-                        graph <source_placeholder> {
-                            ?event a schema:EventSeries ;
-                                schema:name ?name ;
-                                schema:subEvent ?subEvent  .
-                            ?subEvent  schema:location ?subLocation .
-                        } 
-                    } group by ?event ?name  having (count( distinct ?subLocation) > 1)
-            }
-            MINUS 
-            {
-                select ?event 
-                where {
-                    graph <source_placeholder> {
-                        ?event a schema:EventSeries ;
-                            schema:name ?name ;
-                            schema:subEvent ?subEvent  .
-                        ?subEvent  schema:startDate ?startDate ; schema:endDate ?endDate .
-                        bind ( STRDT(strbefore(str(?startDate),"T"), xsd:date ) as ?startDay )
-                        bind (  STRDT(strbefore(str(?endDate),"T"), xsd:date )   as ?endDay )
-                    } 
-                    filter (?startDay != ?endDay )
-                } 
-            }
-        } 
-        group by ?event_adid
-        limit 10 offset 0
+            ?event_adid schema:sameAs ?event .
+            filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
+        }
     }
     graph <source_placeholder> {
         ?event a ?event_type ;
-            schema:name ?name ;
-            schema:description ?description ;
-            schema:startDate ?startDate .
+               schema:name ?name ;
+               schema:startDate ?startDate .
+        optional {
+            ?event schema:description ?description .
+        }
         optional {
             ?event schema:endDate ?endDate .
         }
         optional {
             ?event schema:keywords ?keywords .
-        }
-        optional {
-            ?event schema:additionalType ?additionalType .
         }
         optional {
             ?event schema:audience ?audience .
@@ -177,8 +142,6 @@ where {
             ?virtual_location ?virtual_location_prop ?virtual_location_obj .
         }
     }
-
-    # Add location
     ?event_adid schema:sameAs/schema:location ?place  .
     optional {
         ?place_adid schema:sameAs ?place .
@@ -191,7 +154,6 @@ where {
     } 
     bind(coalesce(?place_adid, ?place_adid2_uri, ?place) as ?place_coalesced) 
    # filter(contains(str(?place_coalesced),"kg.artsdata.ca/resource/K"))
-
 
     optional {
         ?event_adid schema:sameAs/schema:organizer ?organizer .
@@ -225,6 +187,5 @@ where {
         filter(contains(str(?performer_adid),"kg.artsdata.ca/resource/K"))
     }
     bind(URI(coalesce( ?performer_adid, ?performer_adid_uri, ?performer)) as ?performer_coalesced)
-
     bind(?event_adid as ?self_adid)
-} 
+}

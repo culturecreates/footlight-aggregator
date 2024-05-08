@@ -1,4 +1,4 @@
-# Used to view a list of events and event series data as seen by Footlight CMS aggregator
+# Experimental: Using Crow's Theatre graph to view a list of events and event series data as seen by Footlight CMS aggregator
 PREFIX schema: <http://schema.org/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 construct {

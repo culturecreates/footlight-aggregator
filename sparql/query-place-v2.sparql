@@ -1,4 +1,16 @@
-#  Place with external URI for Footlight CMS 
+# Used to get place data to load into CMS
+#
+# INPUTS: 
+#   uri_placeholder: the place with complete external uri starting with http
+#
+# CHANGE LOG: 
+#  - v2 allows external uri for Place
+#
+# NOTES:
+# - When loading events into CMS, the aggregator code checks each event's location.
+# - If a location is not already in CMS then aggregator calls this query to load the place data.
+# - The Place URI can be a K-number or an external URI
+
 PREFIX adr: <http://kg.artsdata.ca/resource/> 
 PREFIX schema: <http://schema.org/> 
 PREFIX ado: <http://kg.artsdata.ca/ontology/> 
@@ -18,7 +30,6 @@ construct {
     ?id schema:image ?id_imageObject .
     ?id_imageObject schema:url ?image_uri .
 }
-#select * 
 where {
     graph ?g {
         values ?p {
@@ -30,7 +41,6 @@ where {
             schema:url
         }
         values ?id {
-           #  <http://kg.footlight.io/resource/0075f62b-f357-4222-aec9-8f8f8b9103ae>
             <uri_placeholder>
         }
         ?id ?p ?o .
