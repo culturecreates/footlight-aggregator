@@ -1,15 +1,16 @@
-[ {
-      "fieldName": "additionalType",
-      "inputProperty": [
-        "additionalType"
-      ],
-      "mapping": {},
-    {
-      "fieldName": "audience",
-      "inputProperty":[
-        "audience"
-      ],
-      "mapping":{
-      }
-    }
-} ]
+[
+  {
+    "fieldName": "additionalType",
+    "inputProperty": [
+      "additionalType"
+    ],
+    "mapping": {}
+  },
+  {
+    "fieldName": "audience",
+    "inputProperty": [
+      "audience"
+    ],
+    "mapping": {}
+  }
+]
