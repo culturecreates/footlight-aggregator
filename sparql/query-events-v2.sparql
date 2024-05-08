@@ -28,7 +28,7 @@ construct {
                 schema:performer ?performer_coalesced ;
                 schema:url ?url_uri ;
                 schema:keywords ?keywords ;
-                schema:additionalType ?additionalType;
+                schema:additionalType ?additionalType ;
                 schema:recordedIn ?recordedIn_str ;
                 schema:audience ?audience ;
                 schema:sameAs ?self_adid , ?event , ?social_uri ;
@@ -108,8 +108,10 @@ where {
     graph <source_placeholder> {
         ?event a ?event_type ;
             schema:name ?name ;
-            schema:description ?description ;
             schema:startDate ?startDate .
+        optional {
+            ?event schema:description ?description .
+        }
         optional {
             ?event schema:endDate ?endDate .
         }
@@ -204,7 +206,6 @@ where {
     bind(coalesce(?place_adid, ?place_adid2_uri, ?place) as ?place_coalesced) 
    # filter(contains(str(?place_coalesced),"kg.artsdata.ca/resource/K"))
 
-
     optional {
         ?event_adid schema:sameAs/schema:organizer ?organizer .
         filter(contains(str(?organizer),"kg.artsdata.ca/resource/K"))
@@ -237,6 +238,5 @@ where {
         filter(contains(str(?performer_adid),"kg.artsdata.ca/resource/K"))
     }
     bind(URI(coalesce( ?performer_adid, ?performer_adid_uri, ?performer)) as ?performer_coalesced)
-
     bind(?event_adid as ?self_adid)
-} 
+}

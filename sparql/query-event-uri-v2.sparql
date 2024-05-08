@@ -26,6 +26,7 @@ construct {
                 schema:performer ?performer_coalesced ;
                 schema:url ?url_uri ;
                 schema:keywords ?keywords ;
+                schema:additionalType ?additionalType ;
                 schema:recordedIn ?recordedIn_str ;
                 schema:audience ?audience ;
                 schema:sameAs ?self_adid , ?event , ?social_uri ;
@@ -51,7 +52,7 @@ construct {
 }
 where {
     {
-        select ?event_adid  ?event where {
+        select ?event_adid ?event where {
             values ?event {
                 <uri_placeholder> 
             }
@@ -61,8 +62,8 @@ where {
     }
     graph <source_placeholder> {
         ?event a ?event_type ;
-               schema:name ?name ;
-               schema:startDate ?startDate .
+            schema:name ?name ;
+            schema:startDate ?startDate .
         optional {
             ?event schema:description ?description .
         }
@@ -71,6 +72,9 @@ where {
         }
         optional {
             ?event schema:keywords ?keywords .
+        }
+        optional {
+            ?event schema:additionalType ?additionalType .
         }
         optional {
             ?event schema:audience ?audience .
@@ -142,6 +146,8 @@ where {
             ?virtual_location ?virtual_location_prop ?virtual_location_obj .
         }
     }
+
+    # Add location
     ?event_adid schema:sameAs/schema:location ?place  .
     optional {
         ?place_adid schema:sameAs ?place .
