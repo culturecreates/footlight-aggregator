@@ -63,8 +63,7 @@ export class PlaceService {
     for (const place of places) {
       syncCount++;
       try {
-        let id = place.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
-        id = place.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX_HTTPS, "");
+        let id = place.url
         const placeFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PLACE_BY_ID);
         const placeFormatted = await this._formatPlaceFetched(calendarId, token, footlightBaseUrl,
           currentUser.id, placeFetched);
