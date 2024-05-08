@@ -1,0 +1,83 @@
+#  Place with external URI for Footlight CMS 
+PREFIX adr: <http://kg.artsdata.ca/resource/> 
+PREFIX schema: <http://schema.org/> 
+PREFIX ado: <http://kg.artsdata.ca/ontology/> 
+construct {
+    ?id ?p ?o .
+    ?id a schema:Place .
+    ?id schema:geo ?id_geo .
+    ?id_geo schema:longitude ?longitude .
+    ?id_geo schema:latitude ?latitude .
+    ?id_geo a schema:GeoCoordinates .
+    ?id schema:address ?address .
+    ?address schema:addressLocality ?addressLocality_en ,  ?addressLocality_fr .
+    ?address schema:addressCountry  ?addressCountry_en ,  ?addressCountry_fr .
+    ?address schema:addressRegion ?addressRegion_en , ?addressRegion_fr .
+    ?address schema:streetAddress ?streetAddress_en , ?streetAddress_fr .
+    ?address schema:postalCode ?postalCode .
+    ?id schema:image ?id_imageObject .
+    ?id_imageObject schema:url ?image_uri .
+}
+#select * 
+where {
+    graph ?g {
+        values ?p {
+            schema:name 
+            schema:description 
+            schema:alternateName 
+            schema:disambiguatingDescription
+            schema:sameAs
+            schema:url
+        }
+        values ?id {
+            <http://kg.footlight.io/resource/0075f62b-f357-4222-aec9-8f8f8b9103ae>
+        }
+        ?id ?p ?o .
+        ?id schema:address ?address .
+        OPTIONAL {
+            ?address schema:addressLocality ?addressLocality_en .
+            filter(lang(?addressLocality_en) = "en") 
+        }
+        OPTIONAL {
+            ?address schema:addressLocality ?addressLocality_fr .
+            filter(lang(?addressLocality_fr) = "fr") 
+        }
+        OPTIONAL {
+            ?address schema:addressCountry ?addressCountry_en .
+            filter(lang(?addressCountry_en) = "en" ) 
+        } 
+        OPTIONAL {
+            ?address schema:addressCountry ?addressCountry_fr .
+            filter(lang(?addressCountry_fr) = "fr" )  
+        } 
+        OPTIONAL {
+            ?address schema:addressRegion ?addressRegion_en .
+            filter(lang(?addressRegion_en) = "en") 
+        }
+        OPTIONAL {
+            ?address schema:addressRegion ?addressRegion_fr .
+            filter(lang(?addressRegion_fr) = "fr") 
+        }
+        OPTIONAL {
+            ?address schema:streetAddress ?streetAddress_en .
+            filter(lang(?streetAddress_en) = "en")
+        }
+        OPTIONAL {
+            ?address schema:streetAddress ?streetAddress_fr .
+            filter(lang(?streetAddress_fr) = "fr") 
+        } 
+        OPTIONAL {
+            ?address schema:postalCode ?postalCode .
+        } 
+        OPTIONAL {
+            ?id schema:longitude ?longitude ;
+                schema:latitude ?latitude .
+            bind(URI(concat(str(?id),"#GeoCoordinates")) as ?id_geo) 
+        } 
+        OPTIONAL {
+            ?id schema:image ?image  .
+            bind(URI(concat(str(?id),"#imageObject")) as ?id_imageObject) 
+            bind(URI(?image) as ?image_uri)
+        } 
+    }
+}
