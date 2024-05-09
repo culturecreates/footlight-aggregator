@@ -49,24 +49,16 @@ where {
     ?id schema:address ?address .
     OPTIONAL {
         ?address schema:addressLocality ?addressLocality .
-
     }
-    
     OPTIONAL {
         ?address schema:addressCountry ?addressCountry .
-        
     } 
-    
     OPTIONAL {
         ?address schema:addressRegion ?addressRegion .
-        
     }
-    
     OPTIONAL {
         ?address schema:streetAddress ?streetAddress .
-        
     }
-    
     OPTIONAL {
         ?address schema:postalCode ?postalCode .
     } 
