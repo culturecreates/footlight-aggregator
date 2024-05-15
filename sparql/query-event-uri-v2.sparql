@@ -8,6 +8,11 @@
 # - v2 is to allow external uri for Place
 #
 # NOTES:
+# - To use, pass this SPARQL Github raw URL as a parm to Artsdata query API:
+#   https://api.artsdata.ca/query?frame=event_footlight&format=json
+#       &sparql={{THIS_SPARQL_GITHUB_URL}}
+#       &uri={{URI}}
+#       &source={{GRAPH}}
 # - Not used in production
 # - Used in Footlight console to debug
 # - Same logic as query-events-2.sparql except for a single uri
