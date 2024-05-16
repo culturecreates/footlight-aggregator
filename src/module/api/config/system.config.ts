@@ -8,5 +8,5 @@ export const APPLICATION: { PORT: number } = {
 };
 
 export const HEADER: { CMS_REFERER_HEADER : string } = {
-    CMS_REFERER_HEADER: env.CMS_REFERER_HEADER || undefined 
+    CMS_REFERER_HEADER: env.CMS_REFERER_HEADER || "https://cms.footlight.io/"
 }
