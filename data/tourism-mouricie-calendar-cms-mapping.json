@@ -1,0 +1,41 @@
+[
+    {
+      "fieldName": "additionalType",
+      "inputProperty": [
+        "additionalType"
+      ],
+      "mapping": {
+        "Exposition": ["6645a17c9f43170063f9d6d3"],
+        "Lecture": ["6645a17c9f43170063f9d6dd"],
+        "Atelier": ["6645a17c9f43170063f9d6c6"],
+        "Spectacle": ["65ba04108468f40064841b25"],
+        "Conference": ["6645a17c9f43170063f9d6cd"],
+        "Festival": ["6645a17c9f43170063f9d6d5"],
+        "Rencontre d'artiste": ["6645a17c9f43170063f9d6e1"],
+        "Chanson":["6645273a9f43170063f9b23e"],
+        "Cinéma": ["6645a17c9f43170063f9d6c9"],
+        "Musique": ["6645a17c9f43170063f9d6df"],
+        "Improvisation": ["6645a17c9f43170063f9d6d9"],
+        "Conte":["6645a17c9f43170063f9d6cf"],
+        "Variétés": ["6645a17c9f43170063f9d6e9"],
+        "Danse": ["6645a17c9f43170063f9d6d1"],
+        "Théâtre": ["6645a17c9f43170063f9d6e7"],
+        "Humour": ["6645a17c9f43170063f9d6d7"],
+        "Cirque": ["6645a17c9f43170063f9d6cb"],
+        "Lancement": ["6645a17c9f43170063f9d6db"],
+        "Salon": ["6645a17c9f43170063f9d6e3"],
+        "Visite guidée": ["6645a17c9f43170063f9d6eb"],
+        "Symposium": ["6645a17c9f43170063f9d6e5"],
+        "Indéterminé": ["6645a17c9f43170063f9d6ed"]
+      }
+    },
+    {
+      "fieldName": "audience",
+      "inputProperty":[
+        "audience"
+      ],
+      "mapping":{
+        "Indéterminé": ["6645a24c9f43170063f9f31b"]
+      }
+    }
+  ]
