@@ -1,6 +1,6 @@
 import { Controller, Inject, Param, ParseIntPipe, Put, Query, Req, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
-import { ApiResponseEnum, ApiStatusCode } from "../../enum";
+import { ApiResponseEnum, ApiStatusCode, EventType } from "../../enum";
 import { EventService } from "../../service";
 import { AuthHeaderExtractor } from "../../helper";
 import { Request } from "express";
@@ -34,7 +34,8 @@ export class EventController {
   @ApiQuery({
     name: "mapping-url",
     description: "**URL to fetch data for mapping keywords to event type taxonomy**",
-    example: "https://culturecreates.github.io/footlight-aggregator/data/ville-de-gatineau-cms-mapping.json"
+    example: "https://culturecreates.github.io/footlight-aggregator/data/ville-de-gatineau-cms-mapping.json",
+    required: false
   })
   @ApiQuery({
     name: "source",
@@ -43,51 +44,24 @@ export class EventController {
     explode: true,
     example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
   })
+  @ApiQuery({
+    name:"event-type",
+    description:"Event Type to fetch data",
+    required:false,
+    enum: Object.values(EventType)
+  })
   async syncEvents(
     @Req() request: Request,
     @Query("footlight-base-url") footlightBaseUrl?: string,
     @Query("calendar-id") calendarId?: string,
     @Query("source") source?: string,
     @Query("batch-size", ParseIntPipe) batchSize?: number,
+    @Query("event-type") eventType?: EventType,
     @Query("mapping-url") mappingUrl?: string): Promise<ApiResponseEnum> {
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-    await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl, batchSize, mappingUrl);
+    await this._eventService.syncEntities(token, calendarId, source, footlightBaseUrl, batchSize, mappingUrl, eventType);
     return { status: ApiStatusCode.SUCCESS, message: "Syncing Events and related entities completed." };
   }
-
-  @Put("sync-series")
-  @ApiOperation({ summary: "Sync event series from Arts data to footlight." })
-  @ApiQuery({
-    name: "footlight-base-url",
-    description: "Select the environment",
-    required: true,
-    enum: Object.values(Environment)
-  })
-  @ApiQuery({
-    name: "calendar-id",
-    description: "**calendar-id (The calendar identifier)**",
-    required: true,
-    explode: true
-  })
-  @ApiQuery({
-    name: "source",
-    description: "**source (Graph)**",
-    required: true,
-    explode: true,
-    example: "http://kg.artsdata.ca/culture-creates/footlight/toutculture-ca"
-  })
-  async syncEventSeries(
-    @Req() request: Request,
-    @Query("footlight-base-url") footlightBaseUrl?: string,
-    @Query("calendar-id") calendarId?: string,
-    @Query("source") source?: string,
-    @Query("batch-size", ParseIntPipe) batchSize?: number
-  ) {
-    const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-    await this._eventService.syncEventSeries(calendarId, token, source, footlightBaseUrl, batchSize);
-    return { status: ApiStatusCode.SUCCESS, message: "Syncing Event Series completed." };
-  }
-
 
   @Put(":id/sync")
   @ApiOperation({ summary: "Re-sync an event by id." })
