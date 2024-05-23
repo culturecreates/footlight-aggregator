@@ -1,0 +1,21 @@
+name: Run Minotaure Aggregator
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * 4" # Run at 4:00 AM ET every Thursday
+
+jobs:
+  push-to-cms:
+    uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main
+    with:
+        cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
+        aggregator_username: ${{ vars.AGGREGATOR_USER_MINOTAURE }}
+        source_url: http://kg.artsdata.ca/culture-creates/footlight/minotaure-ca
+        footlight_base_url: https://api.cms.footlight.io
+        footlight_calendar_id: 6308ef4a7f771f00431d939a
+        batch_size: 5
+        mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/minotaure-mapping.json
+    secrets:
+      aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_MINOTAURE }}
+      datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
