@@ -1,0 +1,27 @@
+[
+    {
+      "fieldName": "additionalType",
+      "inputProperty": [
+        "keywords"
+      ],
+      "mapping": {
+        "MusicPerformance": [
+          "63977c83ca21d5004e7f542d"
+        ],
+        "DEFAULT": [
+          "641db9322831190064570718"
+        ]
+      }
+    },
+    {
+      "fieldName": "audience",
+      "inputProperty": [
+        "audience"
+      ],
+      "mapping": {
+        "DEFAULT": [
+          "63ceb9c4230627006f5670c3"
+        ]
+      }
+    }
+  ]
