@@ -5,7 +5,7 @@
         "additionalType"
       ],
       "mapping": {
-        "http://kg.artsdata.ca/resource/MusicPerformance": [
+        ".*MusicPerformance$": [
           "63977c83ca21d5004e7f542d"
         ],
         "DEFAULT": [
