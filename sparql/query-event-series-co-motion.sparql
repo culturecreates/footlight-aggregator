@@ -42,16 +42,6 @@ where {
             {
                 select  ?event_adid ?event where {
                     graph <http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca> {
-                        ?event a schema:Event .
-                    }
-                    ?event_adid schema:sameAs ?event .
-                    filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
-                } 
-            }
-            UNION 
-            {
-                select  ?event_adid ?event where {
-                    graph <http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca> {
                         ?event a schema:EventSeries .
                     }
                     ?event_adid schema:sameAs ?event .
