@@ -24,7 +24,7 @@ on:
             type: number
             default: 5
         mapping_file_url:
-            required: true
+            required: false
             type: string
     secrets:
         aggregator_password:
