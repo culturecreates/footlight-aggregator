@@ -182,6 +182,7 @@ export class EventService {
     const collaborators = sponsor?.length ? await this._personOrganizationService
       .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId) : undefined;
     delete event?.image?.uri;
+    event.image = [event.image]
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
 
     const eventToAdd = event;
