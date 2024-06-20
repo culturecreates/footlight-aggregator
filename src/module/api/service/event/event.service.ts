@@ -182,6 +182,7 @@ export class EventService {
     const collaborators = sponsor?.length ? await this._personOrganizationService
       .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId) : undefined;
     delete event?.image?.uri;
+    event.image.isMain = true
     event.image = [event.image]
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
 
@@ -225,7 +226,7 @@ export class EventService {
     const url = artsDataUrl + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
     this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
-    if (artsDataResponse.status !== HttpStatus.OK) {
+    if (artsDataResponse?.status !== HttpStatus.OK) {
       return null;
     }
     return artsDataResponse.data.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
