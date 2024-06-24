@@ -1,0 +1,27 @@
+PREFIX schema: <http://schema.org/>
+insert {
+    graph <http://kg.artsdata.ca/culture-creates/artsdata-planet-ville-de-laval/calendrier-activites> {
+        
+   
+    ?event schema:sameAs ?minted .
+    }
+}
+ # select *
+where {
+    {
+        select ?event (sample(?minted_event) as ?minted)  where {
+            graph <http://kg.artsdata.ca/culture-creates/artsdata-planet-ville-de-laval/calendrier-activites> {
+                ?event a schema:Event ;
+                       schema:startDate ?startDate ;
+                     #  schema:name ?name ;
+                       schema:location ?location .
+            }
+            ?minted_event a schema:Event ;
+                          schema:startDate ?startDate ;
+                       #   schema:name ?name ;
+                          schema:location ?location .
+            filter(?event != ?minted_event)
+            filter(contains(str(?minted_event),"artsdata.ca/resource"))
+        } group by ?event 
+    }
+}
