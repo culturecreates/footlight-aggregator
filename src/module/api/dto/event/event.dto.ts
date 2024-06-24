@@ -10,7 +10,7 @@ export class EventDTO {
 
     name: MultilingualString;
     description?: MultilingualString;
-    image: Image;
+    image: Image[];
     sameAs: SameAs[];
     locationId?: Location;
     url?: UriString;

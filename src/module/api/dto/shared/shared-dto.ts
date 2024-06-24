@@ -5,4 +5,5 @@ export class Image {
     large?: IdentifierString;
     thumbnail?: IdentifierString;
     url?: UriString;
+    isMain?: boolean;
 }

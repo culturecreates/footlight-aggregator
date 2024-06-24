@@ -591,7 +591,7 @@ export class EventService {
         || this.convertDateToISO(endDate[0]["@value"])
     }
     if (image) {
-      formattedEvent.image = { url: { uri: image } };
+      formattedEvent.image = [{ url: { uri: image } , isMain: true}];
     }
     if (additionalType) {
       const additionalTypeIds = await this._getConceptIdByNameForRdf(additionalType, patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE);
@@ -766,7 +766,7 @@ export class EventService {
     formattedEvent.uri = event.url;
     formattedEvent.offerConfiguration =
 
-  this._formatCaligramOffers(event.ticket_url, event.price_currency, event.prices, event.price_type);
+    this._formatCaligramOffers(event.ticket_url, event.price_currency, event.prices, event.price_type);
     if (event.tags) {
       let additionalTypeNames = [];
       for (const tag of event.tags) {
@@ -775,7 +775,7 @@ export class EventService {
       formattedEvent.additionalType = await this._getConceptIdByNameForRdf(additionalTypeNames, patternToConceptIdMapping,
         existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE);
     }
-    formattedEvent.image = { url: { uri: event.image.sizes.original } };
+    formattedEvent.image = [{ url: { uri: event.image.sizes.original }, isMain: true }];
     formattedEvent.sameAs = [{ uri: event.url, type: "ExternalSourceIdentifier" }];
     if (event.venue) {
       const location = await this._placeService.formatAndPushCaligramPlaces(event.venue, token, footlightBaseUrl,
