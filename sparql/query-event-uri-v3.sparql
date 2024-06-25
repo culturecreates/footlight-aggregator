@@ -59,7 +59,7 @@ where {
     {
         select ?event_adid ?event where {
             values ?event {
-                <https://www.laval.ca/Pages/Fr/Calendrier/dehors-culture-payzages-parc-prevost.aspx#2024-07-12T14-00> 
+                <uri_placeholder> 
             }
             OPTIONAL {
                 ?event_adid1 schema:sameAs ?event .
@@ -73,7 +73,7 @@ where {
             filter(BOUND(?event_adid))
         }				
     }
-    graph <http://kg.artsdata.ca/culture-creates/artsdata-planet-ville-de-laval/calendrier-activites> {
+    graph <source_placeholder> {
         ?event a ?event_type ;
                schema:name ?name ;
                schema:startDate ?startDate .
