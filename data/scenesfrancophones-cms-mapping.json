@@ -1,0 +1,74 @@
+[
+    {
+      "entityClass" : "EVENT",
+      "fieldName": "additionalType",
+      "inputProperty": [
+        "additionalType"
+      ],
+      "mapping": {
+        "Book Fair": ["667d94abc35c7400635ee6bb"],
+        "Salon du livre": ["667d94abc35c7400635ee6bb"],
+        "Conference": ["667d94abc35c7400635ee6bf"],
+        "Conférence": ["667d94abc35c7400635ee6bf"],
+        "Cultural activity": ["667d94abc35c7400635ee6c1"],
+        "Activité culturelle": ["667d94abc35c7400635ee6c1"],
+        "Exhibition": ["667d94abc35c7400635ee6c3"],
+        "Exposition": ["667d94abc35c7400635ee6c3"],
+        "Festival": ["667d94abc35c7400635ee6c5"],
+        "Festival": ["667d94abc35c7400635ee6c5"],
+        "Guided tour": ["667d94abc35c7400635ee6c7"],
+        "Visite guidée": ["667d94abc35c7400635ee6c7"],
+        "Launch": ["667d94abc35c7400635ee6c9"],
+        "Lancement": ["667d94abc35c7400635ee6c9"],
+        "Market/Fair":["667d94abc35c7400635ee6cb"],
+        "Marché/Foire":["667d94abc35c7400635ee6cb"],
+        "Opening": ["667d94abc35c7400635ee6cd"],
+        "Vernissage": ["667d94abc35c7400635ee6cd"],
+        "Outdoors": ["667d94abc35c7400635ee6cf"],
+        "Plein air": ["667d94abc35c7400635ee6cf"],
+        "Performance": ["667d94abc35c7400635ee6d1"],
+        "Performance": ["667d94abc35c7400635ee6d1"],
+        "Reading":["667d94abc35c7400635ee6d3"],
+        "Lecture à haute voi":["667d94abc35c7400635ee6d3"],
+        "Screening": ["667d94abc35c7400635ee6d5"],
+        "Projection cinématographique": ["667d94abc35c7400635ee6d5"],
+        "Show": ["667d94abc35c7400635ee6d7"],
+        "Spectacle": ["667d94abc35c7400635ee6d7"],
+        "Symposium": ["667d94abc35c7400635ee6d9"],
+        "Symposium": ["667d94abc35c7400635ee6d9"],
+        "Workshop": ["667d94abc35c7400635ee6dd"],
+        "Atelier": ["667d94abc35c7400635ee6dd"],
+        "Indéterminé": ["6687cde4200e900063ed173b"],
+        "Not specified": ["6687cde4200e900063ed173b"]
+      }
+    },
+    {
+      "entityClass" : "EVENT",
+      "fieldName": "audience",
+      "inputProperty":[
+        "audience"
+      ],
+      "mapping":{
+        "Indéterminé": ["6687cdab200e900063ed168d"],
+        "Adult": ["667d959cc35c7400635ee7c6"],
+        "General public": ["667c5bd02a23ca0060e06be6"],
+        "Professional": ["667da5edc35c7400635ef515"],
+        "Teenager": ["667d959cc35c7400635ee7c4"],
+        "Family": ["667ef7ec9d0a290064b5db13"],
+        "Not specified": ["6687cdab200e900063ed168d"],
+        "Adulte": ["667d959cc35c7400635ee7c6"],
+        "Grand public": ["667c5bd02a23ca0060e06be6"],
+        "Professionnel": ["667da5edc35c7400635ef515"],
+        "Adolescent": ["667d959cc35c7400635ee7c4"],
+        "Familial": ["667ef7ec9d0a290064b5db13"]
+      }
+    },
+  {
+    "entityType" : "PLACE",
+    "inputProperty":["addressRegion"],
+    "includePattern" : ["NB"],
+    "excludePattern" : []
+
+  }
+
+  ]
