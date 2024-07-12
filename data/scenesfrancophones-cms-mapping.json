@@ -15,7 +15,6 @@
         "Exhibition": ["667d94abc35c7400635ee6c3"],
         "Exposition": ["667d94abc35c7400635ee6c3"],
         "Festival": ["667d94abc35c7400635ee6c5"],
-        "Festival": ["667d94abc35c7400635ee6c5"],
         "Guided tour": ["667d94abc35c7400635ee6c7"],
         "Visite guidée": ["667d94abc35c7400635ee6c7"],
         "Launch": ["667d94abc35c7400635ee6c9"],
@@ -27,14 +26,12 @@
         "Outdoors": ["667d94abc35c7400635ee6cf"],
         "Plein air": ["667d94abc35c7400635ee6cf"],
         "Performance": ["667d94abc35c7400635ee6d1"],
-        "Performance": ["667d94abc35c7400635ee6d1"],
         "Reading":["667d94abc35c7400635ee6d3"],
         "Lecture à haute voi":["667d94abc35c7400635ee6d3"],
         "Screening": ["667d94abc35c7400635ee6d5"],
         "Projection cinématographique": ["667d94abc35c7400635ee6d5"],
         "Show": ["667d94abc35c7400635ee6d7"],
         "Spectacle": ["667d94abc35c7400635ee6d7"],
-        "Symposium": ["667d94abc35c7400635ee6d9"],
         "Symposium": ["667d94abc35c7400635ee6d9"],
         "Workshop": ["667d94abc35c7400635ee6dd"],
         "Atelier": ["667d94abc35c7400635ee6dd"],
@@ -64,7 +61,7 @@
       }
     },
   {
-    "entityType" : "PLACE",
+    "entityType" : "POSTAL_ADDRESS",
     "inputProperty":["addressRegion"],
     "includePattern" : ["NB"],
     "excludePattern" : []
