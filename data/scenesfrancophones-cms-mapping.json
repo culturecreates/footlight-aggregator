@@ -1,6 +1,6 @@
 [
     {
-      "entityClass" : "EVENT",
+      "entityType" : "EVENT",
       "fieldName": "additionalType",
       "inputProperty": [
         "additionalType"
@@ -40,7 +40,7 @@
       }
     },
     {
-      "entityClass" : "EVENT",
+      "entityType" : "EVENT",
       "fieldName": "audience",
       "inputProperty":[
         "audience"
