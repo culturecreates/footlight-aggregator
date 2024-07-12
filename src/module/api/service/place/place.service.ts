@@ -1,14 +1,14 @@
-import { PostalAddressService, SharedService } from '../../service';
-import { PlaceDTO } from '../../dto';
-import { ArtsDataConstants, ArtsDataUrls, CaligramUrls } from '../../constants';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { FootlightPaths } from '../../constants/footlight-urls';
-import { LoggerService } from '../logger';
-import {
-  EventPredicates,
-  PlacePredicates,
-} from '../../constants/artsdata-urls/rdf-types.constants';
-import { JsonLdParseHelper } from '../../helper';
+import { PostalAddressService, SharedService } from "../../service";
+import { PlaceDTO } from "../../dto";
+import { ArtsDataConstants, ArtsDataUrls, CaligramUrls } from "../../constants";
+import { forwardRef, Inject, Injectable } from "@nestjs/common";
+import { FootlightPaths } from "../../constants/footlight-urls";
+import { LoggerService } from "../logger";
+import { EventPredicates, PlacePredicates } from "../../constants/artsdata-urls/rdf-types.constants";
+import { JsonLdParseHelper } from "../../helper";
+import { FilterCondition } from "../../model/FilterCondition.model";
+import { EntityType } from "../../enum";
+import { FilterEntityHelper } from "../../helper/filter-entity.helper";
 
 @Injectable()
 export class PlaceService {
@@ -18,105 +18,69 @@ export class PlaceService {
     @Inject(forwardRef(() => SharedService))
     private readonly _sharedService: SharedService,
     @Inject(forwardRef(() => LoggerService))
-    private readonly _loggerService: LoggerService,
-  ) {}
+    private readonly _loggerService: LoggerService
+  ) {
+  }
 
   private synchronisedPlaceMap = new Map();
 
-  async getPlaceDetailsFromArtsData(
-    calendarId: string,
-    footlightBaseUrl: string,
-    token: string,
-    artsDataId: string,
-    currentUserId: string,
-  ) {
-    if (artsDataId.startsWith('K')) {
-      artsDataId = 'http://kg.artsdata.ca/resource/' + artsDataId;
+  async getPlaceDetailsFromArtsData(calendarId: string, footlightBaseUrl: string, token: string, artsDataId: string,
+                                    currentUserId: string, conditions?: FilterCondition[]) {
+    if (artsDataId.startsWith("K")) {
+      artsDataId = "http://kg.artsdata.ca/resource/" + artsDataId;
     }
-    const placeFetched = await SharedService.fetchFromArtsDataById(
-      artsDataId,
-      ArtsDataUrls.PLACE_BY_ID,
-    );
+    const placeFetched = await SharedService.fetchFromArtsDataById(artsDataId, ArtsDataUrls.PLACE_BY_ID);
     if (!placeFetched) {
       return undefined;
     }
-    return await this._formatPlaceFetched(
-      calendarId,
-      token,
-      footlightBaseUrl,
-      currentUserId,
-      placeFetched,
-    );
+
+    const { address } = placeFetched;
+    const placeConditions = conditions
+      .filter(condition => condition.entityType === EntityType.PLACE);
+    const validatedPlace = placeConditions?.length ?
+      FilterEntityHelper.validateEntity(EntityType.PLACE, placeFetched, conditions) : true;
+
+    const postalAddressConditions = conditions
+      .filter(condition => condition.entityType === EntityType.POSTAL_ADDRESS);
+    const validatedPostalAddress = postalAddressConditions?.length ? FilterEntityHelper
+      .validateEntity(EntityType.POSTAL_ADDRESS, address, conditions) : true;
+    if (!validatedPlace || !validatedPostalAddress) {
+      return null;
+    }
+
+    return await this._formatPlaceFetched(calendarId, token, footlightBaseUrl, currentUserId, placeFetched);
   }
 
-  async pushPlaceToFootlight(
-    footlightBaseUrl: string,
-    calendarId: string,
-    token: string,
-    placeToAdd: PlaceDTO,
-    currentUserId: string,
-  ) {
+  async pushPlaceToFootlight(footlightBaseUrl: string, calendarId: string, token: string, placeToAdd: PlaceDTO,
+                             currentUserId: string) {
     const url = footlightBaseUrl + FootlightPaths.ADD_PLACE;
-    return await SharedService.syncEntityWithFootlight(
-      calendarId,
-      token,
-      url,
-      placeToAdd,
-      currentUserId,
-    );
+    return await SharedService.syncEntityWithFootlight(calendarId, token, url, placeToAdd, currentUserId);
   }
 
-  async getFootlightIdentifier(
-    calendarId: string,
-    token: string,
-    footlightBaseUrl: string,
-    artsDataUri: string,
-    currentUserId: string,
-  ) {
-    artsDataUri = typeof artsDataUri != 'string' ? artsDataUri[0] : artsDataUri;
-    const artsDataId = artsDataUri.replace(
-      ArtsDataConstants.RESOURCE_URI_PREFIX,
-      '',
-    );
+  async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string,
+                               currentUserId: string, conditions?: FilterCondition[]) {
+    artsDataUri = typeof artsDataUri != "string" ? artsDataUri[0] : artsDataUri;
+    const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
     const placeIdFromMap = this.synchronisedPlaceMap.get(artsDataId);
+
     if (placeIdFromMap) {
-      this._loggerService.infoLogs(
-        `\tThe Place with Artsdata id :${artsDataId} is already synced during this process.`,
-      );
+      this._loggerService.infoLogs(`\tThe Place with Artsdata id :${artsDataId} is already synced during this process.`);
       return placeIdFromMap;
     }
-    const placeDetails = await this.getPlaceDetailsFromArtsData(
-      calendarId,
-      footlightBaseUrl,
-      token,
-      artsDataId,
-      currentUserId,
-    );
+
+    const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token,
+      artsDataId, currentUserId, conditions);
+
     if (placeDetails) {
-      const placeId = await this.pushPlaceToFootlight(
-        footlightBaseUrl,
-        calendarId,
-        token,
-        placeDetails,
-        currentUserId,
-      );
+      const placeId = await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId);
       this.synchronisedPlaceMap.set(artsDataId, placeId);
       return placeId;
     }
-    return undefined;
+    return placeDetails;
   }
 
-  async syncPlaces(
-    token: any,
-    calendarId: string,
-    source: string,
-    footlightBaseUrl: string,
-  ) {
-    const currentUser = await this._sharedService.fetchCurrentUser(
-      footlightBaseUrl,
-      token,
-      calendarId,
-    );
+  async syncPlaces(token: any, calendarId: string, source: string, footlightBaseUrl: string) {
+    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const places = await this._fetchPlacesFromArtsData(source);
     const fetchedPlacesCount = places.length;
     let syncCount = 0;
@@ -125,108 +89,56 @@ export class PlaceService {
       try {
         let id = place.url;
         this._loggerService.infoLogs(`Treating syncPlace ${id}`);
-        const placeFetched = await SharedService.fetchFromArtsDataById(
-          id,
-          ArtsDataUrls.PLACE_BY_ID,
-        );
-        const placeFormatted = await this._formatPlaceFetched(
-          calendarId,
-          token,
-          footlightBaseUrl,
-          currentUser.id,
-          placeFetched,
-        );
-        await this.pushPlaceToFootlight(
-          footlightBaseUrl,
-          calendarId,
-          token,
-          placeFormatted,
-          currentUser.id,
-        );
-        this._loggerService
-          .infoLogs(`(${syncCount}/${fetchedPlacesCount}) Synchronised place with id: 
-        ${JSON.stringify(placeFormatted.sameAs)}`);
+        const placeFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PLACE_BY_ID);
+        const placeFormatted = await this._formatPlaceFetched(calendarId, token, footlightBaseUrl,
+          currentUser.id, placeFetched);
+        await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeFormatted, currentUser.id);
+        this._loggerService.infoLogs(`(${syncCount}/${fetchedPlacesCount}) 
+        Synchronised place with id:${JSON.stringify(placeFormatted.sameAs)}`);
       } catch (e) {
-        this._loggerService.errorLogs(
-          `(${syncCount}/${fetchedPlacesCount}) Error while adding Place ${place.url}` +
-            e,
-        );
+        this._loggerService.errorLogs(`(${syncCount}/${fetchedPlacesCount}) Error while adding Place ${place.url}` + e);
       }
     }
   }
 
   private async _fetchPlacesFromArtsData(source: string) {
-    this._loggerService.infoLogs(
-      `Fetching places from Arts data. Source: ${source}`,
-    );
-    const query = encodeURI(
-      ArtsDataConstants.SPARQL_QUERY_FOR_PLACES.replace('GRAPH_NAME', source),
-    );
+    this._loggerService.infoLogs(`Fetching places from Arts data. Source: ${source}`);
+    const query = encodeURI(ArtsDataConstants.SPARQL_QUERY_FOR_PLACES.replace("GRAPH_NAME", source));
     const url = ArtsDataUrls.ARTSDATA_SPARQL_ENDPOINT;
-    const artsDataResponse = await SharedService.postUrl(
-      url,
-      'query=' + query,
-      {},
-    );
+    const artsDataResponse = await SharedService.postUrl(url, "query=" + query, {});
     return artsDataResponse.data.results.bindings.map((adid) => {
       return { url: adid.adid.value };
     });
   }
 
-  private async _formatPlaceFetched(
-    calendarId: string,
-    token: string,
-    footlightBaseUrl: string,
-    currentUserId,
-    placeFetched: any,
-  ) {
+  private async _formatPlaceFetched(calendarId: string, token: string, footlightBaseUrl: string, currentUserId,
+                                    placeFetched: any) {
     const { address, alternateName } = placeFetched;
     delete placeFetched.address;
-    const postalAddressId = !!address
-      ? await this._postalAddressService.getFootlightIdentifier(
-          calendarId,
-          token,
-          footlightBaseUrl,
-          address,
-          currentUserId,
-        )
-      : undefined;
-    const placeToAdd: PlaceDTO = placeFetched;
-    placeToAdd.alternateName = alternateName?.length
-      ? SharedService.formatAlternateNames(alternateName)
-      : undefined;
 
-    placeToAdd.postalAddressId = postalAddressId
-      ? { entityId: postalAddressId }
-      : undefined;
+    const postalAddressId = !!address ? await this._postalAddressService.getFootlightIdentifier(calendarId, token,
+      footlightBaseUrl, address, currentUserId) : undefined;
+    const placeToAdd: PlaceDTO = placeFetched;
+    placeToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : undefined;
+
+    placeToAdd.postalAddressId = postalAddressId ? { entityId: postalAddressId } : undefined;
     return placeToAdd;
   }
 
-  async formatAndPushJsonLdPlaces(
-    place: any,
-    token: string,
-    calendarId: string,
-    footlightBaseUrl: string,
-    currentUserId: string,
-    postalAddresses: any,
-    context: any,
-  ) {
+  async formatAndPushJsonLdPlaces(place: any, token: string, calendarId: string, footlightBaseUrl: string,
+                                  currentUserId: string, postalAddresses: any, context: any) {
     const formattedPlace = new PlaceDTO();
-    formattedPlace.name = JsonLdParseHelper.formatMultilingualField(
-      place[EventPredicates.NAME],
-    );
+    formattedPlace.name = JsonLdParseHelper.formatMultilingualField(place[EventPredicates.NAME]);
     formattedPlace.geo =
       place[PlacePredicates.LONGITUDE] && place[PlacePredicates.LATITUDE]
         ? {
-            latitude: place[PlacePredicates.LATITUDE],
-            longitude: place[PlacePredicates.LONGITUDE],
-          }
+          latitude: place[PlacePredicates.LATITUDE],
+          longitude: place[PlacePredicates.LONGITUDE]
+        }
         : undefined;
     formattedPlace.sameAs = SharedService.formatSameAsForRdf(place);
-    const artsdataUri = SharedService.checkIfSameAsHasArtsdataIdentifier(
-      formattedPlace.sameAs,
-    );
-    const uri = JsonLdParseHelper.formatEntityUri(context, place['@id']);
+    const artsdataUri = SharedService.checkIfSameAsHasArtsdataIdentifier(formattedPlace.sameAs);
+    const uri = JsonLdParseHelper.formatEntityUri(context, place["@id"]);
     if (artsdataUri) {
       formattedPlace.uri = artsdataUri;
     } else {
@@ -235,62 +147,35 @@ export class PlaceService {
     if (place[PlacePredicates.ADDRESS]) {
       const postalAddressDetails = postalAddresses.find(
         (postalAddress) =>
-          postalAddress['@id'] === place[PlacePredicates.ADDRESS]['@id'],
+          postalAddress["@id"] === place[PlacePredicates.ADDRESS]["@id"]
       );
       formattedPlace.postalAddressId =
-        await this._postalAddressService.formatAndPushJsonLdPostalAddress(
-          postalAddressDetails,
-          footlightBaseUrl,
-          calendarId,
-          token,
-          currentUserId,
-        );
+        await this._postalAddressService.formatAndPushJsonLdPostalAddress(postalAddressDetails, footlightBaseUrl,
+          calendarId, token, currentUserId);
     }
-    return await this.pushPlaceToFootlight(
-      footlightBaseUrl,
-      calendarId,
-      token,
-      formattedPlace,
-      currentUserId,
-    );
+    return await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, formattedPlace, currentUserId);
   }
 
-  async formatAndPushCaligramPlaces(
-    place: any,
-    token: any,
-    footlightBaseUrl: string,
-    calendarId: string,
-    currentUserId: string,
-  ) {
+  async formatAndPushCaligramPlaces(place: any, token: any, footlightBaseUrl: string, calendarId: string,
+                                    currentUserId: string) {
     const formattedPlace = new PlaceDTO();
     formattedPlace.name = { fr: place.name };
     formattedPlace.description = { fr: place.description };
     formattedPlace.geo = {
       latitude: place.latitude,
-      longitude: place.longitude,
+      longitude: place.longitude
     };
     formattedPlace.contactPoint = {
       telephone: place.telephone,
-      url: place.website_url,
+      url: place.website_url
     };
     formattedPlace.postalAddressId =
-      await this._postalAddressService.formatAndPushCaligramPostalAddress(
-        place,
-        token,
-        footlightBaseUrl,
-        calendarId,
-        currentUserId,
-      );
+      await this._postalAddressService.formatAndPushCaligramPostalAddress(place, token, footlightBaseUrl, calendarId,
+        currentUserId);
     formattedPlace.uri = CaligramUrls.VENUE_URL + place.id;
     formattedPlace.sameAs = [
-      { uri: formattedPlace.uri, type: 'ExternalSourceIdentifier' },
+      { uri: formattedPlace.uri, type: "ExternalSourceIdentifier" }
     ];
-    return await this.pushPlaceToFootlight(
-      footlightBaseUrl,
-      calendarId,
-      token,
-      formattedPlace,
-      currentUserId,
-    );
+    return await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, formattedPlace, currentUserId);
   }
 }

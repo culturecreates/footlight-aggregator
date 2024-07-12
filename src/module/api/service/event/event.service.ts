@@ -12,6 +12,7 @@ import { PostalAddressService } from "../postal-address";
 import { TaxonomyService } from "../taxonomy";
 import {
   AggregateOfferType,
+  EntityType,
   EventProperty,
   EventType,
   HttpMethodsEnum,
@@ -57,13 +58,13 @@ export class EventService {
   private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string,
                             batchSize: number, mappingUrl: string, eventType?: EventType) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
-    let offset = 0, hasNext = true, batch = 1, totalCount = 0, tries = 0,
-      maxTry = 3;
-    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
-    const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
-    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping,
+    let offset = 0, hasNext = true, batch = 1, totalCount = 0, errorCount = 0, tries = 0,
+      maxTry = 3, importedCount = 0, skippedCount = 0;
+    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, EntityType.EVENT);
+    const mappingFile = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
+    const existingEventTypeConceptIDs = this._validateConceptIds(mappingFile,
       EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
-    const existingAudienceConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.AUDIENCE,
+    const existingAudienceConceptIDs = this._validateConceptIds(mappingFile, EventProperty.AUDIENCE,
       this.audienceConceptMap);
 
     do {
@@ -92,32 +93,39 @@ export class EventService {
         totalCount++;
         try {
           this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount})`);
-          this.checkExcludedValues(event, patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE)
-          this.checkExcludedValues(event, patternToConceptIdMapping, EventProperty.AUDIENCE)
+          this.checkExcludedValues(event, mappingFile, EventProperty.ADDITIONAL_TYPE);
+          this.checkExcludedValues(event, mappingFile, EventProperty.AUDIENCE);
           const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
-            patternToConceptIdMapping, existingEventTypeConceptIDs, existingAudienceConceptIDs);
+            mappingFile, mappingFile, existingEventTypeConceptIDs, existingAudienceConceptIDs);
+          if (eventFormatted === null) {
+            skippedCount++;
+          } else {
+            importedCount++;
+          }
           await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
           this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
-          ${JSON.stringify(eventFormatted.sameAs)}\n`);
+          ${JSON.stringify(eventFormatted?.sameAs)}\n`);
         } catch (e) {
-          this._loggerService
-            .errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). Error while adding Event 
-            ${JSON.stringify(event.url)}` + e);
+          errorCount++;
+          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). 
+          Error while adding Event ${JSON.stringify(event.url)}` + e);
         }
       }
       offset = offset + batchSize;
       batch = batch + 1;
     } while (hasNext) ;
-    this._loggerService.infoLogs(`Successfully synchronised ${totalCount} Events and linked entities.`);
+    this._loggerService.infoLogs(`Importing events successfully completed.
+    Stats: Total Events: ${totalCount}, Imported: ${importedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}
+    `);
   }
 
 
-  checkExcludedValues(event: any, patternToConceptIdMapping: any, eventProperty: EventProperty){
+  checkExcludedValues(event: any, patternToConceptIdMapping: any, eventProperty: EventProperty) {
     const patternToConceptIdMappingForTheField = patternToConceptIdMapping?.find(concept => concept.fieldName === eventProperty);
     const eventPropertyValuesForTheField = this._getPropertyValues(patternToConceptIdMappingForTheField?.inputProperty, event);
-    for(const eventPropertyValueForAdditionalType of eventPropertyValuesForTheField){
-      if(patternToConceptIdMappingForTheField.excludeValues?.some(excludedValue => excludedValue.toLowerCase() === eventPropertyValueForAdditionalType.toLowerCase())){
-        Exception.badRequest("Excluded value found")
+    for (const eventPropertyValueForAdditionalType of eventPropertyValuesForTheField) {
+      if (patternToConceptIdMappingForTheField.excludeValues?.some(excludedValue => excludedValue.toLowerCase() === eventPropertyValueForAdditionalType.toLowerCase())) {
+        Exception.badRequest("Excluded value found");
       }
     }
   }
@@ -128,13 +136,14 @@ export class EventService {
   }
 
   async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string,
-                    patternToConceptIdMapping?: any, existingEventTypeConceptIDs?: any, existingAudienceConceptIDs?: any) {
+                    mappingFile: any, patternToConceptIdMapping?: any, existingEventTypeConceptIDs?: any,
+                    existingAudienceConceptIDs?: any) {
     const {
       location: locations, performer, organizer, sponsor, alternateName, keywords, startDate, startDateTime, endDate,
       endDateTime, sameAs, subEvent, offers, contactPoint, type
     } = event;
     if (subEvent) {
-      if(type == EventType.EVENT){
+      if (type == EventType.EVENT) {
         const dates = subEvent.map(event => event.startDateTime);
         const customDates = [];
         const timezone = "Canada/Eastern";
@@ -147,20 +156,19 @@ export class EventService {
         event.recurringEvent = { customDates, frequency: "CUSTOM" };
         this._loggerService.infoLogs(event.recurringEvent);
       }
-      if(type == EventType.EVENT_SERIES){
-        const subEvents = []
-        for (const sub of subEvent){
+      if (type == EventType.EVENT_SERIES) {
+        const subEvents = [];
+        for (const sub of subEvent) {
           let subEventToAdd = {
             startDate: sub?.startDateTime?.split("T")[0],
-            startTime: sub?.startDateTime?.split("T")[1]?.slice(0,5),
+            startTime: sub?.startDateTime?.split("T")[1]?.slice(0, 5),
             endDate: sub?.endDateTime?.split("T")[0],
-            endTime: sub?.endDateTime?.split("T")[1]?.slice(0,5),
+            endTime: sub?.endDateTime?.split("T")[1]?.slice(0, 5),
             name: sub.name,
             description: sub.description,
-            sameAs: {uri: sub.uri, type: "ArtsdataIdentifier"},
-            locationId: sub.location? {place: {entityId: await this._placeService.getFootlightIdentifier(calendarId, token, footlightBaseUrl, sub.location.Place, currentUserId)}} : undefined
-          }
-          subEvents.push(subEventToAdd)
+            sameAs: { uri: sub.uri, type: "ArtsdataIdentifier" }
+          };
+          subEvents.push(subEventToAdd);
         }
         event.subEventConfiguration = subEvents;
       }
@@ -174,7 +182,13 @@ export class EventService {
     const virtualLocationUrl = virtualLocation ? virtualLocation.url : null;
 
     const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
-      footlightBaseUrl, location, currentUserId) : undefined;
+      footlightBaseUrl, location, currentUserId, mappingFile) : undefined;
+    if (locationId === null || !locationId) {
+      this._loggerService.infoLogs(`Skipping this event: ${event.uri},`
+        + `as the location is not included within the include condition or part of exclude condition.`);
+      return null;
+    }
+
     const performers = performer?.length ? await this._personOrganizationService
       .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer, currentUserId) : undefined;
     const organizers = organizer?.length ? await this._personOrganizationService
@@ -182,8 +196,10 @@ export class EventService {
     const collaborators = sponsor?.length ? await this._personOrganizationService
       .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId) : undefined;
     delete event?.image?.uri;
-    event.image.isMain = true
-    event.image = [event.image]
+    event.image = [event.image];
+    if (event.image) {
+      event.image.isMain = event.image;
+    }
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
 
     const eventToAdd = event;
@@ -222,7 +238,7 @@ export class EventService {
 
   private async _fetchEventsFromArtsData(source: string, batchSize: number, offset: number, eventType?: EventType) {
     const limit = batchSize ? batchSize : 300;
-    const artsDataUrl = eventType? eventType == EventType.EVENT_SERIES ? ArtsDataUrls.EVENT_SERIES : ArtsDataUrls.EVENTS: ArtsDataUrls.EVENTS;
+    const artsDataUrl = eventType ? eventType == EventType.EVENT_SERIES ? ArtsDataUrls.EVENT_SERIES : ArtsDataUrls.EVENTS : ArtsDataUrls.EVENTS;
     const url = artsDataUrl + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
     this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
@@ -324,13 +340,13 @@ export class EventService {
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string,
                       mappingUrl: string) {
-    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
+    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, EntityType.EVENT);
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const existingEvent = await this._fetchEventFromFootlight(token, calendarId, eventId, footlightBaseUrl);
-    const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
-    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping,
+    const mappingFile = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
+    const existingEventTypeConceptIDs = this._validateConceptIds(mappingFile,
       EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
-    const existingAudienceConceptIDs = this._validateConceptIds(patternToConceptIdMapping,
+    const existingAudienceConceptIDs = this._validateConceptIds(mappingFile,
       EventProperty.AUDIENCE, this.audienceConceptMap);
     if (!existingEvent.modifiedByUserId || existingEvent.modifiedByUserId === currentUser.id) {
       const sameAs = existingEvent.sameAs;
@@ -361,7 +377,7 @@ export class EventService {
 
       const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
       const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id,
-        patternToConceptIdMapping, existingEventTypeConceptIDs, existingAudienceConceptIDs);
+        mappingFile, existingEventTypeConceptIDs, existingAudienceConceptIDs);
       return await SharedService.patchEventInFootlight(calendarId, token, footlightBaseUrl, eventId, eventFormatted);
     } else {
       this._loggerService.infoLogs("Entity cannot be modified. Since this entity is updated latest by a different user.");
@@ -457,8 +473,8 @@ export class EventService {
 
   private _validateConceptIds(patternToConceptIdMapping: any, propertyName: string, existingConceptsMap: string[]) {
     let patternToConceptIdMappingForTheField = patternToConceptIdMapping?.find(concept => concept.fieldName === propertyName).mapping;
-    const conceptIds = patternToConceptIdMappingForTheField? 
-      Object.values(patternToConceptIdMappingForTheField).flat(): undefined;
+    const conceptIds = patternToConceptIdMappingForTheField ?
+      Object.values(patternToConceptIdMappingForTheField).flat() : undefined;
     const existingConceptIds = this._getAllConceptIds(existingConceptsMap);
     this._loggerService.infoLogs(`Validating identifiers from the mapping file for ${propertyName}`);
     return conceptIds?.filter((entityId) => {
@@ -478,7 +494,7 @@ export class EventService {
     offers = [].concat(offers);
 
     const aggregateOffer = offers.find(offer => offer.type === OfferConstants.AGGREGATE_OFFER);
-    if(typeof aggregateOffer?.name?.fr == 'object'){
+    if (typeof aggregateOffer?.name?.fr == "object") {
       aggregateOffer.name.fr = aggregateOffer.name.fr[0];
     }
     const offerConfiguration = {
@@ -534,7 +550,7 @@ export class EventService {
   }
 
   async exportJsonLdData(jsonLd: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string, mappingFiles: any) {
-    const data = jsonLd["@graph"]
+    const data = jsonLd["@graph"];
     const context = jsonLd["@context"];
     let jsonLdPlaces = data.filter(item => item["@type"] === EntityPredicates.PLACE);
     let jsonLdPostalAddresses = data.filter(item => item["@type"] === EntityPredicates.POSTAL_ADDRESS);
@@ -543,7 +559,7 @@ export class EventService {
     let jsonLdOffers = data.filter(item => item["@type"] === EntityPredicates.AGGREGATE_OFFER);
     let jsonLdContactPoints = data.filter(item => item["@type"] === EntityPredicates.CONTACT_POINT);
     let events = [];
-    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
+    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, EntityType.EVENT);
     for (const node of data) {
       if (node["@type"] == EntityPredicates.EVENT) {
         await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl,
@@ -584,14 +600,14 @@ export class EventService {
     }
     if (startDate) {
       formattedEvent.startDateTime = this.convertDateToISO(startDate["@value"])
-        || this.convertDateToISO(startDate[0]["@value"])
+        || this.convertDateToISO(startDate[0]["@value"]);
     }
     if (endDate) {
       formattedEvent.endDateTime = this.convertDateToISO(endDate["@value"])
-        || this.convertDateToISO(endDate[0]["@value"])
+        || this.convertDateToISO(endDate[0]["@value"]);
     }
     if (image) {
-      formattedEvent.image = [{ url: { uri: image } , isMain: true}];
+      formattedEvent.image = [{ url: { uri: image }, isMain: true }];
     }
     if (additionalType) {
       const additionalTypeIds = await this._getConceptIdByNameForRdf(additionalType, patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE);
@@ -640,7 +656,7 @@ export class EventService {
         formattedEvent.collaborators = [{ entityId: participantId, type: participantType }];
       }
     }
-    const uri = JsonLdParseHelper.formatEntityUri(context, event["@id"])
+    const uri = JsonLdParseHelper.formatEntityUri(context, event["@id"]);
     formattedEvent.sameAs = [{ uri: uri, type: "ExternalSourceIdentifier" }];
     formattedEvent.uri = uri;
     await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, formattedEvent, currentUserId);
@@ -707,7 +723,7 @@ export class EventService {
   }
 
   private convertDateToISO(date: string) {
-    return moment.tz(date, 'YYYY-MM-DD HH:mm ', 'Canada/Eastern').toISOString();
+    return moment.tz(date, "YYYY-MM-DD HH:mm ", "Canada/Eastern").toISOString();
   }
 
   async importCaligram(token: any, footlightBaseUrl: string, calendarId: string, mappingFileUrl: string) {
@@ -755,7 +771,7 @@ export class EventService {
   async formatAndPushCaligramEvents(event: any, token: any, footlightBaseUrl: string,
                                     calendarId: string, currentUserId: string, mappingFileUrl: string) {
     let formattedEvent = new EventDTO();
-        await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, "EVENT");
+    await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, EntityType.EVENT);
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFileUrl))?.data;
     const existingEventTypeConceptIDs =
       this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
@@ -766,7 +782,7 @@ export class EventService {
     formattedEvent.uri = event.url;
     formattedEvent.offerConfiguration =
 
-    this._formatCaligramOffers(event.ticket_url, event.price_currency, event.prices, event.price_type);
+      this._formatCaligramOffers(event.ticket_url, event.price_currency, event.prices, event.price_type);
     if (event.tags) {
       let additionalTypeNames = [];
       for (const tag of event.tags) {
