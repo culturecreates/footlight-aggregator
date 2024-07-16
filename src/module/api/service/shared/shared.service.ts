@@ -19,7 +19,7 @@ export class SharedService {
   public static async fetchFromArtsDataById(id: string, baseUrl: string) {
     const url = baseUrl.replace(ArtsDataConstants.ARTS_DATA_ID.toString(), id);
     const artsDataResponse = await this.fetchUrl(url);
-    return artsDataResponse.data.data?.[0];
+    return artsDataResponse.data?.data?.[0];
   }
 
   public static async fetchUrl(url: string, headers?: any) {
