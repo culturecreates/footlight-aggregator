@@ -3,7 +3,7 @@ name: Run Ville de Laval Aggregator
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 8 * * 4"  # Run at 1:00 AM ET every Thursday
+    - cron: "0 8 * * 2"  # Run at 1:00 AM ET every Tuesday
 
 jobs:
   push-to-cms:
