@@ -142,6 +142,7 @@ export class EventService {
       location: locations, performer, organizer, sponsor, alternateName, keywords, startDate, startDateTime, endDate,
       endDateTime, sameAs, subEvent, offers, contactPoint, type
     } = event;
+
     if (subEvent) {
       if (type == EventType.EVENT) {
         const dates = subEvent.map(event => event.startDateTime);
@@ -157,20 +158,12 @@ export class EventService {
         this._loggerService.infoLogs(event.recurringEvent);
       }
       if (type == EventType.EVENT_SERIES) {
-        const subEvents = [];
-        for (const sub of subEvent) {
-          let subEventToAdd = {
-            startDate: sub?.startDateTime?.split("T")[0],
-            startTime: sub?.startDateTime?.split("T")[1]?.slice(0, 5),
-            endDate: sub?.endDateTime?.split("T")[0],
-            endTime: sub?.endDateTime?.split("T")[1]?.slice(0, 5),
-            name: sub.name,
-            description: sub.description,
-            sameAs: { uri: sub.uri, type: "ArtsdataIdentifier" }
-          };
-          subEvents.push(subEventToAdd);
+        const subEvents = subEvent?.length ?
+          subEvent.map(event => this._formatSubEventToAdd(event)) :
+          [this._formatSubEventToAdd(subEvent)];
+        if (subEvents?.length) {
+          event.subEventConfiguration = subEvents;
         }
-        event.subEventConfiguration = subEvents;
       }
     }
     // const offerArray = offers?.length ? offers : [offers];
@@ -196,7 +189,6 @@ export class EventService {
     const collaborators = sponsor?.length ? await this._personOrganizationService
       .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId) : undefined;
     delete event?.image?.uri;
-    event.image = event.image;
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
 
     const eventToAdd = event;
@@ -573,7 +565,7 @@ export class EventService {
     const formattedEvent = new EventDTO();
 
     const [name, description, eventStatus, attendanceMode, startDate, endDate, additionalType, videoUrl, location,
-      offer, organizer, performer, collaborator, url, image, contactPoint] = [
+      offer, organizer, performer, collaborator, image, contactPoint] = [
       event[EventPredicates.NAME], event[EventPredicates.DESCRIPTION], event[EventPredicates.EVENT_STATUS],
       event[EventPredicates.EVENT_ATTENDANCE_MODE], event[EventPredicates.START_DATE], event[EventPredicates.END_DATE],
       event[EventPredicates.ADDITIONAL_TYPE], event[EventPredicates.VIDEO_URL], event[EventPredicates.LOCATION],
@@ -607,8 +599,8 @@ export class EventService {
       formattedEvent.image = [{ url: { uri: image }, isMain: true }];
     }
     if (additionalType) {
-      const additionalTypeIds = await this._getConceptIdByNameForRdf(additionalType, patternToConceptIdMapping, existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE);
-      formattedEvent.additionalType = additionalTypeIds;
+      formattedEvent.additionalType = this._getConceptIdByNameForRdf(additionalType, patternToConceptIdMapping,
+        existingEventTypeConceptIDs, EventProperty.ADDITIONAL_TYPE);
     }
     if (videoUrl) {
       formattedEvent.videoUrl = videoUrl["@id"];
@@ -710,10 +702,7 @@ export class EventService {
 
     if (conceptIds.length) {
       let uniqueConceptIdsList = [...new Set(conceptIds)];
-      const uniqueConceptIds = Array.from(uniqueConceptIdsList).map((conceptId) => ({
-        entityId: conceptId
-      }));
-      return uniqueConceptIds;
+      return Array.from(uniqueConceptIdsList).map((conceptId) => ({ entityId: conceptId }));
     } else {
       return [];
     }
@@ -775,7 +764,7 @@ export class EventService {
     formattedEvent.name = { fr: event.title };
     formattedEvent.description = { fr: event.description };
     formattedEvent = this._formatDatesForCaligram(formattedEvent, event.start_date, event.end_date, event.dates);
-    formattedEvent.isFeaturedEvent = event.featured == "true" ? true : false;
+    formattedEvent.isFeaturedEvent = event.featured == "true";
     formattedEvent.uri = event.url;
     formattedEvent.offerConfiguration =
 
@@ -853,5 +842,17 @@ export class EventService {
         prices: offerPrices
       };
     }
+  }
+
+  private _formatSubEventToAdd(event: any) {
+    return {
+      startDate: event?.startDateTime?.split("T")[0],
+      startTime: event?.startDateTime?.split("T")[1]?.slice(0, 5),
+      endDate: event?.endDateTime?.split("T")[0],
+      endTime: event?.endDateTime?.split("T")[1]?.slice(0, 5),
+      name: event.name,
+      description: event.description,
+      sameAs: { uri: event.uri, type: "ArtsdataIdentifier" }
+    };
   }
 }

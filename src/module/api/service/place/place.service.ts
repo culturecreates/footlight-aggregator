@@ -36,12 +36,12 @@ export class PlaceService {
 
     const { address } = placeFetched;
     const placeConditions = conditions
-      .filter(condition => condition.entityType === EntityType.PLACE);
+      ?.filter(condition => condition.entityType === EntityType.PLACE);
     const validatedPlace = placeConditions?.length ?
       FilterEntityHelper.validateEntity(EntityType.PLACE, placeFetched, conditions) : true;
 
     const postalAddressConditions = conditions
-      .filter(condition => condition.entityType === EntityType.POSTAL_ADDRESS);
+      ?.filter(condition => condition.entityType === EntityType.POSTAL_ADDRESS);
     const validatedPostalAddress = postalAddressConditions?.length ? FilterEntityHelper
       .validateEntity(EntityType.POSTAL_ADDRESS, address, conditions) : true;
     if (!validatedPlace || !validatedPostalAddress) {
