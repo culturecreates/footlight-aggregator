@@ -547,15 +547,25 @@ export class EventService {
     let jsonLdPeople = data.filter(item => item["@type"] === EntityPredicates.PERSON);
     let jsonLdOffers = data.filter(item => item["@type"] === EntityPredicates.AGGREGATE_OFFER);
     let jsonLdContactPoints = data.filter(item => item["@type"] === EntityPredicates.CONTACT_POINT);
-    let events = [];
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, EntityType.EVENT);
+    const totalCount = data?.length;
+    let currentCount = 0;
+    let errorCount = 0;
     for (const node of data) {
-      if (node["@type"] == EntityPredicates.EVENT) {
-        await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl,
-          currentUserId, jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople, jsonLdOffers, jsonLdContactPoints, mappingFiles, context);
+      try {
+        if (node["@type"] == EntityPredicates.EVENT) {
+          await this.formatAndPushJsonLdEvents(node, jsonLdPlaces, token, calendarId, footlightBaseUrl,
+            currentUserId, jsonLdPostalAddresses, jsonLdOrganizations, jsonLdPeople, jsonLdOffers, jsonLdContactPoints, mappingFiles, context);
+        }
+        this._loggerService.infoLogs(`Importing ${currentCount++} out of ${totalCount}) events`);
+      } catch (e) {
+        this._loggerService.errorLogs(`Error while importing  event with id ${node["@id"]}`);
+        errorCount++;
       }
     }
-    return events;
+    this._loggerService.infoLogs(`Importing events successfully completed. 
+    Stats: Total Events: ${totalCount},Imported: ${currentCount} Error: ${errorCount}
+    `);
   }
 
 
@@ -654,12 +664,14 @@ export class EventService {
   private _formatJsonLdContactPoint(contactPoint: any, jsonLdContactPoints: any) {
     let contactPointData = jsonLdContactPoints
       .find(jsonLdContactPoint => jsonLdContactPoint["@id"] === contactPoint["@id"]);
-    const formattedContactPoint: ContactPointDTO = {
-      url: { uri: contactPointData[EventPredicates.URL]["@id"] },
-      email: contactPoint[EventPredicates.EMAIL],
-      telephone: contactPoint[EventPredicates.TELEPHONE]
-    };
-    return formattedContactPoint;
+    if (contactPointData) {
+      const formattedContactPoint: ContactPointDTO = {
+        url: { uri: contactPointData[EventPredicates.URL]["@id"] },
+        email: contactPoint[EventPredicates.EMAIL],
+        telephone: contactPoint[EventPredicates.TELEPHONE]
+      };
+      return formattedContactPoint;
+    }
   }
 
   private _formatJsonLdOffers(offer: any, jsonLdOffers: any) {
