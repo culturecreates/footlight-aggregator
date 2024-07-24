@@ -68,18 +68,6 @@ where {
                         ?event a schema:EventSeries ;
                                schema:name ?name ;
                                schema:subEvent ?subEvent  .
-                        ?subEvent  schema:location ?subLocation .
-                    }
-                } group by ?event ?name  having (count( distinct ?subLocation) > 1)
-            }
-            MINUS
-            {
-                select ?event
-                where {
-                    graph <http://kg.artsdata.ca/culture-creates/footlight/crowstheatre-com> {
-                        ?event a schema:EventSeries ;
-                               schema:name ?name ;
-                               schema:subEvent ?subEvent  .
                         ?subEvent  schema:startDate ?startDate ;
                                    schema:endDate ?endDate .
                         bind ( STRDT(strbefore(str(?startDate),"T"), xsd:date ) as ?startDay )
