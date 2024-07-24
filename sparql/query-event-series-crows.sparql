@@ -1,3 +1,4 @@
+
 # Experimental: Using Crow's Theatre graph to view a list of events and event series data as seen by Footlight CMS aggregator
 PREFIX schema: <http://schema.org/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -21,6 +22,7 @@ construct {
                 schema:contactPoint ?contact_point .
     ?place_coalesced a schema:Place .
     ?subEvent  schema:startDate ?subEventStartDate ;
+               schema:location ?subEventLocation;
                schema:endDate ?subEventEndDate .
     ?contact_point  schema:name ?contact_name ;
                     schema:url ?contact_url_uri ;
@@ -214,7 +216,8 @@ where {
     bind(URI(coalesce( ?performer_adid, ?performer_adid_uri, ?performer)) as ?performer_coalesced)
     optional {
         ?event schema:subEvent/^schema:sameAs ?subEvent .
-        ?subEvent schema:startDate ?subEventStartDate .
+        ?subEvent schema:startDate ?subEventStartDate ;
+		schema:location ?subEventLocation.
         OPTIONAL {
             ?subEvent schema:endDate ?subEventEndDate .
         }
