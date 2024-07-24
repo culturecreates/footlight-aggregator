@@ -1,3 +1,4 @@
+
 # Experimental: Using Crow's Theatre graph to view a list of events and event series data as seen by Footlight CMS aggregator
 PREFIX schema: <http://schema.org/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -21,6 +22,7 @@ construct {
                 schema:contactPoint ?contact_point .
     ?place_coalesced a schema:Place .
     ?subEvent  schema:startDate ?subEventStartDate ;
+               schema:location ?subEventLocation;
                schema:endDate ?subEventEndDate .
     ?contact_point  schema:name ?contact_name ;
                     schema:url ?contact_url_uri ;
@@ -46,9 +48,9 @@ where {
                     }
                     ?event_adid schema:sameAs ?event .
                     filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
-                } 
+                }
             }
-            UNION 
+            UNION
             {
                 select  ?event_adid ?event where {
                     graph <http://kg.artsdata.ca/culture-creates/footlight/crowstheatre-com> {
@@ -56,7 +58,7 @@ where {
                     }
                     ?event_adid schema:sameAs ?event .
                     filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
-                } 
+                }
             }
             MINUS
             {
@@ -67,12 +69,12 @@ where {
                                schema:name ?name ;
                                schema:subEvent ?subEvent  .
                         ?subEvent  schema:location ?subLocation .
-                    } 
+                    }
                 } group by ?event ?name  having (count( distinct ?subLocation) > 1)
             }
-            MINUS 
+            MINUS
             {
-                select ?event 
+                select ?event
                 where {
                     graph <http://kg.artsdata.ca/culture-creates/footlight/crowstheatre-com> {
                         ?event a schema:EventSeries ;
@@ -82,11 +84,11 @@ where {
                                    schema:endDate ?endDate .
                         bind ( STRDT(strbefore(str(?startDate),"T"), xsd:date ) as ?startDay )
                         bind (  STRDT(strbefore(str(?endDate),"T"), xsd:date )   as ?endDay )
-                    } 
+                    }
                     filter (?startDay != ?endDay )
-                } 
+                }
             }
-        } 
+        }
         group by ?event_adid
         limit 10 offset 0
     }
@@ -113,9 +115,9 @@ where {
         }
         optional {
             ?event schema:image ?image .
-            bind(URI(concat(str(?event),"#imageObject")) as ?id_imageObject) 
+            bind(URI(concat(str(?event),"#imageObject")) as ?id_imageObject)
             bind(URI(?image) as ?image_uri)
-        } 
+        }
         optional {
             ?event schema:offers ?offer .
             ?offer a schema:Offer ;
@@ -177,8 +179,8 @@ where {
         ?place schema:sameAs ?place_adid2 .
         filter(contains(str(?place_adid2),"kg.artsdata.ca/resource/K"))
         bind(URI(?place_adid2) as ?place_adid2_uri)
-    } 
-    bind(coalesce(?place_adid, ?place_adid2_uri, ?place) as ?place_coalesced) 
+    }
+    bind(coalesce(?place_adid, ?place_adid2_uri, ?place) as ?place_coalesced)
     filter(contains(str(?place_coalesced),"kg.artsdata.ca/resource/K"))
     optional {
         ?event_adid schema:sameAs/schema:organizer ?organizer .
@@ -214,7 +216,8 @@ where {
     bind(URI(coalesce( ?performer_adid, ?performer_adid_uri, ?performer)) as ?performer_coalesced)
     optional {
         ?event schema:subEvent/^schema:sameAs ?subEvent .
-        ?subEvent schema:startDate ?subEventStartDate .
+        ?subEvent schema:startDate ?subEventStartDate ;
+		schema:location ?subEventLocation.
         OPTIONAL {
             ?subEvent schema:endDate ?subEventEndDate .
         }
