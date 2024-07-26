@@ -21,6 +21,7 @@ construct {
                 schema:subEvent ?subEvent ;
                 schema:contactPoint ?contact_point .
     ?place_coalesced a schema:Place .
+    ?subEventLocation a schema:Place .
     ?subEvent  schema:startDate ?subEventStartDate ;
                schema:location ?subEventLocation;
                schema:endDate ?subEventEndDate .
