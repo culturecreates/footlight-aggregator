@@ -227,8 +227,13 @@ export class EventService {
 
   private async _fetchEventsFromArtsData(source: string, batchSize: number, offset: number, eventType?: EventType) {
     const limit = batchSize ? batchSize : 300;
-    const artsDataUrl = eventType ? eventType == EventType.EVENT_SERIES ? ArtsDataUrls.EVENT_SERIES : ArtsDataUrls.EVENTS : ArtsDataUrls.EVENTS;
-    const url = artsDataUrl + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
+    let url, artsDataUrl;
+    if (eventType == EventType.EVENT_SERIES) {
+      url = ArtsDataUrls.EVENT_SERIES;
+    } else {
+      artsDataUrl = ArtsDataUrls.EVENTS;
+      url = artsDataUrl + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
+    }
     this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
     if (artsDataResponse?.status !== HttpStatus.OK) {
