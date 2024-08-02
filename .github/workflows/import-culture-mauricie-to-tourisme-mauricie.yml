@@ -1,4 +1,4 @@
-name: Run Co-motion Aggregator
+name: Run Tourisme Maurice(source - Culture Mauricie) Aggregator
 
 on:
   workflow_dispatch:
