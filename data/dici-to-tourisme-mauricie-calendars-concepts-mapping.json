@@ -79,7 +79,7 @@
     }
   },
   {
-    "class ": "Event",
+    "class": "Event",
     "mappedToField": "Audience",
     "fieldName": "audience",
     "mapping": {
@@ -92,7 +92,7 @@
     }
   },
   {
-    "class": "Event",
+    "class": "Place",
     "fieldName": "region",
     "mappedToField": "Region",
     "mapping": {
