@@ -2,11 +2,11 @@
   {
     "_comment_": "This file contains the mapping between the concepts of the DICI.ca and the Tourisme Mauricie calendars.",
     "_class_": "The entity class, It can be Event, Place, Organization or Person.",
-    "_fieldName_": "The field name matching with the database. Example fieldName for eventType is additionalType",
+    "_fieldName_": "The field name matching with the database. Example fieldName for eventType is EVENT_TYPE",
     "_mappedToField_": "The field name matching with the taxonomy. Example mappedToField for eventType is EventType"
   },
   {
-    "fieldName": "additionalType",
+    "fieldName": "EVENT_TYPE",
     "mappedToField": "EventType",
     "class": "Event",
     "mapping": {
@@ -81,7 +81,7 @@
   {
     "class": "Event",
     "mappedToField": "Audience",
-    "fieldName": "audience",
+    "fieldName": "AUDIENCE",
     "mapping": {
       "65b20bc08468f400648302c5": [
         "65b0bc668252ed00a6ca0925"
@@ -93,7 +93,7 @@
   },
   {
     "class": "Place",
-    "fieldName": "region",
+    "fieldName": "REGION",
     "mappedToField": "Region",
     "mapping": {
       "657b25f850bec8006419149a": "66b11309d09b4d00634d5b24",
