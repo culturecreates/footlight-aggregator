@@ -21,9 +21,6 @@ jobs:
               "email": "${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }}",
               "password": "${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2  }}"
             }
-        secrets:
-          FOOTLIGHT_USERNAME: ${{ secrets.FOOTLIGHT_USERNAME }}
-          FOOTLIGHT_PASSWORD: ${{ secrets.FOOTLIGHT_PASSWORD }}
         env:
           ACCESS_TOKEN: ${{ steps.login.outputs.response.body.accessToken }}
 
