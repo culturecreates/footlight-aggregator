@@ -11,7 +11,7 @@ jobs:
 
       - name: Run the script
         run: |
-          python ./scripts/copy-dici-calendar-events-to-tourisme-mauricie.py \
+          python ./script/copy-events-from-one-calendar-to-another.py \
           -u ${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }} \
           -p ${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2 }} \
           -s 657199fea5ac3d006314ea92 -d 661e5a8818a64f7829aeae24 \
