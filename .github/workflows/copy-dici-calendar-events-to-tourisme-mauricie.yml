@@ -9,10 +9,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Run the script
-        run: |
-          python ./script/copy-events-from-one-calendar-to-another.py \
-          -u ${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }} \
-          -p ${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2 }} \
-          -s 657199fea5ac3d006314ea92 -d 661e5a8818a64f7829aeae24 \
-          -m https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/dici-to-tourisme-mauricie-calendars-concepts-mapping.json
+    jobs:
+      build:
+        runs-on: ubuntu-latest
+        steps:
+          - name: checkout repo content
+            uses: actions/checkout@v2 # checkout the repository content
+
+          - name: setup python
+            uses: actions/setup-python@v4
+            with:
+              python-version: '3.10' # install the python version needed
+
+          - name: install python packages
+            run: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+
+          - name: Run the script
+            run: |
+              python ./script/copy-events-from-one-calendar-to-another.py \
+              -u ${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }} \
+              -p ${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2 }} \
+              -s 657199fea5ac3d006314ea92 -d 661e5a8818a64f7829aeae24 \
+              -m https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/dici-to-tourisme-mauricie-calendars-concepts-mapping.json
