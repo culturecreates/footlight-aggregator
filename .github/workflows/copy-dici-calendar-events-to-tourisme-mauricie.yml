@@ -10,19 +10,19 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Login to Footlight CMS
-        uses: gr2m/http-request@v2.1.0
+        uses: actions/http-client@v3
         with:
           url: https://api.cms.footlight.io/login
           method: POST
-          headers: |
+          headers:
             Content-Type: application/json
           body: |
             {
-              "email": "${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }}",
-              "password": "${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2  }}"
+              "email": "${{ secrets.FOOTLIGHT_USERNAME }}",
+              "password": "${{ secrets.FOOTLIGHT_PASSWORD }}"
             }
         env:
-          ACCESS_TOKEN: ${{ steps.login.outputs.response.body.accessToken }}
+          ACCESS_TOKEN: ${{ steps.login.outputs.response.data.accessToken }}
 
       - name: Update Calendar Mapping
         uses: gr2m/http-request@v2.1.0
