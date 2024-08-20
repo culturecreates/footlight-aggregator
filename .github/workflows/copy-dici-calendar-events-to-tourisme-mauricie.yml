@@ -10,5 +10,9 @@ jobs:
     steps:
 
       - name: Run the script
-        run: python /scripts/copy-dici-calendar-events-to-tourisme-mauricie.py -u ${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }} -p ${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2 }} -s 657199fea5ac3d006314ea92 -d 661e5a8818a64f7829aeae24 -m https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/dici-to-tourisme-mauricie-calendars-concepts-mapping.json
-        shell: sh
+        run: |
+          python ./scripts/copy-dici-calendar-events-to-tourisme-mauricie.py \
+          -u ${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }} \
+          -p ${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2 }} \
+          -s 657199fea5ac3d006314ea92 -d 661e5a8818a64f7829aeae24 \
+          -m https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/dici-to-tourisme-mauricie-calendars-concepts-mapping.json
