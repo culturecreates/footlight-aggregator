@@ -25,7 +25,6 @@ def import_events(access_token, source_calendar_id, destination_calendar_id, map
         'calendar-id': destination_calendar_id,
         'Referer': 'https://api.cms.footlight.io/api/'
     }
-
     try:
         put_url = "https://api.cms.footlight.io/entities/import/SOURCE_CALENDAR_ID"  # Replace with your actual PUT API endpoint
         put_url = put_url.replace('SOURCE_CALENDAR_ID', source_calendar_id)
@@ -41,7 +40,6 @@ def import_events(access_token, source_calendar_id, destination_calendar_id, map
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(description="Process input arguments")
     parser.add_argument("-u", "--username", required=True, help="Username")
     parser.add_argument("-p", "--password", required=True, help="Password")

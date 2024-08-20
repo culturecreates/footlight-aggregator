@@ -1,32 +1,14 @@
-name: Copy published events from DICI.ca to Tourism Mauricie
+name: Copy events from DICI.ca to Tourisme Mauricie
 
 on:
   workflow_dispatch:
 
 jobs:
-  update_footlight_cms:
+  import-events:
+    name: Import events and linked entities
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
 
-      - name: Login to Footlight CMS
-        uses: actions/http-client@v3
-        with:
-          url: https://api.cms.footlight.io/login
-          method: POST
-          body: |
-            {
-              "email": "${{ secrets.FOOTLIGHT_USERNAME }}",
-              "password": "${{ secrets.FOOTLIGHT_PASSWORD }}"
-            }
-        env:
-          ACCESS_TOKEN: ${{ steps.login.outputs.response.data.accessToken }}
-
-      - name: Update Calendar Mapping
-        uses: gr2m/http-request@v2.1.0
-        with:
-          url: https://api.cms.footlight.io/entities/import/657199fea5ac3d006314ea92?mapping-file-url=https%3A%2F%2Fraw.githubusercontent.com%2Fculturecreates%2Ffootlight-aggregator%2Fmain%2Fdata%2Fdici-to-tourisme-mauricie-calendars-concepts-mapping.json
-          method: PUT
-          headers: |
-            Authorization: Bearer ${{ env.ACCESS_TOKEN }}
-            calendar-id: 661e5a8818a64f7829aeae24
+      - name: Run the script
+        run: python ./scripts/copy-dici-calendar-events-to-tourisme-mauricie.py -u ${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }} -p ${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2 }} -s 657199fea5ac3d006314ea92 -d 661e5a8818a64f7829aeae24 -m https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/dici-to-tourisme-mauricie-calendars-concepts-mapping.json
+        shell: sh
