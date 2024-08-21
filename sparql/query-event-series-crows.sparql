@@ -1,5 +1,8 @@
 
 # Experimental: Using Crow's Theatre graph to view a list of events and event series data as seen by Footlight CMS aggregator
+
+# Note: This returns subEvents with location. The frame needs to be modified "subEvent":{ "location":[{"@embed": "@always"}] to ensure the location will have enough data to be @contained wih Place @type.
+
 PREFIX schema: <http://schema.org/>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 construct {
