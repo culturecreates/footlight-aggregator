@@ -62,5 +62,4 @@ if __name__ == "__main__":
     else:
         print("Authentication Failed.")
 
-    response = import_events(access_token, source_calendar_id, destination_calendar_id, mapping_file_url)
     print(response)
