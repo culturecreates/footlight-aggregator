@@ -1,4 +1,4 @@
-name: Run Trois Rivieres Aggregator
+name: Import footlight-tourisme-troisrivieres-com
 
 on:
   workflow_dispatch:
