@@ -472,7 +472,7 @@ export class EventService {
     const existingConceptIds = this._getAllConceptIds(existingConceptsMap);
     this._loggerService.infoLogs(`Validating identifiers from the mapping file for ${propertyName}`);
     return conceptIds?.filter((entityId) => {
-      const id = existingConceptIds.some((conceptId) => conceptId.includes(entityId));
+      const id = existingConceptIds?.some((conceptId) => conceptId.includes(entityId));
       if (!id) {
         this._loggerService.infoLogs(`\tNo match found for the conceptId: ${entityId} from the mapping file in the CMS.`);
       }
