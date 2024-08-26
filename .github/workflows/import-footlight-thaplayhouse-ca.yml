@@ -1,4 +1,4 @@
-name: Run The Play House Aggregator
+name: Run The Play House Aggregator (ArtsCultureNB)
 
 on:
   workflow_dispatch:
