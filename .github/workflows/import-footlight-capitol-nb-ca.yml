@@ -1,4 +1,4 @@
-name: Run The Imperial Theatre Aggregator (ArtsCultureNB)
+name: Run The Capitol NB Aggregator (ArtsCultureNB)
 
 on:
   workflow_dispatch:
