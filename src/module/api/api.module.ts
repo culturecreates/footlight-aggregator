@@ -22,5 +22,6 @@ import { PlaceController } from "./controller/place";
   providers: [PersonOrganizationService, EventService, PostalAddressService, PersonService, PlaceService,
     OrganizationService, AuthenticationService, TaxonomyService, InvitationService, SharedService]
 })
+
 export class ApiModule {
 }
