@@ -23,5 +23,6 @@ import { LoggerService } from "./service";
   providers: [PersonOrganizationService, EventService, PostalAddressService, PersonService, PlaceService,
     OrganizationService, AuthenticationService, TaxonomyService, InvitationService, SharedService, LoggerService]
 })
+
 export class ApiModule {
 }
