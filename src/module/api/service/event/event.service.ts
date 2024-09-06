@@ -115,6 +115,10 @@ export class EventService {
       batch = batch + 1;
     } while (hasNext) ;
     this._loggerService.infoLogs(`Importing events successfully completed.
+    Source : ${source}
+    BatchSize: : ${batchSize}
+    CalendarId: ${calendarId}
+    
     Stats: Total Events: ${totalCount}, Imported: ${importedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}
     `);
   }
