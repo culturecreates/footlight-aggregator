@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  nestjs-app:
+    build: .
+    ports:
+      - "3030:3030"  # Map container port 3000 to host port 3000
+    command: npm run start  # Start command for development (override with `docker-compose up -d` for background)
+
