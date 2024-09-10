@@ -11,7 +11,7 @@ jobs:
     with:
       cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
       aggregator_username: ${{ vars.AGGREGATOR_USER_IMPERIAL_THEATRE }}
-      source_url: http://kg.artsdata.ca/culture-creates/footlight/imperialtheatre-ca
+      source_url: http://kg.artsdata.ca/culture-creates/artsdata-orion/imperialtheatre-ca
       footlight_base_url: https://api.cms.footlight.io
       footlight_calendar_id: 65eeaf8ebec01b0064312f94
       batch_size: 5
