@@ -20,7 +20,7 @@ jobs:
           scp -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}:/home/ubuntu/tourisme-mouricie/tourisme.json ./
 
       - name: Upload json into artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: tourisme
           path: ./tourisme.json
@@ -42,7 +42,7 @@ jobs:
         run: /opt/ontorefine/dist/bin/ontorefine &
 
       - name: Download data from artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: tourisme
 
@@ -59,7 +59,7 @@ jobs:
           --configurations project-config.json \
           -f json >> entities.ttl
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: entities
           path: ./entities.ttl
@@ -86,7 +86,7 @@ jobs:
         run: npm run build
 
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: entities
 
