@@ -38,7 +38,7 @@ jobs:
           --configurations project-config.json \
           -f xml >> entities.ttl
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: entities
           path: ./entities.ttl
@@ -65,7 +65,7 @@ jobs:
         run: npm run build
 
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: entities
 
