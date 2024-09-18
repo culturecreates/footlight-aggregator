@@ -13,6 +13,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 # - v2 is to allow external uri for Place
 # - v3 allows external event URI to link to Artsdata event URI 
 #      introduced for re-linking when external URIs change or are blank nodes.
+# - v3#patch is to support both event.image and event.image.url.
 #
 # NOTES:
 # - To use, pass this SPARQL Github raw URL as a parm to Artsdata query API:
@@ -143,8 +144,18 @@ where {
             ?event schema:url ?url_str .
             bind(URI(str(?url_str)) as ?url_uri)
         }
+        
+        # The next 2 parts load images
         optional {
+            # This loads event.image 
             ?event schema:image ?image .
+            bind(URI(concat(str(?event),"#imageObject")) as ?id_imageObject) 
+            bind(URI(?image) as ?image_uri)
+            filter( not exists { ?image schema:url ?some_url } )
+        } 
+        optional {
+            # This loads event.image.url 
+            ?event schema:image/schema:url ?image .
             bind(URI(concat(str(?event),"#imageObject")) as ?id_imageObject) 
             bind(URI(?image) as ?image_uri)
         } 
