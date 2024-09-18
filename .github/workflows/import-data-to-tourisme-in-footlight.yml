@@ -8,7 +8,7 @@ jobs:
   get-tourisme-data:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: SSH and get data
         env:
             PRIVATE_KEY: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY}}
@@ -69,7 +69,7 @@ jobs:
     needs: transform-data-into-rdf
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: npm install
 

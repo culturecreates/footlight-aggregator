@@ -15,7 +15,7 @@ jobs:
       PRODUCTION_DATABASE_URL : ${{ secrets.PRODUCTION_DATABASE_URL }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Copy file to AWS instance
         run: |
