@@ -95,16 +95,19 @@ export class EventService {
           this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount})`);
           this.checkExcludedValues(event, mappingFile, EventProperty.ADDITIONAL_TYPE);
           this.checkExcludedValues(event, mappingFile, EventProperty.AUDIENCE);
-          const eventFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
-            mappingFile, mappingFile, existingEventTypeConceptIDs, existingAudienceConceptIDs);
-          if (eventFormatted === null) {
-            skippedCount++;
-          } else {
-            importedCount++;
+          const eventsWithMultipleLocations = await this._checkForMultipleLocations(event)
+          for (const event of eventsWithMultipleLocations) {
+            const eventsFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
+              mappingFile, mappingFile, existingEventTypeConceptIDs, existingAudienceConceptIDs);
+            if (eventsFormatted === null) {
+              skippedCount++;
+            } else {
+              importedCount++;
+            }
+            await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventsFormatted, currentUser.id);
+              this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
+            ${JSON.stringify(eventsFormatted?.sameAs)}\n`);
           }
-          await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventFormatted, currentUser.id);
-          this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
-          ${JSON.stringify(eventFormatted?.sameAs)}\n`);
         } catch (e) {
           errorCount++;
           this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). 
@@ -146,7 +149,6 @@ export class EventService {
       location: locations, performer, organizer, sponsor, alternateName, keywords, startDate, startDateTime, endDate,
       endDateTime, sameAs, subEvent, offers, contactPoint, type
     } = event;
-
     if (subEvent) {
       if (type == EventType.EVENT) {
         const dates = subEvent.map(event => event.startDateTime);
@@ -162,11 +164,11 @@ export class EventService {
         this._loggerService.infoLogs(event.recurringEvent);
       }
       if (type == EventType.EVENT_SERIES) {
-        const subEvents = subEvent?.length ?
-          subEvent.map(event => this._formatSubEventToAdd(event)) :
-          [this._formatSubEventToAdd(subEvent)];
-        if (subEvents?.length) {
-          event.subEventConfiguration = subEvents;
+        const subEventConfiguration = subEvent?.length
+        ? await Promise.all(subEvent.map(event => this._formatSubEventToAdd(event, calendarId, token, footlightBaseUrl, currentUserId, mappingFile)))
+        : [await this._formatSubEventToAdd(subEvent, calendarId, token, footlightBaseUrl, currentUserId, mappingFile)];      
+        if (subEventConfiguration?.length) {
+          event.subEventConfiguration = subEventConfiguration;
         }
       }
     }
@@ -865,8 +867,8 @@ export class EventService {
     }
   }
 
-  private _formatSubEventToAdd(event: any) {
-    return {
+  private async _formatSubEventToAdd(event: any, calendarId: string, token: string, footlightBaseUrl: string, currentUserId: string, mappingFile: any) {
+    const subEventToReturn = {
       startDate: event.startDate ? event.startDate : event.startDateTime?.split("T")[0],
       startTime: event.startDateTime?.split("T")[1]?.slice(0, 5),
       endDate: event.endDate ? event.endDate : event.endDateTime?.split("T")[0],
@@ -875,5 +877,36 @@ export class EventService {
       description: event.description,
       sameAs: { uri: event.uri, type: "ArtsdataIdentifier" }
     };
+    if(event.location){
+      const locationId = await this._placeService.getFootlightIdentifier(calendarId, token, footlightBaseUrl, event.location["@none"] || event.location["Place"], currentUserId, mappingFile);
+      subEventToReturn["locationId"] = locationId ? { place: { entityId: locationId } } : locationId;
+    }
+
+    return subEventToReturn;
+  }
+
+  private _checkForMultipleLocations(event: any){
+    const {type} = event;
+    let locations = []
+    let events = []
+    if(type == EventType.EVENT_SERIES){
+      const subEvents = event.subEvent;
+
+      subEvents?.forEach(subEvent => {
+        if(subEvent.location){
+          locations.push(subEvent.location["@none"] || subEvent.location["Place"])
+        }
+      })
+      locations = Array.from(new Set(locations));
+      locations?.forEach(location => {
+        let eventToAdd = {...event}
+        eventToAdd.uri = eventToAdd.uri + "location:" + location.split("/").pop()
+        eventToAdd.subEvent = subEvents.filter(subEvent => subEvent.location["@none"] == location || subEvent.location["Place"] == location)
+        eventToAdd.location = {"Place": location}
+        events.push(eventToAdd)
+      })
+      return events
+    }
+    else return [event]
   }
 }
