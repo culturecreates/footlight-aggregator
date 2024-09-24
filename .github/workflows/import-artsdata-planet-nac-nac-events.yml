@@ -14,7 +14,7 @@ jobs:
         footlight_base_url: https://api.cms.footlight.io
         footlight_calendar_id: 665074693d92390064206343
         batch_size: 10
-        mapping_file_url: 
+        mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/blank-mapping.json
     secrets:
       aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_NAC }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
