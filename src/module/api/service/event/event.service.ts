@@ -96,14 +96,28 @@ export class EventService {
           this.checkExcludedValues(event, mappingFile, EventProperty.ADDITIONAL_TYPE);
           this.checkExcludedValues(event, mappingFile, EventProperty.AUDIENCE);
           const eventsWithMultipleLocations = await this._checkForMultipleLocations(event)
-          for (const event of eventsWithMultipleLocations) {
-            const eventsFormatted = await this.formatEvent(calendarId, token, event, footlightBaseUrl, currentUser.id,
+          for (const eventWithLocation of eventsWithMultipleLocations) {
+            const subEvents = eventWithLocation.subEvent;
+            if(subEvents.length){
+              const updatedSubEvents = [];
+              for (const subEvent of subEvents) {
+                const exists = await this._checkSubEventExists(subEvent, token, calendarId, footlightBaseUrl);
+                if(!exists) {
+                  updatedSubEvents.push(subEvent);
+                }
+              }
+              if(!updatedSubEvents.length){
+                continue;
+              }
+              eventWithLocation.subEvent = updatedSubEvents;
+            }
+            const eventsFormatted = await this.formatEvent(calendarId, token, eventWithLocation, footlightBaseUrl, currentUser.id,
               mappingFile, mappingFile, existingEventTypeConceptIDs, existingAudienceConceptIDs);
             if (eventsFormatted === null) {
               skippedCount++;
             } else {
               importedCount++;
-            }
+            }  
             await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventsFormatted, currentUser.id);
               this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
             ${JSON.stringify(eventsFormatted?.sameAs)}\n`);
@@ -124,6 +138,26 @@ export class EventService {
     
     Stats: Total Events: ${totalCount}, Imported: ${importedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}
     `);
+  }
+
+  private async _checkSubEventExists(subEvent: any, token: string, calendarId: string, footlightBaseUrl: string) {
+    const { uri } = subEvent;
+    const footlightResponse = await this._searchFootlightEntities(token, calendarId, uri, footlightBaseUrl);
+    if (footlightResponse?.length) {
+      return true;
+    }
+    return false;
+  }
+
+  private async _searchFootlightEntities(token: string, calendarId: string, uri: string, footlightBaseUrl: string) {
+    const url = footlightBaseUrl + FootlightPaths.SEARCH + `?query=${uri}` +"&classes=Event";
+    const headers = SharedService.createHeaders(token, calendarId);
+    const footlightResponse = await SharedService.fetchUrl(url, headers);
+    const { status, data } = footlightResponse;
+    if (status !== HttpStatus.OK) {
+      return null;
+    }
+    return data;
   }
 
 
@@ -900,7 +934,10 @@ export class EventService {
       locations = Array.from(new Set(locations));
       locations?.forEach(location => {
         let eventToAdd = {...event}
-        eventToAdd.uri = eventToAdd.uri + "location:" + location.split("/").pop()
+        eventToAdd.derivedFrom = {uri: eventToAdd.uri + "#location:" + location.split("/").pop()}
+        delete eventToAdd.uri
+        eventToAdd.sameAs = eventToAdd.sameAs?.filter(item => !item.uri.startsWith("http://kg.artsdata.ca/resource/K"));
+
         eventToAdd.subEvent = subEvents.filter(subEvent => subEvent.location["@none"] == location || subEvent.location["Place"] == location)
         eventToAdd.location = {"Place": location}
         events.push(eventToAdd)

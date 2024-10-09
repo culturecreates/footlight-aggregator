@@ -6,5 +6,6 @@ export const FootlightPaths = {
     ADD_EVENT: '/events',
     GET_TAXONOMY:'/taxonomy',
     GET_CURRENT_USER:'/users/current',
-    INVITE:'/invite'
+    INVITE:'/invite',
+    SEARCH:'/entities'
 };
