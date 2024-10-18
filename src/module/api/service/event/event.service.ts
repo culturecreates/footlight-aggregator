@@ -625,7 +625,7 @@ export class EventService {
       event[EventPredicates.EVENT_ATTENDANCE_MODE], event[EventPredicates.START_DATE], event[EventPredicates.END_DATE],
       event[EventPredicates.ADDITIONAL_TYPE], event[EventPredicates.VIDEO_URL], event[EventPredicates.LOCATION],
       event[EventPredicates.EVENT_OFFER], event[EventPredicates.ORGANIZER], event[EventPredicates.PERFORMER], event[EventPredicates.COLLABORATOR],
-      event[EventPredicates.URL], event[EventPredicates.IMAGE], event[EventPredicates.EVENT_CONTACT_POINT]
+       event[EventPredicates.IMAGE], event[EventPredicates.EVENT_CONTACT_POINT]
     ];
 
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFiles))?.data;
