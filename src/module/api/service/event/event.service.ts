@@ -98,7 +98,7 @@ export class EventService {
           const eventsWithMultipleLocations = await this._checkForMultipleLocations(event)
           for (const eventWithLocation of eventsWithMultipleLocations) {
             const subEvents = eventWithLocation.subEvent;
-            if(subEvents.length){
+            if(subEvents?.length){
               const updatedSubEvents = [];
               for (const subEvent of subEvents) {
                 const exists = await this._checkSubEventExists(subEvent, token, calendarId, footlightBaseUrl);
