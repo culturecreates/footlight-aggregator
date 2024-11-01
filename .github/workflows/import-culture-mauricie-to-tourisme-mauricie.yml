@@ -2,8 +2,8 @@ name: Run Tourisme Maurice(source - Culture Mauricie) Aggregator
 
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: "0 5 * * 4"  # Run at 1:00 AM ET every Thursday
+  schedule:
+    - cron: "0 8 * * *"  # Run at 4:00 AM ET everyday
 jobs:
   push-to-cms:
     uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main
