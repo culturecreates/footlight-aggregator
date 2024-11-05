@@ -167,6 +167,19 @@ export class SharedService {
     }
   }
 
+  async fetchCalendar(footlightBaseUrl: string, token: string, calendarId: string) {
+    this._loggerService.infoLogs(`Fetching current user info`);
+    const url = `${footlightBaseUrl}${FootlightPaths.GET_CALENDAR}/${calendarId} `;
+    const headers = SharedService.createHeaders(token, calendarId);
+    try {
+      const calendarResponse = await SharedService.fetchUrl(url, headers);
+      return calendarResponse.data;
+    } catch (e) {
+      this._loggerService.errorLogs("Authorisation failed. Please check your credentials and access to the calendar");
+      Exception.unauthorized("Something went wrong.");
+    }
+  }
+
   static _loggerService(args: string) {
     const _loggerService = LoggerService.prototype;
     _loggerService.infoLogs(args);

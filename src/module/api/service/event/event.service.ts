@@ -58,6 +58,8 @@ export class EventService {
   private async _syncEvents(calendarId: string, token: string, source: string, footlightBaseUrl: string,
                             batchSize: number, mappingUrl: string, eventType?: EventType) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
+    const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl, token, calendarId);
+    calendarId = calendar.id;
     let offset = 0, hasNext = true, batch = 1, totalCount = 0, errorCount = 0, tries = 0,
       maxTry = 3, importedCount = 0, skippedCount = 0;
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, EntityType.EVENT);
@@ -95,18 +97,18 @@ export class EventService {
           this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount})`);
           this.checkExcludedValues(event, mappingFile, EventProperty.ADDITIONAL_TYPE);
           this.checkExcludedValues(event, mappingFile, EventProperty.AUDIENCE);
-          const eventsWithMultipleLocations = await this._checkForMultipleLocations(event)
+          const eventsWithMultipleLocations = await this._checkForMultipleLocations(event);
           for (const eventWithLocation of eventsWithMultipleLocations) {
             const subEvents = eventWithLocation.subEvent;
-            if(subEvents?.length){
+            if (subEvents?.length) {
               const updatedSubEvents = [];
               for (const subEvent of subEvents) {
                 const exists = await this._checkSubEventExists(subEvent, token, calendarId, footlightBaseUrl);
-                if(!exists) {
+                if (!exists) {
                   updatedSubEvents.push(subEvent);
                 }
               }
-              if(!updatedSubEvents.length){
+              if (!updatedSubEvents.length) {
                 continue;
               }
               eventWithLocation.subEvent = updatedSubEvents;
@@ -117,9 +119,9 @@ export class EventService {
               skippedCount++;
             } else {
               importedCount++;
-            }  
+            }
             await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventsFormatted, currentUser.id);
-              this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
+            this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
             ${JSON.stringify(eventsFormatted?.sameAs)}\n`);
           }
         } catch (e) {
@@ -131,13 +133,8 @@ export class EventService {
       offset = offset + batchSize;
       batch = batch + 1;
     } while (hasNext) ;
-    this._loggerService.infoLogs(`Importing events successfully completed.
-    Source : ${source}
-    BatchSize: : ${batchSize}
-    CalendarId: ${calendarId}
-    
-    Stats: Total Events: ${totalCount}, Imported: ${importedCount}, Skipped: ${skippedCount}, Errors: ${errorCount}
-    `);
+    this._loggerService.infoLogs(`Importing events successfully completed.`);
+    this._loggerService.logStatistics(calendar.slug, calendarId, source, totalCount, errorCount, skippedCount);
   }
 
   private async _checkSubEventExists(subEvent: any, token: string, calendarId: string, footlightBaseUrl: string) {
@@ -150,7 +147,7 @@ export class EventService {
   }
 
   private async _searchFootlightEntities(token: string, calendarId: string, uri: string, footlightBaseUrl: string) {
-    const url = footlightBaseUrl + FootlightPaths.SEARCH + `?query=${uri}` +"&classes=Event";
+    const url = footlightBaseUrl + FootlightPaths.SEARCH + `?query=${uri}` + "&classes=Event";
     const headers = SharedService.createHeaders(token, calendarId);
     const footlightResponse = await SharedService.fetchUrl(url, headers);
     const { status, data } = footlightResponse;
@@ -199,8 +196,8 @@ export class EventService {
       }
       if (type == EventType.EVENT_SERIES) {
         const subEventConfiguration = subEvent?.length
-        ? await Promise.all(subEvent.map(event => this._formatSubEventToAdd(event, calendarId, token, footlightBaseUrl, currentUserId, mappingFile)))
-        : [await this._formatSubEventToAdd(subEvent, calendarId, token, footlightBaseUrl, currentUserId, mappingFile)];      
+          ? await Promise.all(subEvent.map(event => this._formatSubEventToAdd(event, calendarId, token, footlightBaseUrl, currentUserId, mappingFile)))
+          : [await this._formatSubEventToAdd(subEvent, calendarId, token, footlightBaseUrl, currentUserId, mappingFile)];
         if (subEventConfiguration?.length) {
           event.subEventConfiguration = subEventConfiguration;
         }
@@ -574,16 +571,19 @@ export class EventService {
     return offerConfiguration;
   }
 
-  async syncEntitiesUsingRdf(token: string, rdfFilePath: string, mappingFileUrl: string, footlightBaseUrl: string, calendarId: string) {
+  async syncEntitiesUsingRdf(token: string, rdfFilePath: string, mappingFileUrl: string, footlightBaseUrl: string, calendarId: string, source?: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const currentUserId = currentUser.id;
     let rdfData = fs.readFileSync(rdfFilePath, "utf8");
 
     const jsonldData = parse(rdfData);
-    await this.exportJsonLdData(jsonldData, token, calendarId, footlightBaseUrl, currentUserId, mappingFileUrl);
+    await this.exportJsonLdData(jsonldData, token, calendarId, footlightBaseUrl, currentUserId, mappingFileUrl, source);
   }
 
-  async exportJsonLdData(jsonLd: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string, mappingFiles: any) {
+  async exportJsonLdData(jsonLd: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string,
+                         mappingFiles: any, source?: string) {
+    const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl, token, calendarId);
+    calendarId = calendar.id;
     const data = jsonLd["@graph"];
     const context = jsonLd["@context"];
     let jsonLdPlaces = data.filter(item => item["@type"] === EntityPredicates.PLACE);
@@ -608,9 +608,8 @@ export class EventService {
         errorCount++;
       }
     }
-    this._loggerService.infoLogs(`Importing events successfully completed. 
-    Stats: Total Events: ${totalCount},Imported: ${currentCount} Error: ${errorCount}
-    `);
+    this._loggerService.infoLogs(`Importing events successfully completed.`);
+    this._loggerService.logStatistics(calendarId, calendar.slug, source, totalCount, errorCount);
   }
 
 
@@ -625,7 +624,7 @@ export class EventService {
       event[EventPredicates.EVENT_ATTENDANCE_MODE], event[EventPredicates.START_DATE], event[EventPredicates.END_DATE],
       event[EventPredicates.ADDITIONAL_TYPE], event[EventPredicates.VIDEO_URL], event[EventPredicates.LOCATION],
       event[EventPredicates.EVENT_OFFER], event[EventPredicates.ORGANIZER], event[EventPredicates.PERFORMER], event[EventPredicates.COLLABORATOR],
-       event[EventPredicates.IMAGE], event[EventPredicates.EVENT_CONTACT_POINT]
+      event[EventPredicates.IMAGE], event[EventPredicates.EVENT_CONTACT_POINT]
     ];
 
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFiles))?.data;
@@ -911,7 +910,7 @@ export class EventService {
       description: event.description,
       sameAs: { uri: event.uri, type: "ArtsdataIdentifier" }
     };
-    if(event.location){
+    if (event.location) {
       const locationId = await this._placeService.getFootlightIdentifier(calendarId, token, footlightBaseUrl, event.location["@none"] || event.location["Place"], currentUserId, mappingFile);
       subEventToReturn["locationId"] = locationId ? { place: { entityId: locationId } } : locationId;
     }
@@ -919,31 +918,30 @@ export class EventService {
     return subEventToReturn;
   }
 
-  private _checkForMultipleLocations(event: any){
-    const {type} = event;
-    let locations = []
-    let events = []
-    if(type == EventType.EVENT_SERIES){
+  private _checkForMultipleLocations(event: any) {
+    const { type } = event;
+    let locations = [];
+    let events = [];
+    if (type == EventType.EVENT_SERIES) {
       const subEvents = event.subEvent;
 
       subEvents?.forEach(subEvent => {
-        if(subEvent.location){
-          locations.push(subEvent.location["@none"] || subEvent.location["Place"])
+        if (subEvent.location) {
+          locations.push(subEvent.location["@none"] || subEvent.location["Place"]);
         }
-      })
+      });
       locations = Array.from(new Set(locations));
       locations?.forEach(location => {
-        let eventToAdd = {...event}
-        eventToAdd.derivedFrom = {uri: eventToAdd.uri + "#location:" + location.split("/").pop()}
-        delete eventToAdd.uri
+        let eventToAdd = { ...event };
+        eventToAdd.derivedFrom = { uri: eventToAdd.uri + "#location:" + location.split("/").pop() };
+        delete eventToAdd.uri;
         eventToAdd.sameAs = eventToAdd.sameAs?.filter(item => !item.uri.startsWith("http://kg.artsdata.ca/resource/K"));
 
-        eventToAdd.subEvent = subEvents.filter(subEvent => subEvent.location["@none"] == location || subEvent.location["Place"] == location)
-        eventToAdd.location = {"Place": location}
-        events.push(eventToAdd)
-      })
-      return events
-    }
-    else return [event]
+        eventToAdd.subEvent = subEvents.filter(subEvent => subEvent.location["@none"] == location || subEvent.location["Place"] == location);
+        eventToAdd.location = { "Place": location };
+        events.push(eventToAdd);
+      });
+      return events;
+    } else return [event];
   }
 }
