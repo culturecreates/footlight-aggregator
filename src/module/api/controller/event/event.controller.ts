@@ -162,15 +162,22 @@ export class EventController {
     required: true,
     type:String
   })
+  @ApiQuery({
+    name: "source",
+    description: "source-uri",
+    required: false,
+    type:String
+  })
   async importEventsFromRDF(
     @Req() request: Request,
     @Query("rdf-file") rdfFilePath: string,
     @Query("mapping-file") mappingFileUrl: string,
-    @Query("footlight-base-url") footlightBaseUrl?: string,
-    @Query("calendar-id") calendarId?: string,
+    @Query("footlight-base-url") footlightBaseUrl: string,
+    @Query("calendar-id") calendarId: string,
+    @Query("source") source?: string
     ) {
     const token = AuthHeaderExtractor.fromAuthHeaderAsBearerToken(request);
-    await this._eventService.syncEntitiesUsingRdf(token, rdfFilePath, mappingFileUrl, footlightBaseUrl, calendarId)
+    await this._eventService.syncEntitiesUsingRdf(token, rdfFilePath, mappingFileUrl, footlightBaseUrl, calendarId, source)
   }
 
   @Put("import-caligram")
