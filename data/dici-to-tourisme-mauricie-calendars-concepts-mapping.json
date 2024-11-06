@@ -6,7 +6,10 @@
     "_mappedToField_": "The field name matching with the taxonomy. Example mappedToField for eventType is EventType"
   },
   {
-    "fieldName": "EVENT_TYPE",
+    "fieldName": "additionalType",
+    "inputProperty": [
+      "additionalType"
+    ],
     "mappedToField": "EventType",
     "class": "Event",
     "mapping": {
@@ -81,7 +84,10 @@
   {
     "class": "Event",
     "mappedToField": "Audience",
-    "fieldName": "AUDIENCE",
+    "fieldName": "audience",
+    "inputProperty": [
+      "audience"
+    ],
     "mapping": {
       "65b20bc08468f400648302c5": [
         "6645a24c9f43170063f9f31b"
@@ -93,7 +99,10 @@
   },
   {
     "class": "Place",
-    "fieldName": "REGION",
+    "fieldName": "region",
+    "inputProperty": [
+      "region"
+    ],
     "mappedToField": "Region",
     "mapping": {
       "657b25f850bec8006419149a": "66b11309d09b4d00634d5b24",
