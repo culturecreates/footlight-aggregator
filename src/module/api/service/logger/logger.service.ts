@@ -16,18 +16,18 @@ export class LoggerService {
 
   async logStatistics(calendarId:string, calendarSlug: string, source: string, eventCount: number, errorCount: number,
                       skippedCount?: number) {
-    let message = `Import statistics:
-        Source: ${source}
-        CalendarId : ${calendarId}
-        CalendarSlug : ${calendarSlug}
-        DateTime:  ${new Date()}
-        Events: ${eventCount}
-        Imported: ${eventCount - errorCount - skippedCount}
-        Error:${errorCount}`;
-    if (skippedCount) {
-      message += `\nSkipped: ${skippedCount}`;
-    }
-    DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.error(message) : console.error(message);
+    skippedCount = skippedCount || 0;
+    let message :string = `Import statistics:
+    Events: ${eventCount}
+    Imported: ${eventCount - errorCount - skippedCount}
+    Error: ${errorCount}
+    Skipped: ${skippedCount}
+    Source: ${source}
+    CalendarSlug: ${calendarSlug}
+    CalendarId: ${calendarId}
+    DateTime: ${new Date()}`;
+
+    DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.info(message) : console.log(message);
   }
 
 }
