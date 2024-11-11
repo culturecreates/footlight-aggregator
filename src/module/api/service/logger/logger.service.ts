@@ -27,7 +27,7 @@ export class LoggerService {
     CalendarId: ${calendarId}
     DateTime: ${new Date()}`;
 
-    DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.error(message) : console.error(message);
+    DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.info(message) : console.log(message);
   }
 
 }
