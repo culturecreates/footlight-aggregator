@@ -17,7 +17,7 @@ export class LoggerService {
   async logStatistics(calendarId:string, calendarSlug: string, source: string, eventCount: number, errorCount: number,
                       skippedCount?: number) {
     skippedCount = skippedCount || 0;
-    let message = `Import statistics:
+    let message :string = `Import statistics:
     Events: ${eventCount}
     Imported: ${eventCount - errorCount - skippedCount}
     Error: ${errorCount}
