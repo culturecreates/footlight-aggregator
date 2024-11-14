@@ -7,7 +7,7 @@ from bson import ObjectId
 
 def append_ids(ids, results, collection):
     for result in results:
-        ids = ids + collection + ":" + str(result['_id']) + "\n"
+        ids = ids + 'resource' + ":" + str(result['_id']) + "\n"
     return ids
 
 def get_entity_ids(client):
@@ -35,11 +35,7 @@ def reconcile_entities(client, ids):
 
     query = """
                PREFIX schema: <http://schema.org/>
-               PREFIX events: <http://lod.footlight.io/resource/events/>
-               PREFIX places: <http://lod.footlight.io/resource/places/>
-               PREFIX people: <http://lod.footlight.io/resource/people/>
-               PREFIX organizations: <http://lod.footlight.io/resource/organizations/>
-               PREFIX concepts: <http://lod.footlight.io/resource/concepts/>
+               PREFIX resource: <http://lod.footlight.io/resource/>
                SELECT DISTINCT ?entity ?sameAs
                  WHERE {
 	                   VALUES ?entity {
