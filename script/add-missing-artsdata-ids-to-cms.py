@@ -35,11 +35,11 @@ def reconcile_entities(client, ids):
 
     query = """
                PREFIX schema: <http://schema.org/>
-               PREFIX events: <http://api.footlight.io/events/>
-               PREFIX places: <http://api.footlight.io/places/>
-               PREFIX people: <http://api.footlight.io/people/>
-               PREFIX organizations: <http://api.footlight.io/organizations/>
-               PREFIX concepts: <http://api.footlight.io/concepts/>
+               PREFIX events: <http://lod.footlight.io/resource/events/>
+               PREFIX places: <http://lod.footlight.io/resource/places/>
+               PREFIX people: <http://lod.footlight.io/resource/people/>
+               PREFIX organizations: <http://lod.footlight.io/resource/organizations/>
+               PREFIX concepts: <http://lod.footlight.io/resource/concepts/>
                SELECT DISTINCT ?entity ?sameAs
                  WHERE {
 	                   VALUES ?entity {
