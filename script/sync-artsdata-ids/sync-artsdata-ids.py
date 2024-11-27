@@ -26,7 +26,7 @@ def get_entity_ids(client, collection):
 
 def unlink_entities(client, headers):
     db = client['footlight-calendar']
-    query = load_query('unlink-entities.sparql')
+    query = load_query('./unlink-entities.sparql')
     # query = """
     #             PREFIX prov: <http://www.w3.org/ns/prov#>
     #             PREFIX schema: <http://schema.org/>
@@ -61,7 +61,7 @@ def unlink_entities(client, headers):
 def reconcile_entities(client, ids, entity_type, headers):
     db = client['footlight-calendar']
     formatted_ids = append_ids(ids)
-    query = load_query('reconcile-entities.sparql')
+    query = load_query('./reconcile-entities.sparql')
     # query = """
     #            PREFIX schema: <http://schema.org/>
     #            PREFIX resource: <http://lod.footlight.io/resource/>
