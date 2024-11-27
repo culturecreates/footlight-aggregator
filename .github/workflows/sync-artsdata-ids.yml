@@ -20,7 +20,7 @@ jobs:
       - name: Copy directory to AWS instance
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          scp -o StrictHostKeyChecking=no -i private_key ./script/sync-artsdata-ids/* ${USER_NAME}@${HOSTNAME}:./application/scripts/
+          scp -o StrictHostKeyChecking=no -i private_key -r ./script/sync-artsdata-ids/* ${USER_NAME}@${HOSTNAME}:./application/scripts/
 
       - name: Run reconcile-entities-in-cms.py
         run: |
