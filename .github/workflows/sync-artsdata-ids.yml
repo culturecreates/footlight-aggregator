@@ -1,4 +1,4 @@
-name: Add missing Artsdata ids to CMS entities
+name: Sync Artsdata ids with CMS entities
 
 on:
   workflow_dispatch:
@@ -17,12 +17,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Copy file to AWS instance
+      - name: Copy directory to AWS instance
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          scp -o StrictHostKeyChecking=no -i private_key ./script/add-missing-artsdata-ids-to-cms.py ${USER_NAME}@${HOSTNAME}:./application/scripts/
+          scp -o StrictHostKeyChecking=no -i private_key ./script/sync-artsdata-ids/* ${USER_NAME}@${HOSTNAME}:./application/scripts/
 
       - name: Run reconcile-entities-in-cms.py
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "python3 ./application/scripts/add-missing-artsdata-ids-to-cms.py ${PRODUCTION_DATABASE_URL}"
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "python3 ./application/scripts/sync-artsdata-ids.py ${PRODUCTION_DATABASE_URL}"
