@@ -1,0 +1,16 @@
+PREFIX schema: <http://schema.org/>
+PREFIX resource: <http://lod.footlight.io/resource/>
+SELECT DISTINCT ?entity ?sameAs
+WHERE {
+    VALUES ?entity {
+        <entity-ids-placeholder>
+    }
+    OPTIONAL {
+        ?entity ^schema:sameAs ?sameAsReverse .
+    }
+    OPTIONAL {
+        ?entity schema:sameAs ?sameAsForward.
+    }
+    BIND(COALESCE(?sameAsReverse, ?sameAsForward) AS ?sameAs)
+    FILTER(STRSTARTS(STR(?sameAs), 'http://kg.artsdata.ca/resource/K'))
+}

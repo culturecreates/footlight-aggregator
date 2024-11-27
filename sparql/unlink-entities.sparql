@@ -1,0 +1,13 @@
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX schema: <http://schema.org/>
+SELECT ?event ?cms_startDate (SAMPLE(?names) AS ?name) ?artsdata_event ?artsdata_startDate (SAMPLE(?artsdata_names) AS ?artsdata_name)
+WHERE {
+    ?event a schema:Event ;
+        schema:startDate ?cms_startDate ;
+        schema:sameAs ?artsdata_event ;
+        schema:name ?names .
+    FILTER(CONTAINS(STR(?artsdata_event), "kg.artsdata.ca"))
+    FILTER(CONTAINS(STR(?event), "lod.footlight.io"))
+    ?artsdata_event schema:startDate ?artsdata_startDate ; schema:name ?artsdata_names .
+    FILTER(STRDT(SUBSTR(STR(?cms_startDate), 1, 10), xsd:date) != STRDT(SUBSTR(STR(?artsdata_startDate), 1, 10), xsd:date) && (?cms_startDate != ?artsdata_startDate))
+} GROUP BY ?event ?cms_startDate ?artsdata_event ?artsdata_startDate
