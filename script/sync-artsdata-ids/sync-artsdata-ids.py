@@ -27,21 +27,6 @@ def get_entity_ids(client, collection):
 def unlink_entities(client, headers):
     db = client['footlight-calendar']
     query = load_query('./sparql/unlink-entities.sparql')
-    # query = """
-    #             PREFIX prov: <http://www.w3.org/ns/prov#>
-    #             PREFIX schema: <http://schema.org/>
-    #             select ?event ?cms_startDate  (sample(?names) as ?name) ?artsdata_event ?artsdata_startDate (sample(?artsdata_names) as ?artsdata_name)  where {
-    #                 ?event a schema:Event ;
-    #                     schema:startDate ?cms_startDate ;
-    #                     schema:sameAs ?artsdata_event ;
-    #                         schema:name ?names .
-    #                 filter(contains(str(?artsdata_event),"kg.artsdata.ca"))
-    #                 filter(contains(str(?event),"lod.footlight.io"))
-    #                 ?artsdata_event schema:startDate ?artsdata_startDate ; schema:name ?artsdata_names .
-    #                 # Compare dates on same floating date not dateTime but also check if timezone dates are the same
-    #                 filter( strdt(substr(str(?cms_startDate),1,10),xsd:date) !=strdt(substr(str(?artsdata_startDate),1,10),xsd:date)  && (?cms_startDate != ?artsdata_startDate) )
-    #             } group by  ?event ?cms_startDate ?artsdata_event ?artsdata_startDate
-    #         """
     data = {'query' : query}
     data_encoded = urllib.parse.urlencode(data)
     response = post('https://db.artsdata.ca/repositories/artsdata', headers=headers, data=data_encoded)
@@ -62,25 +47,6 @@ def reconcile_entities(client, ids, entity_type, headers):
     db = client['footlight-calendar']
     formatted_ids = append_ids(ids)
     query = load_query('./sparql/reconcile-entities.sparql')
-    # query = """
-    #            PREFIX schema: <http://schema.org/>
-    #            PREFIX resource: <http://lod.footlight.io/resource/>
-    #            SELECT DISTINCT ?entity ?sameAs
-    #              WHERE {
-	#                    VALUES ?entity {
-	#                            <entity-ids-placeholder>
-    #                    }
-    #                     OPTIONAL {
-    #                        ?entity ^schema:sameAs ?sameAsReverse .
-    #                     }
-    #                      OPTIONAL {
-    #                         ?entity schema:sameAs ?sameAsForward.
-    #                     }
-    #                    BIND (COALESCE(?sameAsReverse,?sameAsForward) AS ?sameAs)
-    #                    FILTER(STRSTARTS(STR(?sameAs),'http://kg.artsdata.ca/resource/K'))
-    #                    }
-    #            """
-
     query = query.replace("<entity-ids-placeholder>", formatted_ids)
     data = {'query': query}
     data_encoded = urllib.parse.urlencode(data)
