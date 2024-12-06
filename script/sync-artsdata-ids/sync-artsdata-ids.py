@@ -5,6 +5,12 @@ import urllib.parse
 import sys
 from bson import ObjectId
 
+from datadog_api_client import ApiClient, Configuration
+from datadog_api_client.v2.api.logs_api import LogsApi
+from datadog_api_client.v2.model.content_encoding import ContentEncoding
+from datadog_api_client.v2.model.http_log import HTTPLog
+from datadog_api_client.v2.model.http_log_item import HTTPLogItem
+
 def load_query(file_path):
     with open(file_path, 'r') as file:
         return file.read()
@@ -41,6 +47,7 @@ def unlink_entities(client, headers):
             {"$pull": {"sameAs": {"type": "ArtsdataIdentifier"}}}
         )
         print(f"Event {event_id} unlinked")
+        log_to_datadog(f"Event {event_id} unlinked")
 
 
 def reconcile_entities(client, ids, entity_type, headers):
@@ -69,6 +76,26 @@ def reconcile_entities(client, ids, entity_type, headers):
                                            "sameAs": {"uri": value, "type": "ArtsdataIdentifier"}}})
         if (update_result.raw_result['updatedExisting']):
             print(f"Updated entity {id}")
+            log_to_datadog(f"Updated entity {id}")
+
+
+def log_to_datadog(message):
+    log_body = HTTPLog(
+    [
+        HTTPLogItem(
+            ddsource="aggregator",
+            ddtags="sync-ids",
+            hostname="production-server-7",
+            message=message,
+            service="footlight-aggregator", 
+        ),
+    ]
+    )
+    configuration = Configuration()
+    with ApiClient(configuration) as api_client:
+        api_instance = LogsApi(api_client)
+        api_instance.submit_log(content_encoding=ContentEncoding.DEFLATE, body=log_body)
+
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -88,8 +115,10 @@ if __name__ == '__main__':
     collections = ["organizations", "places", "events", "people"]
     for collection in collections:
         print(f"Updating {collection} started!")
+        log_to_datadog(f"Updating {collection} started!")
         ids = get_entity_ids(client, collection)
         reconcile_entities(client, ids,collection, headers)
         print(f"Updating {collection} completed!\n")
+        log_to_datadog(f"Updating {collection} completed!")
 
     unlink_entities(client, headers)
