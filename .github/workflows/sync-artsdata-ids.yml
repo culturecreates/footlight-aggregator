@@ -13,6 +13,7 @@ jobs:
       HOSTNAME : ${{ vars.PRODUCTION_SERVER_7_IP}}
       USER_NAME : ${{ vars.PRODUCTION_SERVER_7_USER_NAME }}
       PRODUCTION_DATABASE_URL : ${{ secrets.PRODUCTION_DATABASE_URL }}
+      DD_API_KEY : ${{ secrets.DATA_DOG_CLIENT_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -25,4 +26,4 @@ jobs:
       - name: Run reconcile-entities-in-cms.py
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "cd ./application/scripts/ ; python3 ./sync-artsdata-ids.py ${PRODUCTION_DATABASE_URL}"
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "cd ./application/scripts/ ;DD_SITE="datadoghq.com" DD_API_KEY="${DD_API_KEY}" python3 ./sync-artsdata-ids.py ${PRODUCTION_DATABASE_URL}"
