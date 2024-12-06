@@ -203,7 +203,6 @@ export class EventService {
         }
       }
     }
-    // const offerArray = offers?.length ? offers : [offers];
 
     const location = locations?.Place;
     const virtualLocation = locations?.VirtualLocation;
@@ -211,22 +210,36 @@ export class EventService {
     const virtualLocationDescription = virtualLocation ? virtualLocation.description : null;
     const virtualLocationUrl = virtualLocation ? virtualLocation.url : null;
 
-    const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
+    const locationFetchResult = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
       footlightBaseUrl, location, currentUserId, mappingFile) : undefined;
-    if (locationId === null || !locationId) {
+
+    if(!locationFetchResult.success){
       this._loggerService.infoLogs(`Skipping this event: ${event.uri},`
         + `as the location is not included within the include condition or part of exclude condition.`);
       return null;
     }
+    const locationId = locationFetchResult.data;
 
-    const performers = performer?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer, currentUserId) : undefined;
-    const organizers = organizer?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer, currentUserId) : undefined;
-    const collaborators = sponsor?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId) : undefined;
+    const performersResult = performer?.length ? await this._personOrganizationService
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer, currentUserId, mappingFile) : undefined;
+    const organizersResult = organizer?.length ? await this._personOrganizationService
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer, currentUserId, mappingFile) : undefined;
+    const collaboratorsResult = sponsor?.length ? await this._personOrganizationService
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId, mappingFile) : undefined;
+
+    if(!performersResult?.success && performer?.length || !organizersResult?.success && organizer?.length || !collaboratorsResult?.success && sponsor?.length){
+      this._loggerService.infoLogs(`Skipping this event: ${event.uri},`
+        + `as the person/organization is not included within the include condition or part of exclude condition.`);
+      return null;
+    }
+
+    const performers = performersResult.data;
+    const organizers = organizersResult.data;
+    const collaborators = collaboratorsResult.data;
+
     delete event?.image?.uri;
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
+
 
     const eventToAdd = event;
     delete eventToAdd.location;
@@ -664,8 +677,8 @@ export class EventService {
     }
     if (location) {
       let placeDetails = places.find(place => place["@id"] === location["@id"]);
-      let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses, context);
-      formattedEvent.locationId = { place: { entityId: placeEntityId } };
+      let placePushResult = await this._placeService.formatAndPushJsonLdPlaces(placeDetails, token, calendarId, footlightBaseUrl, currentUserId, jsonLdPostalAddresses, context);
+      formattedEvent.locationId = { place: { entityId: placePushResult.data } };
     }
     if (offer) {
       formattedEvent.offerConfiguration = this._formatJsonLdOffers(offer, jsonLdOffers);
@@ -836,9 +849,9 @@ export class EventService {
     formattedEvent.image = [{ url: { uri: event.image.sizes.original }, isMain: true }];
     formattedEvent.sameAs = [{ uri: event.url, type: "ExternalSourceIdentifier" }];
     if (event.venue) {
-      const location = await this._placeService.formatAndPushCaligramPlaces(event.venue, token, footlightBaseUrl,
+      const locationResult = await this._placeService.formatAndPushCaligramPlaces(event.venue, token, footlightBaseUrl,
         calendarId, currentUserId);
-      formattedEvent.locationId = { place: { entityId: location } };
+      formattedEvent.locationId = { place: { entityId: locationResult.data } };
     }
     if (event.organization) {
       const organizationId = await this._organizationService.formatAndPushCaligramOrganization(event.organization, token,
