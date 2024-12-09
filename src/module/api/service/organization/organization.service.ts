@@ -8,6 +8,7 @@ import { PersonOrganizationService } from "../person-organization";
 import { LoggerService } from "..";
 import { JsonLdParseHelper } from "../../helper";
 import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
+import { FilterConditions } from "../../model/FilterCondition.model";
 
 @Injectable()
 export class OrganizationService {
@@ -23,14 +24,14 @@ export class OrganizationService {
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string,
-                               organizationDetails: OrganizationDTO, currentUserId: string) {
-    return await this._pushOrganizationToFootlight(footlightBaseUrl, calendarId, token, organizationDetails, currentUserId);
+                               organizationDetails: OrganizationDTO, currentUserId: string, filterConditions?: FilterConditions[] ) {
+    return await this._pushOrganizationToFootlight(footlightBaseUrl, calendarId, token, organizationDetails, currentUserId, filterConditions);
   }
 
   private async _pushOrganizationToFootlight(footlightUrl: string, calendarId: string, token: string,
-                                             organizationToAdd: OrganizationDTO, currentUserId: string) {
+                                             organizationToAdd: OrganizationDTO, currentUserId: string, filterConditions?: FilterConditions[]) {
     const url = footlightUrl + FootlightPaths.ADD_ORGANIZATION;
-    return await SharedService.syncEntityWithFootlight(calendarId, token, url, organizationToAdd, currentUserId);
+    return await SharedService.syncEntityWithFootlight(calendarId, token, url, organizationToAdd, currentUserId, filterConditions);
   }
 
   async syncOrganizations(token: any, calendarId: string, source: string, footlightBaseUrl: string) {

@@ -5,8 +5,8 @@ import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { LoggerService } from "../logger";
 import { EventPredicates, PlacePredicates } from "../../constants/artsdata-urls/rdf-types.constants";
-import { JsonLdParseHelper } from "../../helper";
-import { FilterCondition } from "../../model/FilterCondition.model";
+import { Exception, JsonLdParseHelper } from "../../helper";
+import { FilterConditions, Filters } from "../../model/FilterCondition.model";
 import { EntityType } from "../../enum";
 import { FilterEntityHelper } from "../../helper/filter-entity.helper";
 
@@ -25,7 +25,7 @@ export class PlaceService {
   private synchronisedPlaceMap = new Map();
 
   async getPlaceDetailsFromArtsData(calendarId: string, footlightBaseUrl: string, token: string, artsDataId: string,
-                                    currentUserId: string, conditions?: FilterCondition[]) {
+                                    currentUserId: string, filterConditions?: FilterConditions[]) {
     if (artsDataId.startsWith("K")) {
       artsDataId = "http://kg.artsdata.ca/resource/" + artsDataId;
     }
@@ -34,31 +34,27 @@ export class PlaceService {
       return undefined;
     }
 
-    const { address } = placeFetched;
-    const placeConditions = conditions
-      ?.filter(condition => condition.entityType === EntityType.PLACE);
-    const validatedPlace = placeConditions?.length ?
-      FilterEntityHelper.validateEntity(EntityType.PLACE, placeFetched, conditions) : true;
+    // const { address } = placeFetched;
+    const validatedPlace = filterConditions?.length ?
+      FilterEntityHelper.validateEntity(placeFetched, filterConditions) : true;
 
-    const postalAddressConditions = conditions
-      ?.filter(condition => condition.entityType === EntityType.POSTAL_ADDRESS);
-    const validatedPostalAddress = postalAddressConditions?.length ? FilterEntityHelper
-      .validateEntity(EntityType.POSTAL_ADDRESS, address, conditions) : true;
-    if (!validatedPlace || !validatedPostalAddress) {
-      return null;
+    if(!validatedPlace) {
+       Exception.preconditionFailed(`Place with id ${artsDataId} does not meet the filter conditions`);
     }
-
-    return await this._formatPlaceFetched(calendarId, token, footlightBaseUrl, currentUserId, placeFetched);
+    else{
+      const formattedPlace =  await this._formatPlaceFetched(calendarId, token, footlightBaseUrl, currentUserId, placeFetched);
+      return formattedPlace;
+    }
   }
 
   async pushPlaceToFootlight(footlightBaseUrl: string, calendarId: string, token: string, placeToAdd: PlaceDTO,
-                             currentUserId: string) {
+                             currentUserId: string, filters?: FilterConditions[] ) : Promise<string> {
     const url = footlightBaseUrl + FootlightPaths.ADD_PLACE;
-    return await SharedService.syncEntityWithFootlight(calendarId, token, url, placeToAdd, currentUserId);
+    return await SharedService.syncEntityWithFootlight(calendarId, token, url, placeToAdd, currentUserId, filters);
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string,
-                               currentUserId: string, conditions?: FilterCondition[]) {
+                               currentUserId: string, filters?: Filters[]): Promise<string> {
     artsDataUri = typeof artsDataUri != "string" ? artsDataUri[0] : artsDataUri;
     const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
     const placeIdFromMap = this.synchronisedPlaceMap.get(artsDataId);
@@ -68,15 +64,15 @@ export class PlaceService {
       return placeIdFromMap;
     }
 
-    const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token,
-      artsDataId, currentUserId, conditions);
+    const filterConditionsForArtsdataPlaces = filters?.find(filter => filter?.entityType === EntityType.PLACE)?.artsdataFilters;
+    const filterConditionsForFootlightPlaces = filters?.find(filter => filter?.entityType === EntityType.PLACE)?.footlightFilters;
 
-    if (placeDetails) {
-      const placeId = await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId);
-      this.synchronisedPlaceMap.set(artsDataId, placeId);
-      return placeId;
-    }
-    return placeDetails;
+    const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token,
+      artsDataId, currentUserId, filterConditionsForArtsdataPlaces);
+
+    const placeId = await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId, filterConditionsForFootlightPlaces);
+    this.synchronisedPlaceMap.set(artsDataId, placeId);
+    return placeId;
   }
 
   async syncPlaces(token: any, calendarId: string, source: string, footlightBaseUrl: string) {

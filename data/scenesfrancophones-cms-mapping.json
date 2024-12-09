@@ -61,11 +61,13 @@
       }
     },
   {
-    "entityType" : "POSTAL_ADDRESS",
-    "inputProperty":["addressRegion"],
-    "includePattern" : ["NB"],
-    "excludePattern" : []
-
+    "entityType" : "PLACE",
+    "artsdataFilters":[
+      {
+        "inputProperty":["address.addressRegion"],
+        "includePatterns" : ["NB"],
+        "excludePatterns" : [] 
+      }
+    ]
   }
-
-  ]
+]

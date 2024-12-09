@@ -1,41 +1,33 @@
 import { EntityType } from "../enum";
-import { FilterCondition } from "../model/FilterCondition.model";
+import { FilterConditions, Filters } from "../model/FilterCondition.model";
 
 export class FilterEntityHelper {
 
-  static validateEntity(entityType: EntityType, entity: any, condition: FilterCondition[]): boolean {
+  static validateEntity(entity: any, filterConditions: FilterConditions[]): boolean {
     if (!entity) {
       return false;
     }
-    for (const filterCondition of condition) {
-      if (filterCondition.entityType === entityType) {
-        for (const property of filterCondition.inputProperty) {
-          const rawValue = entity[property];
+    if(filterConditions?.length){
+      for (const filterCondition of filterConditions) {
+        const {inputProperty, includePatterns, excludePatterns, includeExactProperties, excludeExactProperties} = filterCondition;
+        for(const property of inputProperty){
+          const formattedProperty = property.split('.');
+          let rawValue;
+          for(const prop of formattedProperty){
+            rawValue = rawValue ? rawValue[prop] : entity[prop];
+          }
           const value = rawValue.en || rawValue.fr || rawValue["@none"];
-          if (filterCondition.includePattern?.length) {
-            if (!rawValue) {
-              return false;
-            }
-            for (const pattern of filterCondition.includePattern) {
-
-              if (!value.includes(pattern)) {
-                return false;
-              }
-            }
-            ;
-          }
-          if (filterCondition.excludePattern?.length) {
-            filterCondition.excludePattern.forEach(pattern => {
-              if (value.includes(pattern)) {
-                return false;
-              }
-            });
-          }
+          if (
+            includePatterns?.some(pattern => !value?.includes(pattern)) ||
+            includeExactProperties?.some(property => value !== property) ||
+            excludeExactProperties?.some(property => value === property) ||
+            excludePatterns?.some(pattern => value?.includes(pattern))
+          ) {
+            return false;
+          }          
         }
-        ;
       }
     }
-    ;
     return true;
   }
 

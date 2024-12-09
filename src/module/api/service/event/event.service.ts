@@ -115,9 +115,7 @@ export class EventService {
             }
             const eventsFormatted = await this.formatEvent(calendarId, token, eventWithLocation, footlightBaseUrl, currentUser.id,
               mappingFile, mappingFile, existingEventTypeConceptIDs, existingAudienceConceptIDs);
-            if (eventsFormatted === null) {
-              skippedCount++;
-            } else {
+            if (eventsFormatted) {
               importedCount++;
             }
             await this._pushEventsToFootlight(calendarId, token, footlightBaseUrl, eventsFormatted, currentUser.id);
@@ -125,9 +123,15 @@ export class EventService {
             ${JSON.stringify(eventsFormatted?.sameAs)}\n`);
           }
         } catch (e) {
-          errorCount++;
-          this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). 
-          Error while adding Event ${JSON.stringify(event.url)}` + e);
+          if(e.status == '412'){
+            this._loggerService.infoLogs('Skipping event as it does not satisfy the filter conditions')
+            skippedCount++;
+          }
+          else {
+            errorCount++;
+            this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). 
+            Error while adding Event ${JSON.stringify(event.url)}` + e);
+          }
         }
       }
       offset = offset + batchSize;
@@ -203,7 +207,6 @@ export class EventService {
         }
       }
     }
-    // const offerArray = offers?.length ? offers : [offers];
 
     const location = locations?.Place;
     const virtualLocation = locations?.VirtualLocation;
@@ -211,22 +214,20 @@ export class EventService {
     const virtualLocationDescription = virtualLocation ? virtualLocation.description : null;
     const virtualLocationUrl = virtualLocation ? virtualLocation.url : null;
 
-    const locationId: string = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
+    const locationId = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
       footlightBaseUrl, location, currentUserId, mappingFile) : undefined;
-    if (locationId === null || !locationId) {
-      this._loggerService.infoLogs(`Skipping this event: ${event.uri},`
-        + `as the location is not included within the include condition or part of exclude condition.`);
-      return null;
-    }
+
 
     const performers = performer?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer, currentUserId) : undefined;
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer, currentUserId, mappingFile) : undefined;
     const organizers = organizer?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer, currentUserId) : undefined;
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer, currentUserId, mappingFile) : undefined;
     const collaborators = sponsor?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId) : undefined;
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId, mappingFile) : undefined;
+
     delete event?.image?.uri;
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
+
 
     const eventToAdd = event;
     delete eventToAdd.location;
@@ -836,9 +837,9 @@ export class EventService {
     formattedEvent.image = [{ url: { uri: event.image.sizes.original }, isMain: true }];
     formattedEvent.sameAs = [{ uri: event.url, type: "ExternalSourceIdentifier" }];
     if (event.venue) {
-      const location = await this._placeService.formatAndPushCaligramPlaces(event.venue, token, footlightBaseUrl,
+      const locationId = await this._placeService.formatAndPushCaligramPlaces(event.venue, token, footlightBaseUrl,
         calendarId, currentUserId);
-      formattedEvent.locationId = { place: { entityId: location } };
+      formattedEvent.locationId = { place: { entityId: locationId } };
     }
     if (event.organization) {
       const organizationId = await this._organizationService.formatAndPushCaligramOrganization(event.organization, token,

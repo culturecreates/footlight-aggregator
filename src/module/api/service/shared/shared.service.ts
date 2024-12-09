@@ -8,6 +8,8 @@ import { LoggerService } from "..";
 import { HEADER } from "../../config";
 import { SameAs } from "../../model";
 import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
+import { FilterConditions, Filters } from "../../model/FilterCondition.model";
+import { FilterEntityHelper } from "../../helper/filter-entity.helper";
 
 @Injectable()
 export class SharedService {
@@ -19,7 +21,7 @@ export class SharedService {
   public static async fetchFromArtsDataById(id: string, baseUrl: string) {
     const url = baseUrl.replace(ArtsDataConstants.ARTS_DATA_ID.toString(), id);
     const artsDataResponse = await this.fetchUrl(url);
-    return artsDataResponse.data?.data?.[0];
+    return artsDataResponse?.data?.data?.[0];
   }
 
   public static async fetchUrl(url: string, headers?: any) {
@@ -80,7 +82,7 @@ export class SharedService {
   }
 
   public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any,
-                                              currentUserId: string) {
+                                              currentUserId: string, conditions?: FilterConditions[]): Promise<string> {
     const addResponse = await this.addEntityToFootlight(calendarId, token, url, body);
     const { status, response } = addResponse;
     if (status === HttpStatus.CREATED) {
@@ -89,6 +91,10 @@ export class SharedService {
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
       const existingEntity = await this._getEntityFromFootlight(calendarId, token, existingEntityId, url);
+      const validationResult = FilterEntityHelper.validateEntity(existingEntity, conditions);
+      if(!validationResult){
+        Exception.preconditionFailed(`Entity with id ${existingEntityId} does not meet the filter conditions`);
+      }
       if (!existingEntity?.modifiedByUserId || existingEntity?.modifiedByUserId === currentUserId) {
         const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
         if (updateResponse.status === HttpStatus.OK) {
@@ -99,14 +105,13 @@ export class SharedService {
       } else {
         this._loggerService(`\tEntity cannot be modified. Since this entity is updated latest by a different user.`);
       }
-
       return existingEntityId;
     } else if (status === HttpStatus.UNAUTHORIZED) {
       this._loggerService("Unauthorized Exception!");
       Exception.unauthorized(response.message);
     } else {
-      this._loggerService(`Some thing went wrong.${JSON.stringify(body)}`);
-      Exception.internalServerError(`Some thing went wrong Event: ${response?.error}, message: ${response?.message}, 
+      this._loggerService(`Something went wrong.${JSON.stringify(body)}`);
+      Exception.internalServerError(`Something went wrong Event: ${response?.error}, message: ${response?.message}, 
                       same as: ${JSON.stringify(body?.sameAs)}`);
     }
   }
