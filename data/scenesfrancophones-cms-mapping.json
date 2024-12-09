@@ -65,7 +65,7 @@
     "artsdataFilters":[
       {
         "inputProperty":["address.addressRegion"],
-        "includePatterns" : ["QC"],
+        "includePatterns" : ["NB"],
         "excludePatterns" : [] 
       }
     ]

@@ -5,11 +5,10 @@ import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { LoggerService } from "../logger";
 import { EventPredicates, PlacePredicates } from "../../constants/artsdata-urls/rdf-types.constants";
-import { JsonLdParseHelper } from "../../helper";
+import { Exception, JsonLdParseHelper } from "../../helper";
 import { FilterConditions, Filters } from "../../model/FilterCondition.model";
 import { EntityType } from "../../enum";
 import { FilterEntityHelper } from "../../helper/filter-entity.helper";
-import { EntityFetcherResult } from "../../model/artsdataResultModel";
 
 @Injectable()
 export class PlaceService {
@@ -26,8 +25,7 @@ export class PlaceService {
   private synchronisedPlaceMap = new Map();
 
   async getPlaceDetailsFromArtsData(calendarId: string, footlightBaseUrl: string, token: string, artsDataId: string,
-                                    currentUserId: string, conditions?: FilterConditions[]) {
-    let result: EntityFetcherResult;
+                                    currentUserId: string, filterConditions?: FilterConditions[]) {
     if (artsDataId.startsWith("K")) {
       artsDataId = "http://kg.artsdata.ca/resource/" + artsDataId;
     }
@@ -37,96 +35,44 @@ export class PlaceService {
     }
 
     // const { address } = placeFetched;
-    const placeConditions = conditions
-      ?.filter(condition => condition.entityType === EntityType.PLACE);
-    const validatedPlace = placeConditions?.length ?
-      FilterEntityHelper.validateEntity(placeFetched, conditions) : true;
-
-    // const postalAddressConditions = conditions
-    //   ?.filter(condition => condition.entityType === EntityType.POSTAL_ADDRESS);
-    // const validatedPostalAddress = postalAddressConditions?.length ? FilterEntityHelper
-    //   .validateEntity(address, conditions.find(condition => condition.entityType == EntityType.POSTAL_ADDRESS)?.artsdataFilters) : true;
-    // if (!validatedPlace || !validatedPostalAddress) {
-    //   return null;
-    // }
+    const validatedPlace = filterConditions?.length ?
+      FilterEntityHelper.validateEntity(placeFetched, filterConditions) : true;
 
     if(!validatedPlace) {
-       result = {
-        success: false,
-        message: "Place or Postal Address not validated",
-        data: null
-      }
+       Exception.preconditionFailed(`Place with id ${artsDataId} does not meet the filter conditions`);
     }
     else{
       const formattedPlace =  await this._formatPlaceFetched(calendarId, token, footlightBaseUrl, currentUserId, placeFetched);
-      result = {
-        success: true,
-        message: "Place fetched successfully",
-        data: formattedPlace
-      }
+      return formattedPlace;
     }
-    return result;
   }
 
   async pushPlaceToFootlight(footlightBaseUrl: string, calendarId: string, token: string, placeToAdd: PlaceDTO,
-                             currentUserId: string, filters?: FilterConditions[] ) : Promise<EntityFetcherResult> {
+                             currentUserId: string, filters?: FilterConditions[] ) : Promise<string> {
     const url = footlightBaseUrl + FootlightPaths.ADD_PLACE;
     return await SharedService.syncEntityWithFootlight(calendarId, token, url, placeToAdd, currentUserId, filters);
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string,
-                               currentUserId: string, filters?: Filters[]) {
-    let result: EntityFetcherResult;
+                               currentUserId: string, filters?: Filters[]): Promise<string> {
     artsDataUri = typeof artsDataUri != "string" ? artsDataUri[0] : artsDataUri;
     const artsDataId = artsDataUri.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
     const placeIdFromMap = this.synchronisedPlaceMap.get(artsDataId);
 
     if (placeIdFromMap) {
       this._loggerService.infoLogs(`\tThe Place with Artsdata id :${artsDataId} is already synced during this process.`);
-      result = {
-        success: true,
-        message: "Place fetched from map",
-        data: placeIdFromMap
-      }
+      return placeIdFromMap;
     }
 
-    // const placeConditions = FilterEntityHelper.fetchFiltersByEntities([EntityType.PLACE], filters)
-    const placeConditions = filters.find(filter => filter.entityType === EntityType.PLACE)?.artsdataFilters;
+    const filterConditionsForArtsdataPlaces = filters?.find(filter => filter?.entityType === EntityType.PLACE)?.artsdataFilters;
+    const filterConditionsForFootlightPlaces = filters?.find(filter => filter?.entityType === EntityType.PLACE)?.footlightFilters;
 
-    // const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token,
-    //   artsDataId, currentUserId, placeAndPostalAddressConditions);
+    const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token,
+      artsDataId, currentUserId, filterConditionsForArtsdataPlaces);
 
-    const artadataResult = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token,
-      artsDataId, currentUserId, placeConditions);
-    if(!artadataResult.success){
-      result = {
-        success: false,
-        message: `Place not fetched from Artsdata as ${artadataResult.message}`,
-        data: null
-      }
-    }
-
-    else {
-      const placeDetails = artadataResult.data;
-      const placePushResult = await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId, placeConditions);
-      if(!placePushResult.success){
-        return placePushResult;
-      }
-      const placeId = placePushResult.data;
-      this.synchronisedPlaceMap.set(artsDataId, placeId);
-      result = {
-        success: true,
-        message: "Place fetched successfully",
-        data: placeId
-      }
-    }
-    return result;
-    // if (placeDetails) {
-    //   const placeId = await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId);
-    //   this.synchronisedPlaceMap.set(artsDataId, placeId);
-    //   return placeId;
-    // }
-    // return placeDetails;
+    const placeId = await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId, filterConditionsForFootlightPlaces);
+    this.synchronisedPlaceMap.set(artsDataId, placeId);
+    return placeId;
   }
 
   async syncPlaces(token: any, calendarId: string, source: string, footlightBaseUrl: string) {

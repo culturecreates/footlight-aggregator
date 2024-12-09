@@ -1,7 +1,6 @@
 import { EntityType } from "../enum";
 
 export class FilterConditions {
-  entityType: EntityType;
   inputProperty?: string[];
   includePatterns?: string[];
   includeExactProperties?: string[];
