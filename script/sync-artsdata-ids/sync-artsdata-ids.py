@@ -76,6 +76,7 @@ def reconcile_entities(client, ids, entity_type, headers):
                                                        "sameAs": {"uri": value, "type": "ArtsdataIdentifier"}}})
         if update_result.raw_result['updatedExisting']:
             log_message(f"Linked {entity_type} with id {id} to {value}")
+    return list(result_dict.keys())
 
 
 def log_message(message):
@@ -116,8 +117,8 @@ if __name__ == '__main__':
     for collection in collections:
         log_message(f"Linking {collection} CMS to Artsdata entities has started!")
         ids = get_entity_ids(client, collection)
-        linked_entities.extend(ids)
-        reconcile_entities(client, ids, collection, headers)
+        linked_cms_ids = reconcile_entities(client, ids, collection, headers)
+        linked_entities.extend(linked_cms_ids)
         log_message(f"Linking {collection} CMS to Artsdata entities has completed!")
 
     unlinked_entity_ids = unlink_entities(client, headers)
