@@ -2,14 +2,12 @@ import { ArtsDataConstants } from "../../constants";
 import { Exception } from "../../helper";
 import { forwardRef, HttpStatus, Inject, Injectable } from "@nestjs/common";
 import axios from "axios";
-import { HttpMethodsEnum } from "../../enum";
+import { EntityType, HttpMethodsEnum } from "../../enum";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { LoggerService } from "..";
 import { HEADER } from "../../config";
 import { SameAs } from "../../model";
 import { EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
-import { FilterConditions, Filters } from "../../model/FilterCondition.model";
-import { FilterEntityHelper } from "../../helper/filter-entity.helper";
 
 @Injectable()
 export class SharedService {
@@ -82,7 +80,7 @@ export class SharedService {
   }
 
   public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any,
-                                              currentUserId: string, conditions?: FilterConditions[]): Promise<string> {
+                                              currentUserId: string): Promise<string> {
     const addResponse = await this.addEntityToFootlight(calendarId, token, url, body);
     const { status, response } = addResponse;
     if (status === HttpStatus.CREATED) {
@@ -91,10 +89,6 @@ export class SharedService {
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
       const existingEntity = await this._getEntityFromFootlight(calendarId, token, existingEntityId, url);
-      const validationResult = FilterEntityHelper.validateEntity(existingEntity, conditions);
-      if(!validationResult){
-        Exception.preconditionFailed(`Entity with id ${existingEntityId} does not meet the filter conditions`);
-      }
       if (!existingEntity?.modifiedByUserId || existingEntity?.modifiedByUserId === currentUserId) {
         const updateResponse = await this.updateEntityInFootlight(calendarId, token, existingEntityId, url, body);
         if (updateResponse.status === HttpStatus.OK) {
@@ -135,6 +129,37 @@ export class SharedService {
     const headers = this.createHeaders(token, calendarId);
     const existingEntity = await SharedService.fetchUrl(url, headers);
     return existingEntity?.data;
+  }
+
+  static async getAllEntitiesFromFootlight(calendarId: string, footlightBaseUrl: string, token: string, entityType: EntityType){
+    switch(entityType){
+      case EntityType.PERSON:
+        return await this._fetchAllPeopleFromFootlight(calendarId, footlightBaseUrl, token);
+      case EntityType.ORGANIZATION:
+        return await this._fetchAllOrganizationsFromFootlight(calendarId, footlightBaseUrl, token);
+      case EntityType.PLACE:
+        return await this._fetchAllPlacesFromFootlight(calendarId, footlightBaseUrl, token);
+      default:
+        return null;
+    }
+  }
+
+  private static async _fetchAllPeopleFromFootlight(calendarId: string,footlightBaseUrl: string, token: string){
+    const url = `${footlightBaseUrl}${FootlightPaths.ADD_PEOPLE}?page=1&limit=300`;
+    const headers = this.createHeaders(token, calendarId);
+    return await SharedService.fetchUrl(url, headers);
+  }
+
+  private static async _fetchAllOrganizationsFromFootlight(calendarId: string, footlightBaseUrl:string, token: string){
+    const url = `${footlightBaseUrl}${FootlightPaths.ADD_ORGANIZATION}?page=1&limit=300`;
+    const headers = this.createHeaders(token, calendarId);
+    return await SharedService.fetchUrl(url, headers);
+  }
+
+  private static async _fetchAllPlacesFromFootlight(calendarId: string, footlightBaseUrl:string, token: string){
+    const url = `${footlightBaseUrl}${FootlightPaths.ADD_PLACE}?page=1&limit=300`;
+    const headers = this.createHeaders(token, calendarId);
+    return await SharedService.fetchUrl(url, headers);
   }
 
   static formatAlternateNames(alternateName: { fr: string[], en: string[] }) {

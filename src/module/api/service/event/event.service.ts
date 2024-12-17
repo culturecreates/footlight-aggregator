@@ -29,6 +29,8 @@ import * as fs from "fs";
 import { parse } from "@frogcat/ttl2jsonld";
 import { EntityPredicates, EventPredicates } from "../../constants/artsdata-urls/rdf-types.constants";
 import axios from "axios";
+import { Filters } from "../../model/FilterCondition.model";
+import { FilterEntityHelper } from "../../helper/filter-entity.helper";
 
 @Injectable()
 export class EventService {
@@ -68,6 +70,11 @@ export class EventService {
       EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
     const existingAudienceConceptIDs = this._validateConceptIds(mappingFile, EventProperty.AUDIENCE,
       this.audienceConceptMap);
+    const filters : Filters[] = mappingFile;
+    const entitiesMap = {};
+    for(const filter of filters){
+      entitiesMap[filter.entityType] = (await SharedService.getAllEntitiesFromFootlight(calendarId, footlightBaseUrl, token, filter.entityType))?.data?.data;
+    }
 
     do {
       let events = await this._fetchEventsFromArtsData(source, batchSize, offset, eventType);
@@ -112,7 +119,9 @@ export class EventService {
                 continue;
               }
               eventWithLocation.subEvent = updatedSubEvents;
-            }
+            }     
+            const participants = [eventWithLocation.organizer, eventWithLocation.performer, eventWithLocation.sponsor].flat();
+            await this._filterEvent(filters, eventWithLocation.location, participants, entitiesMap);
             const eventsFormatted = await this.formatEvent(calendarId, token, eventWithLocation, footlightBaseUrl, currentUser.id,
               mappingFile, mappingFile, existingEventTypeConceptIDs, existingAudienceConceptIDs);
             if (eventsFormatted) {
@@ -217,13 +226,32 @@ export class EventService {
     const locationId = location ? await this._placeService.getFootlightIdentifier(calendarId, token,
       footlightBaseUrl, location, currentUserId, mappingFile) : undefined;
 
+    const participantFilterErrors = [];
 
-    const performers = performer?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer, currentUserId, mappingFile) : undefined;
-    const organizers = organizer?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer, currentUserId, mappingFile) : undefined;
-    const collaborators = sponsor?.length ? await this._personOrganizationService
-      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId, mappingFile) : undefined;
+    const performers = await this._personOrganizationService
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, performer, currentUserId, mappingFile)
+      .catch((err) => {
+        if (err.status === 412) participantFilterErrors.push('performers');
+        return undefined;
+      });
+
+    const organizers = await this._personOrganizationService
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, organizer, currentUserId, mappingFile)
+      .catch((err) => {
+        if (err.status === 412) participantFilterErrors.push('organizers');
+        return undefined;
+      });
+
+    const collaborators = await this._personOrganizationService
+      .fetchPersonOrganizationFromFootlight(calendarId, token, footlightBaseUrl, sponsor, currentUserId, mappingFile)
+      .catch((err) => {
+        if (err.status === 412) participantFilterErrors.push('collaborators');
+        return undefined;
+      });
+  
+    if (participantFilterErrors.length === 3) {
+      Exception.preconditionFailed(`Event ${event.uri} does not satisfy the filter conditions`);
+    }
 
     delete event?.image?.uri;
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate, startDateTime, endDate, endDateTime);
@@ -261,6 +289,35 @@ export class EventService {
       delete eventToAdd.endDateTime;
     }
     return eventToAdd;
+  }
+
+  private async _filterEvent(filters: Filters[], locations: any, participants: any[], entitiesMap: any) {
+    for(const filter of filters){
+      if(filter?.footlightFilters?.length){
+        const entities = entitiesMap[filter.entityType];
+        const filteredEntities = entities?.filter(entity => FilterEntityHelper.validateEntity(entity, filter.footlightFilters))
+        if(!filteredEntities.length){
+          Exception.preconditionFailed(`Event does not satisfy the filter conditions`)
+        }
+        if(filter.entityType == EntityType.PLACE){
+          const entity = filteredEntities?.find(entity => entity.sameAs.some(sameAs => sameAs.uri === locations?.Place?.uri))
+          if(!entity){
+            Exception.preconditionFailed(`Event does not satisfy the filter conditions`)
+          }
+        }
+        else if (filter?.entityType === EntityType.PERSON || filter?.entityType === EntityType.ORGANIZATION) {
+          const hasMatchingEntity = participants.some(participant => 
+            filteredEntities?.some(entity => 
+              entity?.sameAs?.some(sameAsEntity => participant?.includes(sameAsEntity?.uri))
+            )
+          );
+        
+          if (!hasMatchingEntity) {
+            Exception.preconditionFailed(`Event does not satisfy the filter conditions`);
+          }
+        }
+      }
+    }
   }
 
   private async _fetchEventsFromArtsData(source: string, batchSize: number, offset: number, eventType?: EventType) {
@@ -350,7 +407,7 @@ export class EventService {
           if (eventPropertyValues.some(eventPropertyValue => eventPropertyValue.toLowerCase() === pattern
             || (regexPattern && regexPattern.test(eventPropertyValue)))
           ) {
-            const mappedUUIDs: string[] = patternToConceptIdMappingForTheField.mapping[pattern];
+            const mappedUUIDs: string[] = patternToConceptIdMappingForTheField?.mapping[pattern];
             const conceptIdToAdd = mappedUUIDs.filter(id => existingConceptIDs.includes(id));
             if (conceptIdToAdd?.length) {
               entityId.push(...conceptIdToAdd);
@@ -360,7 +417,7 @@ export class EventService {
       }
     }
     if (!entityId.length) {
-      defaultEntityId = patternToConceptIdMappingForTheField.mapping[defaultEntityKey]
+      defaultEntityId = patternToConceptIdMappingForTheField?.mapping[defaultEntityKey]
         ? patternToConceptIdMappingForTheField.mapping[defaultEntityKey] : [];
       entityId.push(...defaultEntityId);
     }
@@ -504,7 +561,7 @@ export class EventService {
   }
 
   private _validateConceptIds(patternToConceptIdMapping: any, propertyName: string, existingConceptsMap: string[]) {
-    let patternToConceptIdMappingForTheField = patternToConceptIdMapping?.find(concept => concept.fieldName === propertyName).mapping;
+    let patternToConceptIdMappingForTheField = patternToConceptIdMapping?.find(concept => concept.fieldName === propertyName)?.mapping;
     const conceptIds = patternToConceptIdMappingForTheField ?
       Object.values(patternToConceptIdMappingForTheField).flat() : undefined;
     const existingConceptIds = this._getAllConceptIds(existingConceptsMap);

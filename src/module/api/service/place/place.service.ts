@@ -48,9 +48,9 @@ export class PlaceService {
   }
 
   async pushPlaceToFootlight(footlightBaseUrl: string, calendarId: string, token: string, placeToAdd: PlaceDTO,
-                             currentUserId: string, filters?: FilterConditions[] ) : Promise<string> {
+                             currentUserId: string ) : Promise<string> {
     const url = footlightBaseUrl + FootlightPaths.ADD_PLACE;
-    return await SharedService.syncEntityWithFootlight(calendarId, token, url, placeToAdd, currentUserId, filters);
+    return await SharedService.syncEntityWithFootlight(calendarId, token, url, placeToAdd, currentUserId);
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string,
@@ -65,12 +65,11 @@ export class PlaceService {
     }
 
     const filterConditionsForArtsdataPlaces = filters?.find(filter => filter?.entityType === EntityType.PLACE)?.artsdataFilters;
-    const filterConditionsForFootlightPlaces = filters?.find(filter => filter?.entityType === EntityType.PLACE)?.footlightFilters;
 
     const placeDetails = await this.getPlaceDetailsFromArtsData(calendarId, footlightBaseUrl, token,
       artsDataId, currentUserId, filterConditionsForArtsdataPlaces);
 
-    const placeId = await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId, filterConditionsForFootlightPlaces);
+    const placeId = await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeDetails, currentUserId);
     this.synchronisedPlaceMap.set(artsDataId, placeId);
     return placeId;
   }

@@ -31,7 +31,7 @@ export class OrganizationService {
   private async _pushOrganizationToFootlight(footlightUrl: string, calendarId: string, token: string,
                                              organizationToAdd: OrganizationDTO, currentUserId: string, filterConditions?: FilterConditions[]) {
     const url = footlightUrl + FootlightPaths.ADD_ORGANIZATION;
-    return await SharedService.syncEntityWithFootlight(calendarId, token, url, organizationToAdd, currentUserId, filterConditions);
+    return await SharedService.syncEntityWithFootlight(calendarId, token, url, organizationToAdd, currentUserId);
   }
 
   async syncOrganizations(token: any, calendarId: string, source: string, footlightBaseUrl: string) {

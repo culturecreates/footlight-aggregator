@@ -12,11 +12,7 @@ export class FilterEntityHelper {
         const {inputProperty, includePatterns, excludePatterns, includeExactProperties, excludeExactProperties} = filterCondition;
         for(const property of inputProperty){
           const formattedProperty = property.split('.');
-          let rawValue;
-          for(const prop of formattedProperty){
-            rawValue = rawValue ? rawValue[prop] : entity[prop];
-          }
-          const value = rawValue.en || rawValue.fr || rawValue["@none"];
+          const value = this.getRawValue(formattedProperty, entity);
           if (
             includePatterns?.some(pattern => !value?.includes(pattern)) ||
             includeExactProperties?.some(property => value !== property) ||
@@ -31,5 +27,18 @@ export class FilterEntityHelper {
     return true;
   }
 
+
+  static getRawValue(formattedProperty: string[], entity: any): any {
+    let rawValue;
+    for (const prop of formattedProperty) {
+      if(Array.isArray(rawValue)){
+        rawValue = rawValue.flatMap((value) => value?.[prop]);
+      }
+      else{
+        rawValue = rawValue ? rawValue?.[prop] : entity?.[prop];
+      }
+    }
+    return rawValue;
+  }
 
 }

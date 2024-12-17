@@ -42,11 +42,10 @@ export class PersonOrganizationService {
         const { alternateName, contactPoint } = entityFetched;
 
         const { type } = entityFetched;
-        const filterConditionsForFootlightPeopleOrganizations = filters?.find(filter => filter?.entityType === type)?.footlightFilters;
         let entityId: string;
         if (type === PersonOrganizationType.PERSON) {
           entityId = await this._personService.getFootlightIdentifier(calendarId, token, footlightUrl,
-            entityFetched, currentUserId, filterConditionsForFootlightPeopleOrganizations);
+            entityFetched, currentUserId);
         } else if (type === PersonOrganizationType.ORGANIZATION) {
           const place = entityFetched.place;
           if (entityFetched.place) {
@@ -64,7 +63,7 @@ export class PersonOrganizationService {
             entityFetched.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint;
           }
           entityId = await this._organizationService.getFootlightIdentifier(calendarId, token, footlightUrl,
-            entityFetched, currentUserId, filterConditionsForFootlightPeopleOrganizations);
+            entityFetched, currentUserId);
         }
         entityFetched.alternateName = alternateName?.length
         ? SharedService.formatAlternateNames(alternateName) : undefined;

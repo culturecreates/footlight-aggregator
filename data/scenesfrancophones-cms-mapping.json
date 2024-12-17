@@ -64,7 +64,7 @@
     "entityType" : "PLACE",
     "artsdataFilters":[
       {
-        "inputProperty":["address.addressRegion"],
+        "inputProperty":["address.addressRegion.@none"],
         "includePatterns" : ["NB"],
         "excludePatterns" : [] 
       }
