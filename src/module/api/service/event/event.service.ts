@@ -70,7 +70,7 @@ export class EventService {
       EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
     const existingAudienceConceptIDs = this._validateConceptIds(mappingFile, EventProperty.AUDIENCE,
       this.audienceConceptMap);
-    const filters : Filters[] = mappingFile;
+    const filters : Filters[] = mappingFile || [];
     const entitiesMap = {};
     for(const filter of filters){
       entitiesMap[filter.entityType] = (await SharedService.getAllEntitiesFromFootlight(calendarId, footlightBaseUrl, token, filter.entityType))?.data?.data;
@@ -160,6 +160,7 @@ export class EventService {
   }
 
   private async _searchFootlightEntities(token: string, calendarId: string, uri: string, footlightBaseUrl: string) {
+    uri = encodeURIComponent(uri);
     const url = footlightBaseUrl + FootlightPaths.SEARCH + `?query=${uri}` + "&classes=Event";
     const headers = SharedService.createHeaders(token, calendarId);
     const footlightResponse = await SharedService.fetchUrl(url, headers);
@@ -989,17 +990,20 @@ export class EventService {
         }
       });
       locations = Array.from(new Set(locations));
-      locations?.forEach(location => {
-        let eventToAdd = { ...event };
-        eventToAdd.derivedFrom = { uri: eventToAdd.uri + "#location:" + location.split("/").pop() };
-        delete eventToAdd.uri;
-        eventToAdd.sameAs = eventToAdd.sameAs?.filter(item => !item.uri.startsWith("http://kg.artsdata.ca/resource/K"));
-
-        eventToAdd.subEvent = subEvents.filter(subEvent => subEvent.location["@none"] == location || subEvent.location["Place"] == location);
-        eventToAdd.location = { "Place": location };
-        events.push(eventToAdd);
-      });
-      return events;
-    } else return [event];
+      if(events.length){
+        locations?.forEach(location => {
+          let eventToAdd = { ...event };
+          eventToAdd.derivedFrom = { uri: eventToAdd.uri + "#location:" + location.split("/").pop() };
+          delete eventToAdd.uri;
+          eventToAdd.sameAs = eventToAdd.sameAs?.filter(item => !item.uri.startsWith("http://kg.artsdata.ca/resource/K"));
+  
+          eventToAdd.subEvent = subEvents.filter(subEvent => subEvent.location["@none"] == location || subEvent.location["Place"] == location);
+          eventToAdd.location = { "Place": location };
+          events.push(eventToAdd);
+        });
+        return events;
+      }
+    }
+    return [event];
   }
 }
