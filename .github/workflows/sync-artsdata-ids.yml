@@ -26,4 +26,4 @@ jobs:
       - name: Run reconcile-entities-in-cms.py
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "cd ./application/scripts/ ;DD_SITE="datadoghq.com" DD_API_KEY="${DD_API_KEY}" python3 ./sync-artsdata-ids.py ${PRODUCTION_DATABASE_URL}"
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "cd ./application/scripts/ ;DD_SITE="datadoghq.com" DD_API_KEY="${DD_API_KEY}" ./venv/bin/python ./sync-artsdata-ids.py ${PRODUCTION_DATABASE_URL}"
