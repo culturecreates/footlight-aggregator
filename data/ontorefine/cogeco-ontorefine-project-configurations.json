@@ -563,7 +563,7 @@
                 "property": {
                   "valueSource": {
                     "source": "constant",
-                    "constant": "streetAdress"
+                    "constant": "streetAddress"
                   },
                   "transformation": {
                     "language": "prefix",
