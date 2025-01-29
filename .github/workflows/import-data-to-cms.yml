@@ -57,4 +57,15 @@ jobs:
             -c ${{inputs.footlight_calendar_id}} \
             -b ${{inputs.batch_size}} \
             -m ${{inputs.mapping_file_url}}
-   
+    
+  send-failure-notification:
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - uses: licenseware/send-email-notification@v1
+        with:
+          api-key: ${{ secrets.SENDGRID_API_KEY }}
+          subject: "Medium Alert - ${{github.repository}} [${{github.workflow}}]"
+          from-email: ${{ vars.SENDGRID_FROM_EMAIL }}
+          to-email: ${{ vars.MEDIUM_ALERTS_EMAIL }}
+          markdown-body: ${{github.workflow}} in ${{github.repository}} failed.
