@@ -55,9 +55,9 @@ export class SharedService {
       await axios.patch(url, body, { headers }).then(response => {
         responseData = response.data;
         responseStatus = response.status;
-      }).catch((response) => {
-        responseData = response.data;
-        responseStatus = response.status;
+      }).catch((error) => {
+        responseData = error?.response?.data;
+        responseStatus = error?.response?.status;
       });
       return { status: responseStatus, response: responseData };
     }
@@ -95,6 +95,7 @@ export class SharedService {
           this._loggerService(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
         } else {
           this._loggerService(`\tUpdating Entity (${existingEntityId}) failed!`);
+          return existingEntityId;
         }
       } else {
         this._loggerService(`\tEntity cannot be modified. Since this entity is updated latest by a different user.`);
