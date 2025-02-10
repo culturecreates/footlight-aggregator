@@ -1,4 +1,4 @@
-name: Run Complexe Culturel Aggregator
+name: Run Festivoix Import to culture-mauricie
 
 on:
   workflow_dispatch:
