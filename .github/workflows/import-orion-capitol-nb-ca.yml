@@ -1,4 +1,4 @@
-name: Run The Capitol NB Aggregator (ArtsCultureNB)
+name: Import orion/capitol-nb-ca to artsculturenb 
 
 on:
   workflow_dispatch:
