@@ -60,6 +60,7 @@ jobs:
     
   send-failure-notification:
     runs-on: ubuntu-latest
+    needs: run
     if: failure()
     steps:
       - uses: licenseware/send-email-notification@v1
