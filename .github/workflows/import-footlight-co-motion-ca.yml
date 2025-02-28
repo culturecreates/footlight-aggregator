@@ -2,8 +2,8 @@ name: Run Co-motion Aggregator
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 5 * * 4"  # Run at 1:00 AM ET every Thursday
+#  schedule:
+#    - cron: "0 5 * * 4"  # Run at 1:00 AM ET every Thursday
 jobs:
   push-to-cms:
     uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main

@@ -2,8 +2,8 @@ name: Fetch LePoint Events
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 9 * * *" # Run every day at 5am EST
+#  schedule:
+#    - cron: "0 9 * * *" # Run every day at 5am EST
   
 jobs:
   push-to-cms:

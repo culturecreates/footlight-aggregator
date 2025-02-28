@@ -2,8 +2,8 @@ name: Run The Play House Aggregator (ArtsCultureNB)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 6 * * 5" # Run at 3:00 AM ET every Thursday
+#  schedule:
+#    - cron: "0 6 * * 5" # Run at 3:00 AM ET every Thursday
 
 jobs:
   push-to-cms:

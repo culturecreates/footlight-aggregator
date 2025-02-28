@@ -2,8 +2,8 @@ name: Run The Imperial Theatre Aggregator (ArtsCultureNB)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 6 * * 6" # Run at 4:00 AM ET every Thursday
+#  schedule:
+#    - cron: "0 6 * * 6" # Run at 4:00 AM ET every Thursday
 
 jobs:
   push-to-cms:
