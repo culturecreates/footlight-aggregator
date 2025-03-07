@@ -31,6 +31,7 @@ import { EntityPredicates, EventPredicates } from "../../constants/artsdata-urls
 import axios from "axios";
 import { Filters } from "../../model/FilterCondition.model";
 import { FilterEntityHelper } from "../../helper/filter-entity.helper";
+import { EVENT_CONFIGURATIONS } from "../../config";
 
 @Injectable()
 export class EventService {
@@ -62,6 +63,7 @@ export class EventService {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl, token, calendarId);
     calendarId = calendar.id;
+    const calendarTimezone = calendar.timezone;
     let offset = 0, hasNext = true, batch = 1, totalCount = 0, errorCount = 0, tries = 0,
       maxTry = 3, importedCount = 0, skippedCount = 0;
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, EntityType.EVENT);
@@ -123,7 +125,7 @@ export class EventService {
             const participants = [eventWithLocation.organizer, eventWithLocation.performer, eventWithLocation.sponsor].flat();
             await this._filterEvent(filters, eventWithLocation.location, participants, entitiesMap);
             const eventsFormatted = await this.formatEvent(calendarId, token, eventWithLocation, footlightBaseUrl, currentUser.id,
-              mappingFile, mappingFile, existingEventTypeConceptIDs, existingAudienceConceptIDs);
+              mappingFile, calendarTimezone, existingEventTypeConceptIDs, existingAudienceConceptIDs, );
             if (eventsFormatted) {
               importedCount++;
             }
@@ -188,7 +190,7 @@ export class EventService {
   }
 
   async formatEvent(calendarId: string, token: string, event: any, footlightBaseUrl: string, currentUserId: string,
-                    mappingFile: any, patternToConceptIdMapping?: any, existingEventTypeConceptIDs?: any,
+                    mappingFile: any, calendarTimezone: string, existingEventTypeConceptIDs?: any,
                     existingAudienceConceptIDs?: any) {
     const {
       location: locations, performer, organizer, sponsor, alternateName, keywords, startDate, startDateTime, endDate,
@@ -198,7 +200,7 @@ export class EventService {
       if (type == EventType.EVENT) {
         const dates = subEvent.map(event => event.startDateTime);
         const customDates = [];
-        const timezone = "Canada/Eastern";
+        const timezone = calendarTimezone || EVENT_CONFIGURATIONS.DEFAULT_TIMEZONE;
         dates.forEach(date => {
           const momentFormatted = moment.tz(date, timezone);
           const startDate = momentFormatted.format("YYYY-MM-DD");
@@ -277,9 +279,9 @@ export class EventService {
     eventToAdd.keywords = this._formattedValues(keywords);
     eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
     eventToAdd.additionalType = await this._findMatchingConcepts(event, EventProperty.ADDITIONAL_TYPE,
-      patternToConceptIdMapping, existingEventTypeConceptIDs);
+      mappingFile, existingEventTypeConceptIDs);
     eventToAdd.audience = await this._findMatchingConcepts(event, EventProperty.AUDIENCE,
-      patternToConceptIdMapping, existingAudienceConceptIDs);
+      mappingFile, existingAudienceConceptIDs);
     eventToAdd.offerConfiguration = offers ? this._formatOffers(offers) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if (contactPoint) {
@@ -288,6 +290,13 @@ export class EventService {
     if (isSingleDayEvent) {
       delete eventToAdd.endDate;
       delete eventToAdd.endDateTime;
+    }
+
+    if(startDateTime){
+      eventToAdd.startDateTime = this.convertDateToISO(startDateTime, calendarTimezone);
+    }
+    if(endDateTime){
+      eventToAdd.endDateTime = this.convertDateToISO(endDateTime, calendarTimezone);
     }
     return eventToAdd;
   }
@@ -429,7 +438,9 @@ export class EventService {
   }
 
   async syncEventById(token: any, calendarId: string, eventId: string, source: string, footlightBaseUrl: string,
-                      mappingUrl: string) {
+                      mappingUrl: string) {                
+    const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl, token, calendarId);
+    const calendarTimezone = calendar.timezone;
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, EntityType.EVENT);
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
     const existingEvent = await this._fetchEventFromFootlight(token, calendarId, eventId, footlightBaseUrl);
@@ -467,7 +478,7 @@ export class EventService {
 
       const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
       const eventFormatted = await this.formatEvent(calendarId, token, eventMatching, footlightBaseUrl, currentUser.id,
-        mappingFile, existingEventTypeConceptIDs, existingAudienceConceptIDs);
+        mappingFile, calendarTimezone, existingEventTypeConceptIDs, existingAudienceConceptIDs);
       return await SharedService.patchEventInFootlight(calendarId, token, footlightBaseUrl, eventId, eventFormatted);
     } else {
       this._loggerService.infoLogs("Entity cannot be modified. Since this entity is updated latest by a different user.");
@@ -568,7 +579,7 @@ export class EventService {
     const existingConceptIds = this._getAllConceptIds(existingConceptsMap);
     this._loggerService.infoLogs(`Validating identifiers from the mapping file for ${propertyName}`);
     return conceptIds?.filter((entityId) => {
-      const id = existingConceptIds?.some((conceptId) => conceptId.includes(entityId));
+      const id = existingConceptIds?.some((conceptId) => conceptId === entityId);
       if (!id) {
         this._loggerService.infoLogs(`\tNo match found for the conceptId: ${entityId} from the mapping file in the CMS.`);
       }
@@ -686,6 +697,9 @@ export class EventService {
       event[EventPredicates.IMAGE], event[EventPredicates.EVENT_CONTACT_POINT]
     ];
 
+    const calendarTimezone = (await this._sharedService.fetchCalendar(footlightBaseUrl, token, calendarId))?.timezone;
+    const timezone = calendarTimezone || EVENT_CONFIGURATIONS.DEFAULT_TIMEZONE;
+
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFiles))?.data;
     const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
     if (name) {
@@ -701,12 +715,12 @@ export class EventService {
       formattedEvent.eventAttendanceMode = attendanceMode["@id"].replace("schema:", "");
     }
     if (startDate) {
-      formattedEvent.startDateTime = this.convertDateToISO(startDate["@value"])
-        || this.convertDateToISO(startDate[0]["@value"]);
+      formattedEvent.startDateTime = this.convertDateToISO(startDate["@value"], timezone)
+        || this.convertDateToISO(startDate[0]["@value"], timezone);
     }
     if (endDate) {
-      formattedEvent.endDateTime = this.convertDateToISO(endDate["@value"])
-        || this.convertDateToISO(endDate[0]["@value"]);
+      formattedEvent.endDateTime = this.convertDateToISO(endDate["@value"], timezone)
+        || this.convertDateToISO(endDate[0]["@value"], timezone);
     }
     if (image) {
       formattedEvent.image = [{ url: { uri: image }, isMain: true }];
@@ -823,8 +837,8 @@ export class EventService {
     }
   }
 
-  private convertDateToISO(date: string) {
-    return moment.tz(date, "YYYY-MM-DD HH:mm ", "Canada/Eastern").toISOString();
+  private convertDateToISO(date: string, timezone: string) {
+    return moment.tz(date, "YYYY-MM-DD HH:mm ", timezone).toISOString();
   }
 
   async importCaligram(token: any, footlightBaseUrl: string, calendarId: string, mappingFileUrl: string) {
@@ -873,12 +887,14 @@ export class EventService {
                                     calendarId: string, currentUserId: string, mappingFileUrl: string) {
     let formattedEvent = new EventDTO();
     await this._fetchTaxonomies(calendarId, token, footlightBaseUrl, EntityType.EVENT);
+    const calendarTimezone = (await this._sharedService.fetchCalendar(footlightBaseUrl, token, calendarId))?.timezone;
+    const timezone = calendarTimezone || EVENT_CONFIGURATIONS.DEFAULT_TIMEZONE;
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFileUrl))?.data;
     const existingEventTypeConceptIDs =
       this._validateConceptIds(patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE, this.eventTypeConceptMap);
     formattedEvent.name = { fr: event.title };
     formattedEvent.description = { fr: event.description };
-    formattedEvent = this._formatDatesForCaligram(formattedEvent, event.start_date, event.end_date, event.dates);
+    formattedEvent = this._formatDatesForCaligram(formattedEvent, event.start_date, event.end_date, event.dates, timezone );
     formattedEvent.isFeaturedEvent = event.featured == "true";
     formattedEvent.uri = event.url;
     formattedEvent.offerConfiguration =
@@ -908,10 +924,10 @@ export class EventService {
 
   }
 
-  private _formatDatesForCaligram(formattedEvent: EventDTO, start_date: any, end_date: any, dates: any): EventDTO {
+  private _formatDatesForCaligram(formattedEvent: EventDTO, start_date: any, end_date: any, dates: any, timezone: string): EventDTO {
     if (dates.length === 1) {
-      formattedEvent.startDateTime = this.convertDateToISO(start_date);
-      formattedEvent.endDateTime = this.convertDateToISO(end_date);
+      formattedEvent.startDateTime = this.convertDateToISO(start_date, timezone);
+      formattedEvent.endDateTime = this.convertDateToISO(end_date, timezone);
       return formattedEvent;
     }
     if (dates) {

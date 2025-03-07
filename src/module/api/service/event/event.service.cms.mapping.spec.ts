@@ -305,7 +305,8 @@ describe("Testing cms mapping data", () => {
           sampleEvent,
           'footlightBaseUrl',
           'currentUserId',
-          patternToConceptIdMapping,
+          undefined,
+          'Canada/Eastern',
           existingEventTypeConceptIDs,
           existingAudienceConceptIDs
         );
