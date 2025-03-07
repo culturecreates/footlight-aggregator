@@ -162,6 +162,7 @@ describe("Event service tests", () => {
         'footlightBaseUrl',
         'currentUserId',
         undefined,
+        'Canada/Eastern',
         undefined,
         undefined
       );
@@ -194,6 +195,7 @@ describe("Event service tests", () => {
         'footlightBaseUrl',
         'currentUserId',
         undefined,
+        'Canada/Eastern',
         undefined,
         undefined
       );
