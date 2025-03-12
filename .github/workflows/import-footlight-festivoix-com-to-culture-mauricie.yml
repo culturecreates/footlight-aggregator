@@ -2,8 +2,8 @@ name: Import footlight/festivoix-com to culture-mauricie
 
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: "30 9 * * 2" # Runs at 09:30 UTC, only on Tuesday
+  schedule:
+    - cron: "30 9 * * 2" # Runs at 09:30 UTC, only on Tuesday
 
 jobs:
   run:

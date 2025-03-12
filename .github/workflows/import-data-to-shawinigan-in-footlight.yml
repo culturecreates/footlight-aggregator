@@ -2,8 +2,8 @@ name: Run Shawinigan Aggregator
 
 on:
   workflow_dispatch:
-#  schedule:
-#    - cron: "0 9 * * *"  # Run at 5:00 AM ET everyday
+  schedule:
+    - cron: "0 9 * * *"  # Run at 5:00 AM ET everyday
 
 jobs:
   transform-data-into-rdf:
