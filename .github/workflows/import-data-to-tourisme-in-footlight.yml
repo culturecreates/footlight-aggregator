@@ -1,4 +1,4 @@
-name: Run Tourisme Mauricie Aggregator
+name: Load API Tourisme Mauricie
 
 on:
   workflow_dispatch:

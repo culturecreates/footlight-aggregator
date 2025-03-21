@@ -1,4 +1,4 @@
-name: Run Shawinigan Aggregator
+name: Load API Shawinigan
 
 on:
   workflow_dispatch:

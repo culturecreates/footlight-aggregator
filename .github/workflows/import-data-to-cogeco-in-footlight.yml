@@ -1,4 +1,4 @@
-name: Run Cogeco Aggregator
+name: Load API amphitheatrecogeco.com
 
 on:
   workflow_dispatch:

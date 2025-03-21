@@ -1,4 +1,4 @@
-name: Run Co-motion Aggregator
+name: Import footlight/co-motion-ca
 
 on:
   workflow_dispatch:

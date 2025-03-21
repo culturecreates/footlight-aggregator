@@ -1,4 +1,4 @@
-name: Run Culture 3r Aggregator
+name: Import footlight/culture3r-com
 
 on:
   workflow_dispatch:
