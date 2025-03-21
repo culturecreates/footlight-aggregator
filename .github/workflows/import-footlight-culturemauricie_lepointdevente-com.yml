@@ -1,4 +1,4 @@
-name: Fetch LePoint Events
+name: Import footlight/culturemauricie_lepointdevente-com
 
 on:
   workflow_dispatch:
