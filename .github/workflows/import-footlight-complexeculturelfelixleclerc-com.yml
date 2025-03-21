@@ -1,4 +1,4 @@
-name: Run Complexe Culturel Aggregator
+name: Import footlight/complexeculturelfelixleclerc-com 
 
 on:
   workflow_dispatch:
