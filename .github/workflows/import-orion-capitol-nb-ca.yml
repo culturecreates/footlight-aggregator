@@ -1,4 +1,4 @@
-name: Import capacoa/artsdata-orion/capitol-nb-ca
+name: Import orion/capitol-nb-ca
 
 on:
   workflow_dispatch:
