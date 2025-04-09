@@ -41,7 +41,14 @@ export class PersonOrganizationService {
       if (entityFetched) {
         const { alternateName , contactPoint } = entityFetched;
 
-        const { type } = entityFetched;
+        let { type } = entityFetched;
+        if (Array.isArray(type)) {
+          for (const availableType in Object.values(PersonOrganizationType)){
+            if(type.includes(availableType)){
+              type = availableType;
+            }
+          }
+        }
         let entityId: string;
         if (type === PersonOrganizationType.PERSON) {
           entityId = await this._personService.getFootlightIdentifier(calendarId , token , footlightUrl ,
