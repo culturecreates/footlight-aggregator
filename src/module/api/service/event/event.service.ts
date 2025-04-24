@@ -82,14 +82,14 @@ export class EventService {
       let events = await this._fetchEventsFromArtsData(source , batchSize , offset , eventType);
       if (events === null) {
         if (tries !== maxTry) {
-          this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
+          await this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
           tries++;
           offset = offset + batchSize;
           batch = batch + 1;
           continue;
         }
         if (tries === maxTry) {
-          this._loggerService.errorLogs(`Reached Maximum tries fetching Events from Arts Data`);
+          await this._loggerService.errorLogs(`Reached Maximum tries fetching Events from Arts Data`);
           break;
         }
       }
@@ -103,7 +103,7 @@ export class EventService {
         syncCount++;
         totalCount++;
         try {
-          this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount})`);
+          await this._loggerService.infoLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount})`);
           this.checkExcludedValues(event , mappingFile , EventProperty.ADDITIONAL_TYPE);
           this.checkExcludedValues(event , mappingFile , EventProperty.AUDIENCE);
           const eventsWithMultipleLocations = await this._checkForMultipleLocations(event);
@@ -130,16 +130,16 @@ export class EventService {
               importedCount++;
             }
             await this._pushEventsToFootlight(calendarId , token , footlightBaseUrl , eventsFormatted , currentUser.id);
-            this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
+            await this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
             ${JSON.stringify(eventsFormatted?.sameAs)}\n`);
           }
         } catch (e) {
           if (e.status == "412") {
-            this._loggerService.infoLogs("Skipping event as it does not satisfy the filter conditions");
+            await this._loggerService.infoLogs("Skipping event as it does not satisfy the filter conditions");
             skippedCount++;
           } else {
             errorCount++;
-            this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). 
+            await this._loggerService.errorLogs(`Batch ${batch} :: (${syncCount}/${fetchedEventCount}). 
             Error while adding Event ${JSON.stringify(event.url)}` + e);
           }
         }
@@ -147,8 +147,8 @@ export class EventService {
       offset = offset + batchSize;
       batch = batch + 1;
     } while (hasNext) ;
-    this._loggerService.infoLogs(`Importing events successfully completed.`);
-    this._loggerService.logStatistics(calendar.slug , calendarId , source , totalCount , errorCount , skippedCount);
+    await this._loggerService.infoLogs(`Importing events successfully completed.`);
+    await this._loggerService.logStatistics(calendar.slug , calendarId , source , totalCount , errorCount , skippedCount);
   }
 
   private async _checkSubEventExists(subEvent: any , token: string , calendarId: string , footlightBaseUrl: string) {
@@ -220,7 +220,7 @@ export class EventService {
           customDates.push({ startDate , customTimes: [{ startTime: time }] });
         });
         event.recurringEvent = { customDates , frequency: "CUSTOM" };
-        this._loggerService.infoLogs(event.recurringEvent);
+        await this._loggerService.infoLogs(event.recurringEvent);
       }
       if (type == EventType.EVENT_SERIES) {
         const subEventConfiguration = subEvent?.length
@@ -364,7 +364,7 @@ export class EventService {
   private async _fetchEventSeriesFromArtsData(source: string , batchSize: number , offset: number) {
     const limit = batchSize ? batchSize : 300;
     const url = ArtsDataUrls.EVENT_SERIES + "&source=" + source + "&limit=" + limit + "&offset=" + offset;
-    this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
+    await this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
     if (artsDataResponse.status !== HttpStatus.OK) {
       return null;
@@ -425,7 +425,7 @@ export class EventService {
           try {
             regexPattern = new RegExp(`^${pattern}$` , "gi");
           } catch (e) {
-            this._loggerService.infoLogs(`Invalid Regex: ${e}`);
+            await this._loggerService.infoLogs(`Invalid Regex: ${e}`);
           }
 
           if (eventPropertyValues.some(eventPropertyValue => eventPropertyValue.toLowerCase() === pattern
@@ -495,12 +495,12 @@ export class EventService {
         mappingFile , calendarTimezone , existingEventTypeConceptIDs , existingAudienceConceptIDs);
       return await SharedService.patchEventInFootlight(calendarId , token , footlightBaseUrl , eventId , eventFormatted);
     } else {
-      this._loggerService.infoLogs("Entity cannot be modified. Since this entity is updated latest by a different user.");
+      await this._loggerService.infoLogs("Entity cannot be modified. Since this entity is updated latest by a different user.");
     }
   }
 
   private async _fetchTaxonomies(calendarId: string , token: string , footlightBaseUrl: string , className: string) {
-    this._loggerService.infoLogs("Fetching taxonomies");
+    await this._loggerService.infoLogs("Fetching taxonomies");
     this.taxonomies = await this._taxonomyService.getTaxonomy(calendarId , token , footlightBaseUrl , className);
     if (this.taxonomies) {
       this._extractEventTypeAndAudienceType(this.taxonomies);
@@ -527,7 +527,7 @@ export class EventService {
           eventFormatted);
         const { status , response } = addResponse;
         if (status === HttpStatus.CREATED) {
-          this._loggerService.infoLogs(`Added Entity (${response.id} : ${eventFormatted.uri}) to Footlight!`);
+          await this._loggerService.infoLogs(`Added Entity (${response.id} : ${eventFormatted.uri}) to Footlight!`);
           return response.id;
         } else if (status === HttpStatus.CONFLICT) {
           const existingEntityId = await response.error;
@@ -535,13 +535,13 @@ export class EventService {
           await SharedService.callFootlightAPI(HttpMethodsEnum.PATCH , calendarId , token , url ,
             { imageUrl: event.image?.url?.uri });
         }
-        this._loggerService.infoLogs(`(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
+        await this._loggerService.infoLogs(`(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
         ${JSON.stringify(eventFormatted.sameAs)}`);
       } catch (e) {
-        this._loggerService.errorLogs(`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
+        await this._loggerService.errorLogs(`(${syncCount}/${fetchedEventCount}) Error while adding Event ${event.url}` + e);
       }
     }
-    this._loggerService.infoLogs("Successfully synchronised Events and linked entities.");
+    await this._loggerService.infoLogs("Successfully synchronised Events and linked entities.");
   }
 
   private _formatSameAs(elements: { uri: string }[]) {
@@ -686,14 +686,14 @@ export class EventService {
           await this.formatAndPushJsonLdEvents(node , jsonLdPlaces , token , calendarId , footlightBaseUrl ,
             currentUserId , jsonLdPostalAddresses , jsonLdOrganizations , jsonLdPeople , jsonLdOffers , jsonLdContactPoints , mappingFiles , context);
         }
-        this._loggerService.infoLogs(`Importing ${currentCount++} out of ${totalCount}) events`);
+        await this._loggerService.infoLogs(`Importing ${currentCount++} out of ${totalCount}) events`);
       } catch (e) {
-        this._loggerService.errorLogs(`Error while importing  event with id ${node["@id"]}`);
+        await this._loggerService.errorLogs(`Error while importing  event with id ${node["@id"]}`);
         errorCount++;
       }
     }
-    this._loggerService.infoLogs(`Importing events successfully completed.`);
-    this._loggerService.logStatistics(calendarId , calendar.slug , source , totalCount , errorCount);
+    await this._loggerService.infoLogs(`Importing events successfully completed.`);
+    await this._loggerService.logStatistics(calendarId , calendar.slug , source , totalCount , errorCount);
   }
 
 
