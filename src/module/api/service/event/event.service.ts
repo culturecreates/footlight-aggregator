@@ -625,7 +625,7 @@ export class EventService {
     offersWithPrice?.forEach(offer => {
       prices.push({
         name: offer.name ,
-        price: parseInt(offer.price) ,
+        price: offer.price ? parseInt(offer.price) : undefined ,
         url: offer.url ? { uri: offer.url } : undefined
       });
     });
