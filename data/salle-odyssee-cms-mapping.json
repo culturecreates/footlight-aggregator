@@ -1,5 +1,58 @@
 [
   {
+    "fieldName": "discipline",
+    "inputProperty": [
+      "keywords"
+    ],
+    "mapping": {
+      "chanson": [
+        "67fe307cb5dca20064adc469"
+      ],
+      "cirque": [
+        "67fe307cb5dca20064adc3c7"
+      ],
+      "humour": [
+        "67fe307cb5dca20064adc3cf"
+      ],
+      "paroles-musique-et-danse": [
+        "67fe307cb5dca20064adc3db"
+      ],
+      "country-folk": [
+        "67fe307cb5dca20064adc3d5"
+      ],
+      "country-blues": [
+        "67fe307cb5dca20064adc3d5"
+      ],
+      "theatre-hors-serie": [
+        "67fe307cb5dca20064adc3d7"
+      ],
+      "rendez-vous-theatre": [
+        "67fe307cb5dca20064adc3d7"
+      ],
+      "varietes": [
+        "67fe307cb5dca20064adc3d9"
+      ],
+      "soirees-cabaret": [
+        "67fe307cb5dca20064adc3d9"
+      ],
+      "Heritage": [
+        "67fe307cb5dca20064adc3c1"
+      ],
+      "Patrimoine": [
+        "67fe307cb5dca20064adc3c1"
+      ],
+      "Literary event": [
+        "67fe307cb5dca20064adc3d1"
+      ],
+      "Événement littéraire": [
+        "67fe307cb5dca20064adc3d1"
+      ],
+      "DEFAULT": [
+        "67fe307cb5dca20064adc3dd"
+      ]
+    }
+  },
+  {
     "fieldName": "additionalType",
     "inputProperty": [
       "keywords"
@@ -44,12 +97,6 @@
       "Cours": [
         "64776b93fbeda20064d23331"
       ],
-      "Literary event": [
-        "6418c7fd5e4d4e0066a2edf7"
-      ],
-      "Événement littéraire": [
-        "6418c7fd5e4d4e0066a2edf7"
-      ],
       "Festival": [
         "6418ca425e4d4e0066a2ee9f"
       ],
@@ -64,12 +111,6 @@
       ],
       "Micro ouvert": [
         "6418ca425e4d4e0066a2eea7"
-      ],
-      "Heritage": [
-        "64a5ba0a3c19fa0064e64053"
-      ],
-      "Patrimoine": [
-        "64a5ba0a3c19fa0064e64053"
       ],
       "Screening": [
         "6418ca425e4d4e0066a2eea5"
@@ -90,34 +131,34 @@
         "6418ca425e4d4e0066a2eea3"
       ],
       "chanson": [
-        "6418c4b85e4d4e0066a2ecdb"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "humour": [
-        "63977c83ca21d5004e7f542b"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "country-folk": [
-        "63977c83ca21d5004e7f542d"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "country-blues": [
-        "63977c83ca21d5004e7f542d"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "varietes": [
-        "6418c4b85e4d4e0066a2ecdf"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "theatre-hors-serie": [
-        "63977c83ca21d5004e7f542f"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "rendez-vous-theatre": [
-        "63977c83ca21d5004e7f542f"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "cirque": [
-        "6418c4b85e4d4e0066a2ecdd"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "paroles-musique-et-danse": [
-        "64ecac7f7d6aa800643474f5"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "soirees-cabaret": [
-        "6418c4b85e4d4e0066a2ecdf"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "DEFAULT": [
         "641db9322831190064570718"

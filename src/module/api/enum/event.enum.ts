@@ -17,7 +17,8 @@ export enum OfferCategory {
 
 export enum EventProperty {
     ADDITIONAL_TYPE = 'additionalType',
-    AUDIENCE = 'audience'
+    AUDIENCE = 'audience',
+    DISCIPLINE = 'discipline'
 }
 
 export enum Languages {
