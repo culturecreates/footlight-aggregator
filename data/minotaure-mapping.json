@@ -1,27 +1,41 @@
 [
-    {
-      "fieldName": "additionalType",
-      "inputProperty": [
-        "additionalType"
+  {
+    "fieldName": "discipline",
+    "inputProperty": [
+      "additionalType"
+    ],
+    "mapping": {
+      ".*MusicPerformance$": [
+        "67fe307cb5dca20064adc3d5"
       ],
-      "mapping": {
-        ".*MusicPerformance$": [
-          "63977c83ca21d5004e7f542d"
-        ],
-        "DEFAULT": [
-          "641db9322831190064570718"
-        ]
-      }
-    },
-    {
-      "fieldName": "audience",
-      "inputProperty": [
-        "audience"
-      ],
-      "mapping": {
-        "DEFAULT": [
-          "63ceb9c4230627006f5670c3"
-        ]
-      }
+      "DEFAULT": [
+        "67fe307cb5dca20064adc3dd"
+      ]
     }
-  ]
+  },
+  {
+    "fieldName": "additionalType",
+    "inputProperty": [
+      "additionalType"
+    ],
+    "mapping": {
+      ".*MusicPerformance$": [
+        "6418c27d5e4d4e0066a2e9fd"
+      ],
+      "DEFAULT": [
+        "641db9322831190064570718"
+      ]
+    }
+  },
+  {
+    "fieldName": "audience",
+    "inputProperty": [
+      "audience"
+    ],
+    "mapping": {
+      "DEFAULT": [
+        "63ceb9c4230627006f5670c3"
+      ]
+    }
+  }
+]

@@ -1,5 +1,37 @@
 [
   {
+    "fieldName": "discipline",
+    "inputProperty": [
+      "keywords"
+    ],
+    "mapping": {
+      "Théâtre": [
+        "67fe307cb5dca20064adc3d7"
+      ],
+      "Theatre": [
+        "67fe307cb5dca20064adc3d7"
+      ],
+      "Pièces de théâtre": [
+        "67fe307cb5dca20064adc3d7"
+      ],
+      "Patrimoine": [
+        "67fe307cb5dca20064adc3c1"
+      ],
+      "Heritage": [
+        "67fe307cb5dca20064adc3c1"
+      ],
+      "Événement littéraire": [
+        "67fe307cb5dca20064adc3d1"
+      ],
+      "Literary event": [
+        "67fe307cb5dca20064adc3d1"
+      ],
+      "DEFAULT": [
+        "67fe307cb5dca20064adc3dd"
+      ]
+    }
+  },
+  {
     "fieldName": "additionalType",
     "inputProperty": [
       "keywords"
@@ -53,12 +85,6 @@
       "Screening": [
         "6418ca425e4d4e0066a2eea5"
       ],
-      "Événement littéraire": [
-        "6418c7fd5e4d4e0066a2edf7"
-      ],
-      "Literary event": [
-        "6418c7fd5e4d4e0066a2edf7"
-      ],
       "Micro ouvert": [
         "6418ca425e4d4e0066a2eea7"
       ],
@@ -95,12 +121,6 @@
       "Guided Tour": [
         "6418ca425e4d4e0066a2eea3"
       ],
-      "Patrimoine": [
-        "64a5ba0a3c19fa0064e64053"
-      ],
-      "Heritage": [
-        "64a5ba0a3c19fa0064e64053"
-      ],
       "Cours": [
         "64776b93fbeda20064d23331"
       ],
@@ -108,13 +128,13 @@
         "64776b93fbeda20064d23331"
       ],
       "Théâtre": [
-        "63977c83ca21d5004e7f542f"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "Theatre": [
-        "63977c83ca21d5004e7f542f"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "Pièces de théâtre": [
-        "63977c83ca21d5004e7f542f"
+        "6418c27d5e4d4e0066a2e9fd"
       ],
       "DEFAULT": [
         "641db9322831190064570718"
