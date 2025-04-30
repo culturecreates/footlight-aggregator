@@ -14,6 +14,7 @@ import {
   AggregateOfferType ,
   EntityType ,
   EventProperty ,
+  EventPropertyMappedToField,
   EventType ,
   HttpMethodsEnum ,
   OfferCategory ,
@@ -396,19 +397,15 @@ export class EventService {
     }
   }
 
-  private _extractEventTypeAndAudienceType(taxonomies) {
-    const eventTypeTaxonomy = taxonomies.find(taxonomy => taxonomy.mappedToField === "EventType");
-    this.eventTypeConceptMap = eventTypeTaxonomy?.concept?.map(concept => {
-      return { id: concept.id , name: concept.name };
-    });
-    const audienceTaxonomy = taxonomies.find(taxonomy => taxonomy.mappedToField === "Audience");
-    this.audienceConceptMap = audienceTaxonomy?.concept?.map(concept => {
-      return { id: concept.id , name: concept.name };
-    });
-    const disciplineTaxonomy = taxonomies.find(taxonomy => taxonomy.mappedToField === "EventDiscipline");
-    this.disciplineConceptMap = disciplineTaxonomy?.concept?.map(concept => {
-      return { id: concept.id , name: concept.name };
-    });
+  private _mapTaxonomyConcepts(taxonomies) {
+    const mapConcepts = (field) => {
+      const taxonomy = taxonomies.find(taxonomy => taxonomy.mappedToField === field);
+      return taxonomy?.concept?.map(concept => ({ id: concept.id, name: concept.name })) || [];
+    };
+  
+    this.eventTypeConceptMap = mapConcepts(EventPropertyMappedToField.ADDITIONAL_TYPE);
+    this.audienceConceptMap = mapConcepts(EventPropertyMappedToField.AUDIENCE);
+    this.disciplineConceptMap = mapConcepts(EventPropertyMappedToField.DISCIPLINE);
   }
 
   private _getPropertyValues(lookupPropertyNames: string[] , event: any) {
@@ -512,7 +509,7 @@ export class EventService {
     await this._loggerService.infoLogs("Fetching taxonomies");
     this.taxonomies = await this._taxonomyService.getTaxonomy(calendarId , token , footlightBaseUrl , className);
     if (this.taxonomies) {
-      this._extractEventTypeAndAudienceType(this.taxonomies);
+      this._mapTaxonomyConcepts(this.taxonomies);
     }
   }
 

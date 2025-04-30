@@ -21,6 +21,12 @@ export enum EventProperty {
     DISCIPLINE = 'discipline'
 }
 
+export enum EventPropertyMappedToField {
+    ADDITIONAL_TYPE = 'EventType',
+    AUDIENCE = 'Audience',
+    DISCIPLINE = 'EventDiscipline'
+}
+
 export enum Languages {
     ENGLISH  = 'en',
     FRENCH = 'fr'
