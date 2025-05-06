@@ -1,7 +1,9 @@
 name: Import footlight-tourisme-shawinigan-com
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * *' # 5 AM EDT / 4 AM EST
 
 jobs:
   push-to-cms:

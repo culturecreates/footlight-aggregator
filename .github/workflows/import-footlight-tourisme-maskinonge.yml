@@ -1,7 +1,9 @@
 name: Import footlight-tourisme-maskinonge-com
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 * * *' # 6 AM EDT / 5 AM EST
 
 jobs:
   push-to-cms:
