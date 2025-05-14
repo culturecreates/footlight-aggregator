@@ -650,11 +650,21 @@ export class EventService {
         return prices.some(price => price.price > 0);
       };
 
-      if (priceExists) {
+      const allPricesAreZero = () => {
+        return prices.every(price => price.price === 0);
+      }
+
+      //if price does not exist, set it as paid, only set the offer as free if price exists and all prices are 0. 
+
+      if(!priceExists){
+        offerConfiguration.category = OfferCategory.PAYING;
+      }
+      else if (priceExists && allPricesAreZero) {
+        offerConfiguration.category = OfferCategory.FREE;
+      }
+      else if (priceExists && !allPricesAreZero) {
         offerConfiguration.category = OfferCategory.PAYING;
         offerConfiguration.prices = prices;
-      } else {
-        offerConfiguration.category = OfferCategory.FREE;
       }
     }
 
