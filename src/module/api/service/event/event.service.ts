@@ -274,6 +274,9 @@ export class EventService {
 
     delete event?.image?.uri;
     if (event.image?.url) {
+      if(Array.isArray(event.image.url)){
+        event.image.url = event.image.url[0];
+      }
       event.image = [{ url: event.image.url , isMain: true }];
     }
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate , startDateTime , endDate , endDateTime);
