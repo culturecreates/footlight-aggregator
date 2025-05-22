@@ -829,7 +829,7 @@ export class EventService {
       || jsonLdOffers.find(jsonLdOffer => jsonLdOffer["@id"] === offer[0]["@id"]);
     let offerPrice: OfferPrice = {
       name: JsonLdParseHelper.formatMultilingualField(offerData[EventPredicates.NAME]) ,
-      price: offerData[EventPredicates.PRICE]
+      price: offerData[EventPredicates.PRICE] ? Number.parseFloat(offerData[EventPredicates.PRICE]) : undefined
     };
     const uri = offerData[EventPredicates.URL];
     let offerConfiguration: OfferDTO = {
