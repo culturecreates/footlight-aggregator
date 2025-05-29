@@ -1,22 +1,20 @@
-name: Run Ville de Laval Aggregator
+name: Run Place Bell Aggregator
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: "0 8 * * 2"  # Run at 1:00 AM ET every Tuesday
 
 jobs:
   push-to-cms:
     uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main
     with:
         cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
-        aggregator_username: ${{ vars.AGGREGATOR_USER_VILLELAVAL }}
-        source_url: http://kg.artsdata.ca/culture-creates/artsdata-planet-ville-de-laval/calendrier-activites
+        aggregator_username: ${{ vars.AGGREGATOR_USER_PLACE_BELL }}
+        source_url: http://kg.artsdata.ca/capacoa/artsdata-planet-evenko/place-bell
         footlight_base_url: https://api.cms.footlight.io
         footlight_calendar_id: 63457978637093005071a053
         batch_size: 10
         mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/ville-de-laval-place-bell-cms-mapping.json 
     secrets:
-      aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_VILLELAVAL }}
+      aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_PLACE_BELL }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
    

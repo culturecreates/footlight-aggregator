@@ -1,0 +1,230 @@
+[
+    {
+        "fieldName": "additionalType",
+        "inputProperty": [
+            "additionalType",
+            "keywords"
+        ],
+        "mapping": {
+            "alternatif": [
+                "680bd98aa40f180063e41b4c"
+            ],
+            ".*histoire-et-patrimoine": [
+                "670057ac48f4030063f3cbed",
+                "63c01a771c6b6c005aad85c4"
+            ],
+            "arts ephemères et urbain": [
+                "63bc57dd1c6b6c005aad5778"
+            ],
+            "arts et litterature": [
+                "63c01e911c6b6c005aad89a6"
+            ],
+            "blues": [
+                "643d95811639f100642b4b8b"
+            ],
+            "broadway": [
+                "643d95811639f100642b4b7d"
+            ],
+            "cinema": [
+                "63c01a771c6b6c005aad85b8"
+            ],
+            "cirque": [
+                "63c01a771c6b6c005aad85ba"
+            ],
+            "classical": [
+                "643d95811639f100642b4b79"
+            ],
+            "country": [
+                "67d327dbbe76000064084464"
+            ],
+            "cours de danse": [
+                "63c01a771c6b6c005aad85bc"
+            ],
+            "dance": [
+                "64624a512fb72400648c5cb4"
+            ],
+            "electronic": [
+                "64624a512fb72400648c5cb4"
+            ],
+            "escapades": [
+                "643eb7866f70e40064e0e7d8"
+            ],
+            "festival num": [
+                "63c01a771c6b6c005aad85c0"
+            ],
+            "folk": [
+                "643d95811639f100642b4b91"
+            ],
+            "hip-hop": [
+                "643d95811639f100642b4b93"
+            ],
+            "histoire et societe": [
+                "643eb7866f70e40064e0e7da"
+            ],
+            "indie": [
+                "680bd98aa40f180063e41b4c"
+            ],
+            "jazz": [
+                "643d95811639f100642b4b95"
+            ],
+            "latin": [
+                "643eb7866f70e40064e0e7f1"
+            ],
+            "lutte": [
+                "643d95811639f100642b4b79"
+            ],
+            "metal": [
+                "64cbddf71969520064121bc6"
+            ],
+            ".*patrimoine": [
+                "63c01a771c6b6c005aad85c4"
+            ],
+            "pop": [
+                "643d95811639f100642b4b99"
+            ],
+            "punk": [
+                "643d95811639f100642b4b9b"
+            ],
+            "rap": [
+                "643d95811639f100642b4b93"
+            ],
+            "rnb": [
+                "643d95811639f100642b4b9d"
+            ],
+            "rock": [
+                "643d95811639f100642b4b9f"
+            ],
+            "soul": [
+                "643d95811639f100642b4b9d"
+            ],
+            "techno": [
+                "63c01a771c6b6c005aad85c0"
+            ],
+            "theatre à ciel ouvert": [
+                "63bc57dd1c6b6c005aad577a"
+            ],
+            "virees patrimoniales": [
+                "63c01a771c6b6c005aad85c4"
+            ],
+            "voyages": [
+                "643eb7866f70e40064e0e7d8"
+            ],
+            "zones musicales": [
+                "63bc57dd1c6b6c005aad577c"
+            ],
+            "DEFAULT": [
+                "63c84d71230627006f5655d0"
+            ]
+        }
+    },
+    {
+        "fieldName": "63bd80901c6b6c005aad6f4b",
+        "isDynamic": true,
+        "inputProperty": [
+            "additionalType",
+            "keywords"
+        ],
+        "mapping": {
+            ".*activites-culturelles": [
+                "643d90d21639f100642b4610"
+            ],
+            "art mediation culturelle": [
+                "644bf731e19f7200646cf0a0"
+            ],
+            "conference": [
+                "63c01b741c6b6c005aad86c0"
+            ],
+            "cours de danse": [
+                "63c01b741c6b6c005aad86be"
+            ],
+            ".*exposition": [
+                "63c01b741c6b6c005aad86c2"
+            ],
+            ".*expositions": [
+                "63c01b741c6b6c005aad86c2"
+            ],
+            "festivites ecc": [
+                "63c01b741c6b6c005aad86cc"
+            ],
+            "fêtes de quartier": [
+                "63c01b741c6b6c005aad86cc"
+            ],
+            "halloween": [
+                "63c01b741c6b6c005aad86cc"
+            ],
+            "journee de la culture": [
+                "643d90d21639f100642b4610"
+            ],
+            "marche de noël": [
+                "643d90d21639f100642b461f"
+            ],
+            "mediation": [
+                "644bf731e19f7200646cf0a0"
+            ],
+            "petits bonheurs laval": [
+                "63c01b741c6b6c005aad86c4"
+            ],
+            "spectacle": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            "spectacle petite enfance": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            "spectacles": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            "theatre à ciel ouvert": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            "zones musicales": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            "DEFAULT": [
+                "63c84f08230627006f5659f2"
+            ]
+        }
+    },
+    {
+        "fieldName": "audience",
+        "inputProperty": [
+            "additionalType",
+            "keywords"
+        ],
+        "mapping": {
+            ".*ados": [
+                "63bc55b31c6b6c005aad56c0"
+            ],
+            ".*adultes": [
+                "63bc55b31c6b6c005aad56c2"
+            ],
+            ".*enfants": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            ".*familles": [
+                "64413a0d7a2993006450baa6"
+            ],
+            "jeune public": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "jeunesse": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "petits bonheurs laval": [
+                "670058c548f4030063f3ceee"
+            ],
+            "spectacle petite enfance": [
+                "670058c548f4030063f3ceee"
+            ],
+            "theatre à ciel ouvert": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "zones musicales": [
+                "63bc55b31c6b6c005aad56c2",
+                "64413a0d7a2993006450baa6"
+            ],
+            "DEFAULT": [
+                ""
+            ]
+        }
+    }
+]

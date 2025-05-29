@@ -59,6 +59,7 @@ export class EventService {
   private eventTypeConceptMap;
   private audienceConceptMap;
   private disciplineConceptMap;
+  private dynamicConceptMap;
 
   private async _syncEvents(calendarId: string , token: string , source: string , footlightBaseUrl: string ,
                             batchSize: number , mappingUrl: string , eventType?: EventType) {
@@ -76,6 +77,7 @@ export class EventService {
       this.audienceConceptMap);
     const existingDisciplineConceptIDs = this._validateConceptIds(mappingFile , EventProperty.DISCIPLINE ,
       this.disciplineConceptMap);
+    const existingDynamicConceptIDs = this._getAllConceptIds(this.dynamicConceptMap);
     const filters: Filters[] = mappingFile || [];
     const entitiesMap = {};
     for (const filter of filters) {
@@ -129,7 +131,8 @@ export class EventService {
             const participants = [eventWithLocation.organizer , eventWithLocation.performer , eventWithLocation.sponsor].flat();
             await this._filterEvent(filters , eventWithLocation.location , participants , entitiesMap);
             const eventsFormatted = await this.formatEvent(calendarId , token , eventWithLocation , footlightBaseUrl , currentUser.id ,
-              mappingFile , calendarTimezone , existingEventTypeConceptIDs , existingAudienceConceptIDs, existingDisciplineConceptIDs);
+              mappingFile , calendarTimezone , existingEventTypeConceptIDs , existingAudienceConceptIDs, existingDisciplineConceptIDs,
+              existingDynamicConceptIDs);
             if (eventsFormatted) {
               importedCount++;
             }
@@ -194,7 +197,7 @@ export class EventService {
 
   async formatEvent(calendarId: string , token: string , event: any , footlightBaseUrl: string , currentUserId: string ,
                     mappingFile: any , calendarTimezone: string , existingEventTypeConceptIDs?: any ,
-                    existingAudienceConceptIDs?: any, existingDisciplineConceptIDs?: any) {
+                    existingAudienceConceptIDs?: any, existingDisciplineConceptIDs?: any, existingDynamicConceptIDs?: any) {
     const {
       location: locations ,
       performer ,
@@ -306,6 +309,8 @@ export class EventService {
       mappingFile , existingAudienceConceptIDs);
     eventToAdd.discipline = await this._findMatchingConcepts(event , EventProperty.DISCIPLINE ,
       mappingFile , existingDisciplineConceptIDs);
+    eventToAdd.dynamicFields = await this._findMatchingDynamicConcepts(event,
+      mappingFile , existingDynamicConceptIDs);
     eventToAdd.offerConfiguration = offers ? this._formatOffers(offers) : undefined;
     eventToAdd.sameAs = sameAs ? this._formatSameAs(sameAs) : [];
     if (contactPoint) {
@@ -405,16 +410,38 @@ export class EventService {
       const taxonomy = taxonomies.find(taxonomy => taxonomy.mappedToField === field);
       return taxonomy?.concept?.map(concept => ({ id: concept.id, name: concept.name })) || [];
     };
+
+    const mapDynamicConcepts = () =>
+      taxonomies
+        .filter(t => t.isDynamicField)
+        .flatMap(t => t.concept?.map(c => ({ id: c.id, name: c.name })) || []);
   
     this.eventTypeConceptMap = mapConcepts(EventPropertyMappedToField.ADDITIONAL_TYPE);
     this.audienceConceptMap = mapConcepts(EventPropertyMappedToField.AUDIENCE);
     this.disciplineConceptMap = mapConcepts(EventPropertyMappedToField.DISCIPLINE);
+    this.dynamicConceptMap = mapDynamicConcepts();
   }
 
   private _getPropertyValues(lookupPropertyNames: string[] , event: any) {
     const eventPropertyValues = lookupPropertyNames?.length
       ? lookupPropertyNames.map(property => event[property]?.length ? event[property] : []).flat() : [];
     return this._formattedValues(eventPropertyValues , true);
+  }
+
+  private async _findMatchingDynamicConcepts(event: any , patternToConceptIdMapping: any , existingConceptIDs: any) {
+    const dynamicFields = []
+    const dynamicPatterns = patternToConceptIdMapping.filter(pattern => pattern.isDynamic)
+    for(const dynamicPattern of dynamicPatterns) {
+      const fieldName = dynamicPattern.fieldName;
+      const conceptIds =  (await this._findMatchingConcepts(event , fieldName , dynamicPatterns , existingConceptIDs)).map(concept => concept.entityId);
+      if(conceptIds?.length){
+        dynamicFields.push({
+          taxonomyId: fieldName,
+          conceptIds: conceptIds
+        })
+      }
+    }
+    return dynamicFields;
   }
 
   private async _findMatchingConcepts(event: any , fieldName: string , patternToConceptIdMapping: any ,
