@@ -11,7 +11,7 @@ jobs:
     with:
         cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
         aggregator_username: ${{ vars.AGGREGATOR_USER_VILLELAVAL }}
-        source_url: http://kg.artsdata.ca/culture-creates/artsdata-planet-ville-de-laval/calendrier-activites
+        source_url: http://kg.artsdata.ca/ville-de-laval/evenements/culture
         footlight_base_url: https://api.cms.footlight.io
         footlight_calendar_id: 63457978637093005071a053
         batch_size: 10
