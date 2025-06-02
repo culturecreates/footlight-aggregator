@@ -6,6 +6,9 @@
             "keywords"
         ],
         "mapping": {
+            ".*comedyperformance": [
+                "63bf00421c6b6c005aad80a2"
+            ],
             "alternatif": [
                 "680bd98aa40f180063e41b4c"
             ],
@@ -128,7 +131,7 @@
             ".*activites-culturelles": [
                 "643d90d21639f100642b4610"
             ],
-            "art mediation culturelle": [
+            ".*art-mediation-culturelle": [
                 "644bf731e19f7200646cf0a0"
             ],
             "conference": [

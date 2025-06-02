@@ -689,11 +689,11 @@ export class EventService {
 
       //if price does not exist, set it as paid, only set the offer as free if price exists and all prices are 0. 
 
-      if (!priceExists) {
+      if (!priceExists()) {
         offerConfiguration.category = OfferCategory.PAYING;
-      } else if (priceExists && allPricesAreZero) {
+      } else if (priceExists() && allPricesAreZero()) {
         offerConfiguration.category = OfferCategory.FREE;
-      } else if (priceExists && !allPricesAreZero) {
+      } else if (priceExists() && !allPricesAreZero()) {
         offerConfiguration.category = OfferCategory.PAYING;
         offerConfiguration.prices = prices;
       }
