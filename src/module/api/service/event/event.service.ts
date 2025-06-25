@@ -1,14 +1,7 @@
-import {
-  OrganizationService ,
-  PersonOrganizationService ,
-  PersonService ,
-  PlaceService ,
-  SharedService ,
-} from '../../service';
+import { PersonOrganizationService , PlaceService , SharedService } from '../../service';
 import { forwardRef , HttpStatus , Inject , Injectable } from '@nestjs/common';
-import { ArtsDataConstants , ArtsDataUrls , CaligramUrls } from '../../constants';
-import { ContactPointDTO , CustomDates , EventDTO , OfferDTO , OfferPrice } from '../../dto';
-import { PostalAddressService } from '../postal-address';
+import { ArtsDataConstants , ArtsDataUrls } from '../../constants';
+import { ContactPointDTO , EventDTO , OfferDTO , OfferPrice } from '../../dto';
 import { TaxonomyService } from '../taxonomy';
 import {
   AggregateOfferType ,
@@ -18,9 +11,6 @@ import {
   EventType ,
   HttpMethodsEnum ,
   OfferCategory ,
-  PersonOrganizationType ,
-  PriceCurrency ,
-  RecurringEventFrequency ,
 } from '../../enum';
 import { Exception , JsonLdParseHelper } from '../../helper';
 import { FacebookConstants , FootlightPaths , OfferConstants , SameAsTypes } from '../../constants/footlight-urls';
@@ -29,7 +19,6 @@ import { LoggerService } from '../logger';
 import * as fs from 'fs';
 import { parse } from '@frogcat/ttl2jsonld';
 import { EntityPredicates , EventPredicates } from '../../constants/artsdata-urls/rdf-types.constants';
-import axios from 'axios';
 import { Filters } from '../../model/FilterCondition.model';
 import { FilterEntityHelper } from '../../helper/filter-entity.helper';
 import { EVENT_CONFIGURATIONS } from '../../config';
@@ -37,12 +26,6 @@ import { EVENT_CONFIGURATIONS } from '../../config';
 @Injectable()
 export class EventService {
   constructor(
-    @Inject(forwardRef(() => PersonService))
-    private readonly _personService: PersonService ,
-    @Inject(forwardRef(() => OrganizationService))
-    private readonly _organizationService: OrganizationService ,
-    @Inject(forwardRef(() => PostalAddressService))
-    private readonly _postalAddressService: PostalAddressService ,
     @Inject(forwardRef(() => PlaceService))
     private readonly _placeService: PlaceService ,
     @Inject(forwardRef(() => PersonOrganizationService))
@@ -140,14 +123,18 @@ export class EventService {
               importedCount++;
             }
             const response = await this._pushEventsToFootlight(calendarId , token , footlightBaseUrl , eventsFormatted , currentUser.id);
-            switch(response){
-              case HttpStatus.CREATED: createdCount++
-              break;
-              case HttpStatus.OK: updatedCount++;
-              break;
-              case HttpStatus.CONFLICT: cannotUpdateCount++;
-              break;
-              default: errorCount++;
+            switch (response) {
+              case HttpStatus.CREATED:
+                createdCount++;
+                break;
+              case HttpStatus.OK:
+                updatedCount++;
+                break;
+              case HttpStatus.CONFLICT:
+                cannotUpdateCount++;
+                break;
+              default:
+                errorCount++;
             }
             await this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
             ${JSON.stringify(eventsFormatted?.sameAs)}\n`);
@@ -167,7 +154,7 @@ export class EventService {
       batch = batch + 1;
     } while (hasNext) ;
     await this._loggerService.infoLogs(`Importing events successfully completed.`);
-    await this._loggerService.logStatistics(calendar.slug , calendarId , source , totalCount , errorCount , skippedCount, createdCount , updatedCount , cannotUpdateCount);
+    await this._loggerService.logStatistics(calendar.slug , calendarId , source , totalCount , errorCount , skippedCount , createdCount , updatedCount , cannotUpdateCount);
   }
 
   private async _checkSubEventExists(subEvent: any , token: string , calendarId: string , footlightBaseUrl: string) {
@@ -191,12 +178,12 @@ export class EventService {
     return data;
   }
 
-
   checkExcludedValues(event: any , patternToConceptIdMapping: any , eventProperty: EventProperty) {
     const patternToConceptIdMappingForTheField = patternToConceptIdMapping?.find(concept => concept.fieldName === eventProperty);
     const eventPropertyValuesForTheField = this._getPropertyValues(patternToConceptIdMappingForTheField?.inputProperty , event);
     for (const eventPropertyValueForAdditionalType of eventPropertyValuesForTheField) {
-      if (patternToConceptIdMappingForTheField.excludeValues?.some(excludedValue => excludedValue.toLowerCase() === eventPropertyValueForAdditionalType.toLowerCase())) {
+      if (patternToConceptIdMappingForTheField.excludeValues
+        ?.some(excludedValue => excludedValue.toLowerCase() === eventPropertyValueForAdditionalType.toLowerCase())) {
         Exception.badRequest('Excluded value found');
       }
     }
@@ -225,7 +212,7 @@ export class EventService {
       subEvent ,
       offers ,
       contactPoint ,
-      type,
+      type ,
     } = event;
     if (subEvent) {
       if (type == EventType.EVENT) {
@@ -243,7 +230,8 @@ export class EventService {
       }
       if (type == EventType.EVENT_SERIES) {
         const subEventConfiguration = subEvent?.length
-          ? await Promise.all(subEvent.map(event => this._formatSubEventToAdd(event , calendarId , token , footlightBaseUrl , currentUserId , mappingFile)))
+          ? await Promise.all(subEvent.map(event => this._formatSubEventToAdd(event , calendarId , token ,
+            footlightBaseUrl , currentUserId , mappingFile)))
           : [await this._formatSubEventToAdd(subEvent , calendarId , token , footlightBaseUrl , currentUserId , mappingFile)];
         if (subEventConfiguration?.length) {
           event.subEventConfiguration = subEventConfiguration;
@@ -305,8 +293,8 @@ export class EventService {
         name: virtualLocationName ,
         description: virtualLocationDescription ,
         url: {
-          uri: virtualLocationUrl,
-        },
+          uri: virtualLocationUrl ,
+        } ,
       };
     }
 
@@ -358,8 +346,8 @@ export class EventService {
         } else if (filter?.entityType === EntityType.PERSON || filter?.entityType === EntityType.ORGANIZATION) {
           const hasMatchingEntity = participants.some(participant =>
             filteredEntities?.some(entity =>
-              entity?.sameAs?.some(sameAsEntity => participant?.includes(sameAsEntity?.uri)),
-            ),
+              entity?.sameAs?.some(sameAsEntity => participant?.includes(sameAsEntity?.uri)) ,
+            ) ,
           );
 
           if (!hasMatchingEntity) {
@@ -413,7 +401,7 @@ export class EventService {
                                        eventToAdd: EventDTO , currentUserId: string) {
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
     if (eventToAdd) {
-      return await SharedService.syncEntityWithFootlight(calendarId , token , url , eventToAdd , currentUserId, true);
+      return await SharedService.syncEntityWithFootlight(calendarId , token , url , eventToAdd , currentUserId , true);
     }
   }
 
@@ -448,11 +436,12 @@ export class EventService {
     const dynamicPatterns = patternToConceptIdMapping?.filter(pattern => pattern.isDynamic);
     for (const dynamicPattern of dynamicPatterns) {
       const fieldName = dynamicPattern.fieldName;
-      const conceptIds = (await this._findMatchingConcepts(event , fieldName , dynamicPatterns , existingConceptIDs)).map(concept => concept.entityId);
+      const conceptIds = (await this._findMatchingConcepts(event , fieldName , dynamicPatterns , existingConceptIDs))
+        .map(concept => concept.entityId);
       if (conceptIds?.length) {
         dynamicFields.push({
           taxonomyId: fieldName ,
-          conceptIds: conceptIds,
+          conceptIds: conceptIds ,
         });
       }
     }
@@ -472,7 +461,7 @@ export class EventService {
       const eventPropertyValues = this._getPropertyValues(patternToConceptIdMappingForTheField.inputProperty , event);
       if (eventPropertyValues?.length) {
         for (const pattern in patternToConceptIdMappingForTheField.mapping) {
-          let regexPattern;
+          let regexPattern: RegExp;
           try {
             regexPattern = new RegExp(`^${pattern}$` , 'gi');
           } catch (e) {
@@ -600,7 +589,7 @@ export class EventService {
       if (element.uri.startsWith(FacebookConstants.HTTPS) || element.uri.startsWith(FacebookConstants.HTTP)) {
         return {
           uri: element.uri ,
-          type: SameAsTypes.FACEBOOK_LINK,
+          type: SameAsTypes.FACEBOOK_LINK ,
         };
       }
       return element;
@@ -612,7 +601,7 @@ export class EventService {
     const { uri , name , startDate , startDateTime , endDate , endDateTime , image , sameAs } = event;
     const formattedEvent = {
       name , image , startDate , startDateTime , endDate , endDateTime ,
-      sameAs , uri,
+      sameAs , uri ,
     };
 
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate , startDateTime , endDate , endDateTime);
@@ -638,7 +627,8 @@ export class EventService {
   }
 
   private _validateConceptIds(patternToConceptIdMapping: any , propertyName: string , existingConceptsMap: string[]) {
-    let patternToConceptIdMappingForTheField = patternToConceptIdMapping?.find(concept => concept.fieldName === propertyName)?.mapping;
+    let patternToConceptIdMappingForTheField = patternToConceptIdMapping
+      ?.find(concept => concept.fieldName === propertyName)?.mapping;
     const conceptIds = patternToConceptIdMappingForTheField ?
       Object.values(patternToConceptIdMappingForTheField).flat() : undefined;
     const existingConceptIds = this._getAllConceptIds(existingConceptsMap);
@@ -669,7 +659,7 @@ export class EventService {
       url: aggregateOffer?.url ,
       category: undefined ,
       priceCurrency: OfferConstants.CURRENCY_CAD ,
-      prices: undefined,
+      prices: undefined ,
     };
     const offersWithPrice = offers.filter(offer => offer.type === OfferConstants.OFFER);
     const prices = [];
@@ -677,7 +667,7 @@ export class EventService {
       prices.push({
         name: offer.name ,
         price: offer.price ? parseInt(offer.price) : undefined ,
-        url: offer.url ? { uri: offer.url } : undefined,
+        url: offer.url ? { uri: offer.url } : undefined ,
       });
     });
 
@@ -714,7 +704,8 @@ export class EventService {
     return offerConfiguration;
   }
 
-  async syncEntitiesUsingRdf(token: string , rdfFilePath: string , mappingFileUrl: string , footlightBaseUrl: string , calendarId: string , source?: string) {
+  async syncEntitiesUsingRdf(token: string , rdfFilePath: string , mappingFileUrl: string , footlightBaseUrl: string ,
+                             calendarId: string , source?: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token , calendarId);
     const currentUserId = currentUser.id;
     let rdfData = fs.readFileSync(rdfFilePath , 'utf8');
@@ -723,8 +714,8 @@ export class EventService {
     await this.exportJsonLdData(jsonldData , token , calendarId , footlightBaseUrl , currentUserId , mappingFileUrl , source);
   }
 
-  async exportJsonLdData(jsonLd: any , token: string , calendarId: string , footlightBaseUrl: string , currentUserId: string ,
-                         mappingFiles: any , source?: string) {
+  async exportJsonLdData(jsonLd: any , token: string , calendarId: string , footlightBaseUrl: string ,
+                         currentUserId: string , mappingFiles: any , source?: string) {
     const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl , token , calendarId);
     calendarId = calendar.id;
     const data = jsonLd['@graph'];
@@ -743,7 +734,8 @@ export class EventService {
       try {
         if (node['@type'] == EntityPredicates.EVENT) {
           await this.formatAndPushJsonLdEvents(node , jsonLdPlaces , token , calendarId , footlightBaseUrl ,
-            currentUserId , jsonLdPostalAddresses , jsonLdOrganizations , jsonLdPeople , jsonLdOffers , jsonLdContactPoints , mappingFiles , context);
+            currentUserId , jsonLdPostalAddresses , jsonLdOrganizations , jsonLdPeople , jsonLdOffers ,
+            jsonLdContactPoints , mappingFiles , context);
         }
         await this._loggerService.infoLogs(`Importing ${currentCount++} out of ${totalCount}) events`);
       } catch (e) {
@@ -757,8 +749,9 @@ export class EventService {
 
 
   async formatAndPushJsonLdEvents(event: any , places: Object[] , token: string , calendarId: string ,
-                                  footlightBaseUrl: string , currentUserId: string , jsonLdPostalAddresses: any , jsonLdOrganizations: any ,
-                                  jsonLdPeople: any , jsonLdOffers: any , jsonLdContactPoints , mappingFiles: any , context: any) {
+                                  footlightBaseUrl: string , currentUserId: string , jsonLdPostalAddresses: any ,
+                                  jsonLdOrganizations: any , jsonLdPeople: any , jsonLdOffers: any , jsonLdContactPoints ,
+                                  mappingFiles: any , context: any) {
     const formattedEvent = new EventDTO();
 
     const [name , description , eventStatus , attendanceMode , startDate , endDate , additionalType , videoUrl , location ,
@@ -766,15 +759,17 @@ export class EventService {
       event[EventPredicates.NAME] , event[EventPredicates.DESCRIPTION] , event[EventPredicates.EVENT_STATUS] ,
       event[EventPredicates.EVENT_ATTENDANCE_MODE] , event[EventPredicates.START_DATE] , event[EventPredicates.END_DATE] ,
       event[EventPredicates.ADDITIONAL_TYPE] , event[EventPredicates.VIDEO_URL] , event[EventPredicates.LOCATION] ,
-      event[EventPredicates.EVENT_OFFER] , event[EventPredicates.ORGANIZER] , event[EventPredicates.PERFORMER] , event[EventPredicates.COLLABORATOR] ,
-      event[EventPredicates.IMAGE] , event[EventPredicates.EVENT_CONTACT_POINT],
+      event[EventPredicates.EVENT_OFFER] , event[EventPredicates.ORGANIZER] , event[EventPredicates.PERFORMER] ,
+      event[EventPredicates.COLLABORATOR] ,
+      event[EventPredicates.IMAGE] , event[EventPredicates.EVENT_CONTACT_POINT] ,
     ];
 
     const calendarTimezone = (await this._sharedService.fetchCalendar(footlightBaseUrl , token , calendarId))?.timezone;
     const timezone = calendarTimezone || EVENT_CONFIGURATIONS.DEFAULT_TIMEZONE;
 
     const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFiles))?.data;
-    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping , EventProperty.ADDITIONAL_TYPE , this.eventTypeConceptMap);
+    const existingEventTypeConceptIDs = this._validateConceptIds(patternToConceptIdMapping ,
+      EventProperty.ADDITIONAL_TYPE , this.eventTypeConceptMap);
     if (name) {
       formattedEvent.name = JsonLdParseHelper.formatMultilingualField(name);
     }
@@ -810,7 +805,8 @@ export class EventService {
     }
     if (location) {
       let placeDetails = places.find(place => place['@id'] === location['@id']);
-      let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails , token , calendarId , footlightBaseUrl , currentUserId , jsonLdPostalAddresses , context);
+      let placeEntityId = await this._placeService.formatAndPushJsonLdPlaces(placeDetails , token , calendarId ,
+        footlightBaseUrl , currentUserId , jsonLdPostalAddresses , context);
       formattedEvent.locationId = { place: { entityId: placeEntityId } };
     }
     if (offer) {
@@ -821,7 +817,7 @@ export class EventService {
       if (organizer) {
         let {
           participantId ,
-          participantType,
+          participantType ,
         } = await this._personOrganizationService.formatAndPushPersonOrganization(token , calendarId , footlightBaseUrl ,
           currentUserId , jsonLdOrganizations , jsonLdPeople , event , EventPredicates.ORGANIZER , context);
         formattedEvent.organizers = [{ entityId: participantId , type: participantType }];
@@ -830,7 +826,7 @@ export class EventService {
       if (performer) {
         let {
           participantId ,
-          participantType,
+          participantType ,
         } = await this._personOrganizationService.formatAndPushPersonOrganization(token , calendarId , footlightBaseUrl ,
           currentUserId , jsonLdOrganizations , jsonLdPeople , event , EventPredicates.PERFORMER , context);
         formattedEvent.performers = [{ entityId: participantId , type: participantType }];
@@ -839,7 +835,7 @@ export class EventService {
       if (collaborator) {
         let {
           participantId ,
-          participantType,
+          participantType ,
         } = await this._personOrganizationService.formatAndPushPersonOrganization(token , calendarId , footlightBaseUrl ,
           currentUserId , jsonLdOrganizations , jsonLdPeople , event , EventPredicates.COLLABORATOR , context);
         formattedEvent.collaborators = [{ entityId: participantId , type: participantType }];
@@ -858,7 +854,7 @@ export class EventService {
       const formattedContactPoint: ContactPointDTO = {
         url: { uri: contactPointData[EventPredicates.URL]['@id'] } ,
         email: contactPoint[EventPredicates.EMAIL] ,
-        telephone: contactPoint[EventPredicates.TELEPHONE],
+        telephone: contactPoint[EventPredicates.TELEPHONE] ,
       };
       return formattedContactPoint;
     }
@@ -869,13 +865,13 @@ export class EventService {
       || jsonLdOffers.find(jsonLdOffer => jsonLdOffer['@id'] === offer[0]['@id']);
     let offerPrice: OfferPrice = {
       name: JsonLdParseHelper.formatMultilingualField(offerData[EventPredicates.NAME]) ,
-      price: offerData[EventPredicates.PRICE] ? Number.parseFloat(offerData[EventPredicates.PRICE]) : undefined,
+      price: offerData[EventPredicates.PRICE] ? Number.parseFloat(offerData[EventPredicates.PRICE]) : undefined ,
     };
     const uri = offerData[EventPredicates.URL];
     let offerConfiguration: OfferDTO = {
       url: { uri: uri } ,
       prices: [offerPrice] ,
-      category: uri ? OfferCategory.PAYING : OfferCategory.FREE,
+      category: uri ? OfferCategory.PAYING : OfferCategory.FREE ,
     };
     return offerConfiguration;
   }
@@ -884,7 +880,7 @@ export class EventService {
     conceptNames: string[] ,
     patternToConceptIdMapping: any ,
     existingEventTypeConceptIDs: unknown[] ,
-    eventPropertyValue: EventProperty,
+    eventPropertyValue: EventProperty ,
   ) {
     conceptNames = [].concat(conceptNames);
     const conceptIds = [];
@@ -914,141 +910,8 @@ export class EventService {
     return moment.tz(date , 'YYYY-MM-DD HH:mm ' , timezone).toISOString();
   }
 
-  async importCaligram(token: any , footlightBaseUrl: string , calendarId: string , mappingFileUrl: string) {
-    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token , calendarId);
-    const currentUserId = currentUser.id;
-    const eventIds = await this.getCaligramEventIds();
-    let count = 1;
-    let eventUrl;
-    for (const eventId of eventIds) {
-      try {
-        this._loggerService.infoLogs(`(${count}/${eventIds.length})`);
-        eventUrl = CaligramUrls.EVENT_URL + eventId;
-        const data = (await (axios.get(eventUrl))).data;
-        if (data.status == 'published') {
-          await this.formatAndPushCaligramEvents(data , token , footlightBaseUrl , calendarId , currentUserId , mappingFileUrl);
-        }
-        count++;
-      } catch (e) {
-        this._loggerService.errorLogs(`Error while adding/updating event ${eventUrl}`);
-      }
-    }
-  }
-
-
-  async getCaligramEventIds() {
-    const eventIds = [];
-    let pageNumber = 1;
-    while (true) {
-      let eventData;
-      try {
-        eventData = (await axios.get(CaligramUrls.PAGE_URL + pageNumber)).data.data;
-        if (!eventData.length) {
-          this._loggerService.infoLogs(`no more events found on page ${pageNumber}`);
-          break;
-        }
-      } catch (error) {
-        Exception.internalServerError('Unable to fetch from Caligram listing URL');
-      }
-      eventIds.push(...eventData.map(event => event.id));
-      pageNumber++;
-    }
-    return eventIds;
-  }
-
-  async formatAndPushCaligramEvents(event: any , token: any , footlightBaseUrl: string ,
-                                    calendarId: string , currentUserId: string , mappingFileUrl: string) {
-    let formattedEvent = new EventDTO();
-    await this._fetchTaxonomies(calendarId , token , footlightBaseUrl , EntityType.EVENT);
-    const calendarTimezone = (await this._sharedService.fetchCalendar(footlightBaseUrl , token , calendarId))?.timezone;
-    const timezone = calendarTimezone || EVENT_CONFIGURATIONS.DEFAULT_TIMEZONE;
-    const patternToConceptIdMapping = (await SharedService.fetchJsonFromUrl(mappingFileUrl))?.data;
-    const existingEventTypeConceptIDs =
-      this._validateConceptIds(patternToConceptIdMapping , EventProperty.ADDITIONAL_TYPE , this.eventTypeConceptMap);
-    formattedEvent.name = { fr: event.title };
-    formattedEvent.description = { fr: event.description };
-    formattedEvent = this._formatDatesForCaligram(formattedEvent , event.start_date , event.end_date , event.dates , timezone);
-    formattedEvent.isFeaturedEvent = event.featured == 'true';
-    formattedEvent.uri = event.url;
-    formattedEvent.offerConfiguration =
-
-      this._formatCaligramOffers(event.ticket_url , event.price_currency , event.prices , event.price_type);
-    if (event.tags) {
-      let additionalTypeNames = [];
-      for (const tag of event.tags) {
-        additionalTypeNames.push(tag.name);
-      }
-      formattedEvent.additionalType = await this._getConceptIdByNameForRdf(additionalTypeNames , patternToConceptIdMapping ,
-        existingEventTypeConceptIDs , EventProperty.ADDITIONAL_TYPE);
-    }
-    formattedEvent.image = [{ url: { uri: event.image.sizes.original } , isMain: true }];
-    formattedEvent.sameAs = [{ uri: event.url , type: 'ExternalSourceIdentifier' }];
-    if (event.venue) {
-      const locationId = await this._placeService.formatAndPushCaligramPlaces(event.venue , token , footlightBaseUrl ,
-        calendarId , currentUserId);
-      formattedEvent.locationId = { place: { entityId: locationId } };
-    }
-    if (event.organization) {
-      const organizationId = await this._organizationService.formatAndPushCaligramOrganization(event.organization , token ,
-        calendarId , footlightBaseUrl , currentUserId);
-      formattedEvent.organizers = [{ entityId: organizationId as string , type: PersonOrganizationType.ORGANIZATION }];
-    }
-    await this._pushEventsToFootlight(calendarId , token , footlightBaseUrl , formattedEvent , currentUserId);
-
-  }
-
-  private _formatDatesForCaligram(formattedEvent: EventDTO , start_date: any , end_date: any , dates: any , timezone: string): EventDTO {
-    if (dates.length === 1) {
-      formattedEvent.startDateTime = this.convertDateToISO(start_date , timezone);
-      formattedEvent.endDateTime = this.convertDateToISO(end_date , timezone);
-      return formattedEvent;
-    }
-    if (dates) {
-      let customDate = new CustomDates();
-      let customDates = [];
-      for (const date of dates) {
-        let dateAndTime = date.start_date.split(' ');
-        customDate = {
-          startDate: dateAndTime[0] ,
-          customTimes: [{
-            startTime: dateAndTime[1],
-          }],
-        };
-        customDates.push(customDate);
-      }
-      formattedEvent.recurringEvent = {
-        frequency: RecurringEventFrequency.CUSTOM ,
-        customDates: customDates,
-      };
-      return formattedEvent;
-    }
-    return formattedEvent;
-  }
-
-  private _formatCaligramOffers(tickerUrl: string , currency: string , prices: any , priceType: string) {
-    let priceCurrency = currency == 'CAD' ? PriceCurrency.CAD : currency == 'USD' ? PriceCurrency.USD : null;
-    if (priceType == OfferCategory.FREE) {
-      return {
-        url: { uri: tickerUrl } ,
-        category: OfferCategory.FREE ,
-        priceCurrency: priceCurrency,
-      };
-    } else {
-      let offerPrices = [];
-      for (const price of prices) {
-        const offerPrice = { price: price.value , name: { fr: price.description } };
-        offerPrices.push(offerPrice);
-      }
-      return {
-        url: { uri: tickerUrl } ,
-        category: OfferCategory.PAYING ,
-        priceCurrency: priceCurrency ,
-        prices: offerPrices,
-      };
-    }
-  }
-
-  private async _formatSubEventToAdd(event: any , calendarId: string , token: string , footlightBaseUrl: string , currentUserId: string , mappingFile: any) {
+  private async _formatSubEventToAdd(event: any , calendarId: string , token: string , footlightBaseUrl: string ,
+                                     currentUserId: string , mappingFile: any) {
     const subEventToReturn = {
       startDate: event.startDate ? event.startDate : event.startDateTime?.split('T')[0] ,
       startTime: event.startDateTime?.split('T')[1]?.slice(0 , 5) ,
@@ -1056,10 +919,11 @@ export class EventService {
       endTime: event.endDateTime?.split('T')[1]?.slice(0 , 5) ,
       name: event.name ,
       description: event.description ,
-      sameAs: { uri: event.uri , type: 'ArtsdataIdentifier' },
+      sameAs: { uri: event.uri , type: 'ArtsdataIdentifier' } ,
     };
     if (event.location) {
-      const locationId = await this._placeService.getFootlightIdentifier(calendarId , token , footlightBaseUrl , event.location['@none'] || event.location['Place'] , currentUserId , mappingFile);
+      const locationId = await this._placeService.getFootlightIdentifier(calendarId , token , footlightBaseUrl ,
+        event.location['@none'] || event.location['Place'] , currentUserId , mappingFile);
       subEventToReturn['locationId'] = locationId ? { place: { entityId: locationId } } : locationId;
     }
 
@@ -1084,9 +948,10 @@ export class EventService {
           let eventToAdd = { ...event };
           eventToAdd.derivedFrom = { uri: eventToAdd.uri + '#location:' + location.split('/').pop() };
           delete eventToAdd.uri;
-          eventToAdd.sameAs = eventToAdd.sameAs?.filter(item => !item.uri.startsWith('http://kg.artsdata.ca/resource/K'));
-
-          eventToAdd.subEvent = subEvents.filter(subEvent => subEvent.location['@none'] == location || subEvent.location['Place'] == location);
+          eventToAdd.sameAs = eventToAdd.sameAs
+            ?.filter(item => !item.uri.startsWith('http://kg.artsdata.ca/resource/K'));
+          eventToAdd.subEvent = subEvents
+            .filter(subEvent => subEvent.location['@none'] == location || subEvent.location['Place'] == location);
           eventToAdd.location = { 'Place': location };
           events.push(eventToAdd);
         });
