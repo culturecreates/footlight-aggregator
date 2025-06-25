@@ -69,6 +69,9 @@ export class EventService {
     const calendarTimezone = calendar.timezone;
     let offset = 0 , hasNext = true , batch = 1 , totalCount = 0 , errorCount = 0 , tries = 0 ,
       maxTry = 3 , importedCount = 0 , skippedCount = 0;
+    let createdCount = 0;
+    let updatedCount = 0;
+    let cannotUpdateCount = 0;
     await this._fetchTaxonomies(calendarId , token , footlightBaseUrl , EntityType.EVENT);
     const mappingFile = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
     const existingEventTypeConceptIDs = this._validateConceptIds(mappingFile ,
@@ -136,7 +139,16 @@ export class EventService {
             if (eventsFormatted) {
               importedCount++;
             }
-            await this._pushEventsToFootlight(calendarId , token , footlightBaseUrl , eventsFormatted , currentUser.id);
+            const response = await this._pushEventsToFootlight(calendarId , token , footlightBaseUrl , eventsFormatted , currentUser.id);
+            switch(response){
+              case HttpStatus.CREATED: createdCount++
+              break;
+              case HttpStatus.OK: updatedCount++;
+              break;
+              case HttpStatus.CONFLICT: cannotUpdateCount++;
+              break;
+              default: errorCount++;
+            }
             await this._loggerService.infoLogs(`\t(${syncCount}/${fetchedEventCount}) Synchronised event with id: 
             ${JSON.stringify(eventsFormatted?.sameAs)}\n`);
           }
@@ -155,7 +167,7 @@ export class EventService {
       batch = batch + 1;
     } while (hasNext) ;
     await this._loggerService.infoLogs(`Importing events successfully completed.`);
-    await this._loggerService.logStatistics(calendar.slug , calendarId , source , totalCount , errorCount , skippedCount);
+    await this._loggerService.logStatistics(calendar.slug , calendarId , source , totalCount , errorCount , skippedCount, createdCount , updatedCount , cannotUpdateCount);
   }
 
   private async _checkSubEventExists(subEvent: any , token: string , calendarId: string , footlightBaseUrl: string) {
@@ -401,7 +413,7 @@ export class EventService {
                                        eventToAdd: EventDTO , currentUserId: string) {
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
     if (eventToAdd) {
-      return await SharedService.syncEntityWithFootlight(calendarId , token , url , eventToAdd , currentUserId);
+      return await SharedService.syncEntityWithFootlight(calendarId , token , url , eventToAdd , currentUserId, true);
     }
   }
 
@@ -979,7 +991,7 @@ export class EventService {
     if (event.organization) {
       const organizationId = await this._organizationService.formatAndPushCaligramOrganization(event.organization , token ,
         calendarId , footlightBaseUrl , currentUserId);
-      formattedEvent.organizers = [{ entityId: organizationId , type: PersonOrganizationType.ORGANIZATION }];
+      formattedEvent.organizers = [{ entityId: organizationId as string , type: PersonOrganizationType.ORGANIZATION }];
     }
     await this._pushEventsToFootlight(calendarId , token , footlightBaseUrl , formattedEvent , currentUserId);
 

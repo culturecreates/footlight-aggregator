@@ -15,11 +15,14 @@ export class LoggerService {
   }
 
   async logStatistics(calendarId:string, calendarSlug: string, source: string, eventCount: number, errorCount: number,
-                      skippedCount?: number) {
+                      skippedCount?: number, createdCount?: number, updatedCount?: number, cannotUpdateCount?: number) {
     skippedCount = skippedCount || 0;
     let message :string = `Import statistics:
     Events: ${eventCount}
     Imported: ${eventCount - errorCount - skippedCount}
+    Created: ${createdCount || 0}
+    Updated: ${updatedCount || 0}
+    Cannot Update: ${cannotUpdateCount || 0}
     Error: ${errorCount}
     Skipped: ${skippedCount}
     Source: ${source}
@@ -28,6 +31,10 @@ export class LoggerService {
     DateTime: ${new Date()}`;
 
     DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.info(message) : console.log(message);
+    if(createdCount == 0){
+      message = `Warning: No events were created for calendar ${calendarSlug} (${calendarId}) from source ${source}.`;
+      DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.warn(message) : console.warn(message);
+    }
   }
 
 }
