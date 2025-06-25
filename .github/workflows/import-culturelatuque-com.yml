@@ -1,4 +1,4 @@
-name: Import culturelatuque-com
+name: Import footlight/culturelatuque-com
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: Run Place Bell Aggregator
+name: Import artsdata-planet-evenko/place-bell
 
 on:
   workflow_dispatch:

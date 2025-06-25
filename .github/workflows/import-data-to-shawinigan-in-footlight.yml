@@ -1,4 +1,4 @@
-name: Load API Shawinigan
+name: Import events using Shawinigan (API)
 
 on:
   workflow_dispatch:

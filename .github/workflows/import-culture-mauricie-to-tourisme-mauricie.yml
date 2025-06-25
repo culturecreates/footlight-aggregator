@@ -1,4 +1,4 @@
-name: Run Tourisme Maurice(source - Culture Mauricie) Aggregator
+name: Import artsdata-planet-footlight/culture-mauricie
 
 on:
   workflow_dispatch:

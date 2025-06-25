@@ -1,4 +1,4 @@
-name: Import footlight-tourisme-shawinigan-com
+name: Import footlight/tourismeshawinigan-com
 
 on:
   workflow_dispatch:

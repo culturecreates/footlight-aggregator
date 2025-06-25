@@ -1,4 +1,4 @@
-name: Run Minotaure Aggregator
+name: Import footlight/minotaure-ca
 
 on:
   workflow_dispatch:

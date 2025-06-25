@@ -1,4 +1,4 @@
-name: Run Salle Odyssee Aggregator
+name: Import footlight/maisondelaculture-ca
 
 on:
   workflow_dispatch:

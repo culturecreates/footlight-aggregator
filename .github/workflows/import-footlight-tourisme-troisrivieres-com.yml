@@ -1,4 +1,4 @@
-name: Import footlight-tourisme-troisrivieres-com
+name: Import footlight/tourisme-troisrivieres-com
 
 on:
   workflow_dispatch:

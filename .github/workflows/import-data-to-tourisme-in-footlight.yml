@@ -1,4 +1,4 @@
-name: Load API Tourisme Mauricie
+name: Import Events from Tourisme Mauricie API
 
 on:
   workflow_dispatch:

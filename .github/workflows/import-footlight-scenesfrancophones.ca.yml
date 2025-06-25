@@ -1,4 +1,4 @@
-name: Run Scenes Francophones Aggregator (ArtsCultureNB)
+name: Import artsdata-planet-scenesfrancophones/scenesfrancophones-ca (ArtsCultureNB)
 
 on:
   workflow_dispatch:

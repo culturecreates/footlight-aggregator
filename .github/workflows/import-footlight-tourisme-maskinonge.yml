@@ -1,4 +1,4 @@
-name: Import footlight-tourisme-maskinonge-com
+name: Import footlight/tourismemaskinonge-com
 
 on:
   workflow_dispatch:

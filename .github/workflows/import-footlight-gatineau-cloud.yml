@@ -1,4 +1,4 @@
-name: Run Ville de Gatineau Aggregator
+name: Import footlight/gatineau-cloud
 
 on:
   workflow_dispatch:

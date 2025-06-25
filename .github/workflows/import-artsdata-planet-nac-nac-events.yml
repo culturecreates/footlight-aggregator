@@ -1,8 +1,7 @@
-name: Import Artsdata-planet-nac/nac-events
+name: Import artsdata-planet-nac/nac-events
 
 on:
   workflow_dispatch:
-  
 
 jobs:
   push-to-cms:
