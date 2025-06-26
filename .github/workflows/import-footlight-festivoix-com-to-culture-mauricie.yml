@@ -1,4 +1,4 @@
-name: Import footlight/festivoix-com to culture-mauricie
+name: Import footlight/festivoix-com
 
 on:
   workflow_dispatch:
