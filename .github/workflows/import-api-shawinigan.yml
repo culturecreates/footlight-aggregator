@@ -1,5 +1,3 @@
-name: Import events using Shawinigan (API)
-
 on:
   workflow_dispatch:
   schedule:
