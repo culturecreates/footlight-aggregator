@@ -1,4 +1,4 @@
-name: Import events using amphitheatrecogeco.com API
+name: Import API amphitheatrecogeco.com
 
 on:
   workflow_dispatch:

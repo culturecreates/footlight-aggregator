@@ -1,3 +1,5 @@
+name: Import API Shawinigan
+
 on:
   workflow_dispatch:
   schedule:
