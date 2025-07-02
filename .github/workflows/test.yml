@@ -1,0 +1,20 @@
+name: Test Failure Notification
+
+on:
+  workflow_dispatch:
+
+jobs:
+  push-to-cms:
+    uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main
+    with:
+        cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
+        aggregator_username: ${{ vars.AGGREGATOR_USER_COMOTION }}
+        source_url: http://kg.artsdata.ca/culture-creates/footlight/co-motion-ca
+        footlight_base_url: https://staging.api.cms.footlight.io
+        footlight_calendar_id: 63457978637093005071a053
+        batch_size: 5
+        mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/co-motion-cms-mapping.json 
+    secrets:
+      aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_TEST}} //incorrect secret name for testing purposes
+      datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
