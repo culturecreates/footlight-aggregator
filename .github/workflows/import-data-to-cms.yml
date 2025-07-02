@@ -31,6 +31,8 @@ on:
           required: true
         datadog_token:
             required: true
+        SENDGRID_API_KEY:
+            required: true
 jobs:
   run:
     runs-on: ubuntu-latest

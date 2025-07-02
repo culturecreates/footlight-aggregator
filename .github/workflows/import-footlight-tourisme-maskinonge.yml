@@ -18,3 +18,4 @@ jobs:
     secrets:
       aggregator_password: ${{ secrets.AGGREGATOR_TOURISME_MASKINONGE }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
+      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
