@@ -31,9 +31,14 @@ export class LoggerService {
     DateTime: ${new Date()}`;
 
     DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.info(message) : console.log(message);
-    if(createdCount == 0 && updatedCount == 0 && cannotUpdateCount == 0){
-      message = `Warning: No events were created or updated for calendar ${calendarSlug} (${calendarId}) from source ${source}.`;
+
+    if(createdCount == 0) {
+      message = `No new events were created for calendar ${calendarSlug} (${calendarId}) from source ${source}.`;
       DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.warn(message) : console.warn(message);
+      if(updatedCount == 0 && cannotUpdateCount == 0) {
+        message = `Warning: No events were created or updated for calendar ${calendarSlug} (${calendarId}) from source ${source}.`;
+        DATA_DOG.LOG_TO_DATA_DOG === true ? datadogLogger.warn(message) : console.warn(message);
+      }
     }
   }
 
