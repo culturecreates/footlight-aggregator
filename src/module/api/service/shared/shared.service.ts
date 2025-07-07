@@ -172,7 +172,7 @@ export class SharedService {
     return alternateNames.length ? alternateNames : undefined;
   }
 
-  static createHeaders(token: string, calendarId: string, languagePreference?: string) {
+  static createHeaders(token: string, calendarId?: string, languagePreference?: string) {
     const headers = {
       Accept: "*/*",
       Authorization: `Bearer ${token}`,
@@ -186,10 +186,10 @@ export class SharedService {
     return headers;
   }
 
-  async fetchCurrentUser(footlightBaseUrl: string, token: string, calendarId: string) {
+  async fetchCurrentUser(footlightBaseUrl: string, token: string) {
     this._loggerService.infoLogs(`Fetching current user info`);
     const url = footlightBaseUrl + FootlightPaths.GET_CURRENT_USER;
-    const headers = SharedService.createHeaders(token, calendarId);
+    const headers = SharedService.createHeaders(token);
     try {
       const userResponse = await SharedService.fetchUrl(url, headers);
       return userResponse.data;

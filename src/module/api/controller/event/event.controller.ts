@@ -27,7 +27,7 @@ export class EventController {
   })
   @ApiQuery({
     name: "calendar-id",
-    description: "**calendar-id (The calendar identifier)**",
+    description: "**calendar-id (The calendar identifier or slug)**",
     required: true,
     explode: true
   })
@@ -73,7 +73,7 @@ export class EventController {
   })
   @ApiQuery({
     name: "calendar-id",
-    description: "**calendar-id (The calendar identifier)**",
+    description: "**calendar-id (The calendar identifier or slug)**",
     required: true,
     explode: true
   })

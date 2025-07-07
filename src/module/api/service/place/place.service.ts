@@ -75,7 +75,7 @@ export class PlaceService {
   }
 
   async syncPlaces(token: any, calendarId: string, source: string, footlightBaseUrl: string) {
-    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
+    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token);
     const places = await this._fetchPlacesFromArtsData(source);
     const fetchedPlacesCount = places.length;
     let syncCount = 0;

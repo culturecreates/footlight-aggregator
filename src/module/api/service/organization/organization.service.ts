@@ -35,7 +35,7 @@ export class OrganizationService {
   }
 
   async syncOrganizations(token: any, calendarId: string, source: string, footlightBaseUrl: string) {
-    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token, calendarId);
+    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl, token);
     const organizations = await this._fetchOrganizationsFromArtsData(source);
     const fetchedOrganizationCount = organizations.length;
     let syncCount = 0;
