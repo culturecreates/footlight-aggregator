@@ -736,7 +736,7 @@ export class EventService {
             currentUserId , jsonLdPostalAddresses , jsonLdOrganizations , jsonLdPeople , jsonLdOffers ,
             jsonLdContactPoints , mappingFiles , context);
         }
-        await this._loggerService.infoLogs(`Importing ${currentCount++} out of ${totalCount}) events`);
+        await this._loggerService.infoLogs(`Importing ${currentCount++} out of (${totalCount}) events`);
       } catch (e) {
         await this._loggerService.errorLogs(`Error while importing  event with id ${node['@id']}`);
         errorCount++;
