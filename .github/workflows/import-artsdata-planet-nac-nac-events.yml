@@ -7,13 +7,13 @@ jobs:
   push-to-cms:
     uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main
     with:
-        cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
-        aggregator_username: anac@culturecreates.com
-        source_url: http://kg.artsdata.ca/culture-creates/artsdata-planet-nac/nac-events
-        footlight_base_url: https://api.cms.footlight.io
-        footlight_calendar_id: 665074693d92390064206343
-        batch_size: 10
-        mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/blank-mapping.json
+      cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
+      aggregator_username: anac@culturecreates.com
+      source_url: http://kg.artsdata.ca/culture-creates/artsdata-planet-nac/nac-events
+      footlight_base_url: https://api.cms.footlight.io
+      footlight_calendar_id: nac-osaka
+      batch_size: 10
+      mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/blank-mapping.json
     secrets:
       aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_NAC }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}

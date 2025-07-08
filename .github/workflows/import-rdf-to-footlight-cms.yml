@@ -49,7 +49,7 @@ jobs:
 
       - name: Download project-configuration-file
         id: step-4
-        run: | 
+        run: |
           curl '${{inputs.onto-refine-config-url}}' >> project-config.json
 
       - name: Transform json data to RDF
@@ -77,10 +77,10 @@ jobs:
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
         with:
-          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }} 
-          envkey_ENABLING_LOG_TO_DATA_DOG: true 
-          envkey_CMS_REFERER_HEADER: ${{ vars.CMS_REFERER_HEADER }} 
-          file_name: .env 
+          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
+          envkey_ENABLING_LOG_TO_DATA_DOG: true
+          envkey_CMS_REFERER_HEADER: ${{ vars.CMS_REFERER_HEADER }}
+          file_name: .env
           fail_on_empty: false
 
       - name: Build Footlight Aggregator

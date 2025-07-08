@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PRIVATE_KEY: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY_PRODUCTION}}
-      HOSTNAME : ${{ vars.PRODUCTION_SERVER_7_IP}}
-      USER_NAME : ${{ vars.PRODUCTION_SERVER_7_USER_NAME }}
-      PRODUCTION_DATABASE_URL : ${{ secrets.PRODUCTION_DATABASE_URL }}
-      DD_API_KEY : ${{ secrets.DATA_DOG_CLIENT_KEY }}
+      HOSTNAME: ${{ vars.PRODUCTION_SERVER_7_IP}}
+      USER_NAME: ${{ vars.PRODUCTION_SERVER_7_USER_NAME }}
+      PRODUCTION_DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+      DD_API_KEY: ${{ secrets.DATA_DOG_CLIENT_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

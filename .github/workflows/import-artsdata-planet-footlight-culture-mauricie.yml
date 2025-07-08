@@ -8,13 +8,13 @@ jobs:
   push-to-cms:
     uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main
     with:
-        cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
-        aggregator_username: ${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }}
-        source_url: http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie
-        footlight_base_url: https://api.cms.footlight.io
-        footlight_calendar_id: 661e5a8818a64f7829aeae24
-        batch_size: 5
-        mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/dici-to-tourisme-mauricie-calendars-concepts-mapping.json
+      cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
+      aggregator_username: ${{ vars.AGGREGATOR_USER_CULTURE_MAURICIE_2 }}
+      source_url: http://kg.artsdata.ca/culture-creates/artsdata-planet-footlight/culture-mauricie
+      footlight_base_url: https://api.cms.footlight.io
+      footlight_calendar_id: tourisme-mauricie
+      batch_size: 5
+      mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/dici-to-tourisme-mauricie-calendars-concepts-mapping.json
     secrets:
       aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2 }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}

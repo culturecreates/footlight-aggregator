@@ -11,9 +11,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: SSH and get data
         env:
-            PRIVATE_KEY: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY}}
-            HOSTNAME : ${{ vars.STAGING_SERVER_3_IP}}
-            USER_NAME : ${{ vars.STAGING_SERVER_3_USER_NAME }}
+          PRIVATE_KEY: ${{ secrets.AWS_LIGHTSAIL_ACCESS_KEY}}
+          HOSTNAME: ${{ vars.STAGING_SERVER_3_IP}}
+          USER_NAME: ${{ vars.STAGING_SERVER_3_USER_NAME }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} "curl https://www.tourismemauricie.com/wp-admin/admin-ajax.php?action=caligram  >> ./tourisme-mouricie/tourisme.json "
@@ -76,10 +76,10 @@ jobs:
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
         with:
-          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }} 
-          envkey_ENABLING_LOG_TO_DATA_DOG: true 
-          envkey_CMS_REFERER_HEADER: ${{ vars.CMS_REFERER_HEADER }} 
-          file_name: .env 
+          envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
+          envkey_ENABLING_LOG_TO_DATA_DOG: true
+          envkey_CMS_REFERER_HEADER: ${{ vars.CMS_REFERER_HEADER }}
+          file_name: .env
           fail_on_empty: false
 
       - name: Build Footlight Aggregator

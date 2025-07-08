@@ -13,7 +13,7 @@ jobs:
       aggregator_username: ${{ vars.AGGREGATOR_USER_COMPLEXE_CULTUREL }}
       source_url: http://kg.artsdata.ca/culture-creates/footlight/complexeculturelfelixleclerc-com
       footlight_base_url: https://api.cms.footlight.io
-      footlight_calendar_id: 657199fea5ac3d006314ea92
+      footlight_calendar_id: culture-mauricie
       batch_size: 5
       mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/complexe-culturel-cms-mapping.json
     secrets:

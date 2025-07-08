@@ -3,7 +3,7 @@ name: Import orion/capitol-nb-ca
 on:
   workflow_dispatch:
   schedule:
-  - cron: "0 7 * * 5" # Run at 5:00 AM ET every Thursday
+    - cron: "0 7 * * 5" # Run at 5:00 AM ET every Thursday
 
 jobs:
   push-to-cms:
@@ -13,7 +13,7 @@ jobs:
       aggregator_username: ${{ vars.AGGREGATOR_USER_CAPITOL_NB }}
       source_url: http://kg.artsdata.ca/capacoa/artsdata-orion/capitol-nb-ca
       footlight_base_url: https://api.cms.footlight.io # production
-      footlight_calendar_id: 65eeaf8ebec01b0064312f94
+      footlight_calendar_id: artsculturenb
       batch_size: 5
       mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/theplayhouse-cms-mapping.json
     secrets:
