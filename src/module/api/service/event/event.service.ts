@@ -46,9 +46,9 @@ export class EventService {
 
   private async _syncEvents(calendarId: string , token: string , source: string , footlightBaseUrl: string ,
                             batchSize: number , mappingUrl: string , eventType?: EventType) {
-    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token , calendarId);
+    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token);
+    calendarId = await this._getCalendarId(calendarId , currentUser);
     const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl , token , calendarId);
-    calendarId = calendar.id;
     const calendarTimezone = calendar.timezone;
     let offset = 0 , hasNext = true , batch = 1 , totalCount = 0 , errorCount = 0 , tries = 0 ,
       maxTry = 3 , importedCount = 0 , skippedCount = 0;
@@ -67,7 +67,8 @@ export class EventService {
     const filters: Filters[] = mappingFile || [];
     const entitiesMap = {};
     for (const filter of filters) {
-      entitiesMap[filter.entityType] = (await SharedService.getAllEntitiesFromFootlight(calendarId , footlightBaseUrl , token , filter.entityType))?.data?.data;
+      entitiesMap[filter.entityType] = (await SharedService.getAllEntitiesFromFootlight(calendarId , footlightBaseUrl ,
+        token , filter.entityType))?.data?.data;
     }
 
     do {
@@ -496,7 +497,7 @@ export class EventService {
     const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl , token , calendarId);
     const calendarTimezone = calendar.timezone;
     await this._fetchTaxonomies(calendarId , token , footlightBaseUrl , EntityType.EVENT);
-    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token , calendarId);
+    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token);
     const existingEvent = await this._fetchEventFromFootlight(token , calendarId , eventId , footlightBaseUrl);
     const mappingFile = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
     const existingEventTypeConceptIDs = this._validateConceptIds(mappingFile ,
@@ -529,8 +530,6 @@ export class EventService {
         Exception.badRequest('The event is not found in Artsdata');
       }
 
-
-      const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token , calendarId);
       const eventFormatted = await this.formatEvent(calendarId , token , eventMatching , footlightBaseUrl , currentUser.id ,
         mappingFile , calendarTimezone , existingEventTypeConceptIDs , existingAudienceConceptIDs);
       return await SharedService.patchEventInFootlight(calendarId , token , footlightBaseUrl , eventId , eventFormatted);
@@ -554,7 +553,6 @@ export class EventService {
   }
 
   async reloadEventImages(token: any , calendarId: string , source: string , footlightBaseUrl: string) {
-    //TODO
     const events = await this._fetchEventsFromArtsData(source , 300 , 0);
     const fetchedEventCount = events.length;
     let syncCount = 0;
@@ -706,7 +704,7 @@ export class EventService {
 
   async syncEntitiesUsingRdf(token: string , rdfFilePath: string , mappingFileUrl: string , footlightBaseUrl: string ,
                              calendarId: string , source?: string) {
-    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token , calendarId);
+    const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token);
     const currentUserId = currentUser.id;
     let rdfData = fs.readFileSync(rdfFilePath , 'utf8');
 
@@ -959,5 +957,18 @@ export class EventService {
       }
     }
     return [event];
+  }
+
+  private async _getCalendarId(calendarId: string , currentUser: any) {
+    //Calendar id could be a slug or id.
+    const filteredRole = currentUser.roles
+      ?.find(role => role.calendarId === calendarId || role.calendarSlug === calendarId);
+    if (!filteredRole) {
+      await this._loggerService.errorLogs(`User ${currentUser.email} has no access to this calendar:: ${calendarId} 
+      or the calendar does not exist.`);
+      Exception.unauthorized(`User ${currentUser.email} has no access to this calendar:: ${calendarId} 
+      or the calendar does not exist.`);
+    }
+    return filteredRole.calendarId;
   }
 }
