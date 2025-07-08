@@ -705,6 +705,7 @@ export class EventService {
   async syncEntitiesUsingRdf(token: string , rdfFilePath: string , mappingFileUrl: string , footlightBaseUrl: string ,
                              calendarId: string , source?: string) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token);
+    calendarId = await this._getCalendarId(calendarId , currentUser);
     const currentUserId = currentUser.id;
     let rdfData = fs.readFileSync(rdfFilePath , 'utf8');
 
