@@ -646,6 +646,7 @@ export class EventService {
 
   private _formatOffers(offers: any) {
     offers = [].concat(offers);
+    const priceUrl = [];
 
     const aggregateOffer = offers.find(offer => offer.type === OfferConstants.AGGREGATE_OFFER);
     if (typeof aggregateOffer?.name?.fr == 'object') {
@@ -668,6 +669,9 @@ export class EventService {
         price: offer.price ? parseInt(priceValue) : undefined ,
         url: offer.url ? { uri: offer.url } : undefined ,
       });
+      if (offer.url) {
+        priceUrl.push(offer.url);
+      }
     });
 
     if (aggregateOffer?.additionalType) {
@@ -698,6 +702,10 @@ export class EventService {
         offerConfiguration.category = OfferCategory.PAYING;
         offerConfiguration.prices = prices;
       }
+    }
+
+    if (!offerConfiguration.url && priceUrl.length) {
+      offerConfiguration.url = { uri: priceUrl.find(price => price) };
     }
 
     return offerConfiguration;
