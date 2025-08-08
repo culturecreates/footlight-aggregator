@@ -662,9 +662,10 @@ export class EventService {
     const offersWithPrice = offers.filter(offer => offer.type === OfferConstants.OFFER);
     const prices = [];
     offersWithPrice?.forEach(offer => {
+      const priceValue = offer.price['@value'] || offer.price;
       prices.push({
         name: offer.name ,
-        price: offer.price ? parseInt(offer.price) : undefined ,
+        price: offer.price ? parseInt(priceValue) : undefined ,
         url: offer.url ? { uri: offer.url } : undefined ,
       });
     });
@@ -680,7 +681,7 @@ export class EventService {
       }
     } else {
       const priceExists = () => {
-        return prices.some(price => price.price > 0);
+        return prices.some(price => price.price > 0 || price.url?.uri);
       };
 
       const allPricesAreZero = () => {
