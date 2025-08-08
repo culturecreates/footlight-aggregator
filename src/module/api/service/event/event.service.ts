@@ -663,12 +663,14 @@ export class EventService {
     const offersWithPrice = offers.filter(offer => offer.type === OfferConstants.OFFER);
     const prices = [];
     offersWithPrice?.forEach(offer => {
-      const priceValue = offer.price['@value'] || offer.price;
-      prices.push({
-        name: offer.name ,
-        price: offer.price ? parseInt(priceValue) : undefined ,
-        url: offer.url ? { uri: offer.url } : undefined ,
-      });
+      const priceValue = offer.price?.['@value'] || offer.price;
+      if (!priceValue) {
+        prices.push({
+          name: offer.name ,
+          price: offer.price ? parseInt(priceValue) : undefined ,
+          url: offer.url ? { uri: offer.url } : undefined ,
+        });
+      }
       if (offer.url) {
         priceUrl.push(offer.url);
       }
