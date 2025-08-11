@@ -19,4 +19,5 @@ jobs:
     secrets:
       aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_SALLE_ODYSSEE }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
-      SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      AWS_SES_ACCESS_KEY: ${{ secrets.AWS_SES_ACCESS_KEY }}
+      AWS_SES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
