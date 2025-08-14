@@ -132,6 +132,7 @@ export class EventService {
                 updatedCount++;
                 break;
               case HttpStatus.CONFLICT:
+              case HttpStatus.UNAUTHORIZED:
                 cannotUpdateCount++;
                 break;
               default:
