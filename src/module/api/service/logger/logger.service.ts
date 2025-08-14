@@ -25,8 +25,8 @@ Successfully Imported: ${eventCount - errorCount - skippedCount}
  Breakdown:
   • Created:             ${createdCount || 0}
   • Updated:             ${updatedCount || 0}
-  • Cannot Update:       ${cannotUpdateCount || 0}
   • Errors:              ${errorCount}
+  • Cannot Update:       ${cannotUpdateCount || 0}
   • Skipped:             ${skippedCount}
 
 🔗 Source Info:
