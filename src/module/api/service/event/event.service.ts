@@ -286,6 +286,9 @@ export class EventService {
     }
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate , startDateTime , endDate , endDateTime);
 
+    if (Array.isArray(event.url)) {
+      event.url = event.url[0];
+    }
 
     const eventToAdd = { ...event };
     delete eventToAdd.location;
