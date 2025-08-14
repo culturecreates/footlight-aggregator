@@ -17,13 +17,12 @@ export class LoggerService {
   async logStatistics(calendarId: string , calendarSlug: string , source: string , eventCount: number , errorCount: number ,
                       skippedCount?: number , createdCount?: number , updatedCount?: number , cannotUpdateCount?: number) {
     skippedCount = skippedCount || 0;
-    let message: string = `
-    📊 Import Statistics
----------------------
-🗓️ Total Events:        ${eventCount}
-✅ Successfully Imported: ${eventCount - errorCount - skippedCount}
+    let message: string = `Import Statistics: 
+    
+Total Events:        ${eventCount}
+Successfully Imported: ${eventCount - errorCount - skippedCount}
 
-📁 Breakdown:
+ Breakdown:
   • Created:             ${createdCount || 0}
   • Updated:             ${updatedCount || 0}
   • Cannot Update:       ${cannotUpdateCount || 0}
@@ -31,7 +30,7 @@ export class LoggerService {
   • Skipped:             ${skippedCount}
 
 🔗 Source Info:
-  ${source ? '• Source:              ${source}' : ''}
+  ${source ? `• Source:              ${source}` : ''}
   • Calendar Slug:       ${calendarSlug}
   • Calendar ID:         ${calendarId}
 
