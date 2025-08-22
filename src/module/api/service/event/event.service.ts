@@ -881,7 +881,10 @@ export class EventService {
       name: JsonLdParseHelper.formatMultilingualField(offerData[EventPredicates.NAME]) ,
       price: offerData[EventPredicates.PRICE] ? Number.parseFloat(offerData[EventPredicates.PRICE]) : undefined ,
     };
-    const uri = offerData[EventPredicates.URL];
+    let uri = offerData[EventPredicates.URL];
+    if (Array.isArray(uri)) {
+      uri = uri[0];
+    }
     let offerConfiguration: OfferDTO = {
       url: { uri: uri } ,
       prices: [offerPrice] ,
