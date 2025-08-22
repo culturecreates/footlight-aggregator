@@ -162,10 +162,7 @@ export class EventService {
   private async _checkSubEventExists(subEvent: any , token: string , calendarId: string , footlightBaseUrl: string) {
     const { uri } = subEvent;
     const footlightResponse = await this._searchFootlightEntities(token , calendarId , uri , footlightBaseUrl);
-    if (footlightResponse?.length) {
-      return true;
-    }
-    return false;
+    return !!footlightResponse?.length;
   }
 
   private async _searchFootlightEntities(token: string , calendarId: string , uri: string , footlightBaseUrl: string) {
