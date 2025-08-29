@@ -81,13 +81,13 @@ export class SharedService {
     }
   }
 
-  public static async syncEntityWithFootlight(calendarId: string , token: string , url: string , body: any ,
-                                              currentUserId: string , returnStatus?: Boolean) {
-    const addResponse = await this.addEntityToFootlight(calendarId , token , url , body);
-    const { status , response } = addResponse;
+  public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any,
+                                              currentUserId: string) {
+    const addResponse = await this.addEntityToFootlight(calendarId, token, url, body);
+    const { status, response } = addResponse;
     if (status === HttpStatus.CREATED) {
       this._loggerService(`\tAdded Entity (${response.id} : ${body.uri}) to Footlight!`);
-      return returnStatus ? status : response.id;
+      return { status: status, id: response.id }
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
       const existingEntity = await this._getEntityFromFootlight(calendarId , token , existingEntityId , url);
@@ -95,14 +95,14 @@ export class SharedService {
         const updateResponse = await this.updateEntityInFootlight(calendarId , token , existingEntityId , url , body);
         if (updateResponse.status === HttpStatus.OK) {
           this._loggerService(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
-          return returnStatus ? updateResponse.status : existingEntityId;
+          return { status: updateResponse.status, id: existingEntityId };
         } else {
           this._loggerService(`\tUpdating Entity (${existingEntityId}) failed!`);
-          return returnStatus ? updateResponse.status : existingEntityId;
+          return { status: updateResponse.status, id: existingEntityId };
         }
       } else {
         this._loggerService(`\tEntity cannot be modified. Since this entity is updated latest by a different user.`);
-        return returnStatus ? HttpStatus.CONFLICT : existingEntityId;
+        return { status: HttpStatus.CONFLICT, id: existingEntityId };
       }
     } else if (status === HttpStatus.UNAUTHORIZED) {
       this._loggerService('Unauthorized Exception!');

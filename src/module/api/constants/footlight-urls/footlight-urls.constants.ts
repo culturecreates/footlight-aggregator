@@ -8,5 +8,6 @@ export const FootlightPaths = {
     GET_CALENDAR:'/calendars',
     GET_CURRENT_USER:'/users/current',
     INVITE:'/invite',
-    SEARCH:'/entities'
+    SEARCH:'/entities',
+    PUBLISH_MESSAGE: '/messages'
 };

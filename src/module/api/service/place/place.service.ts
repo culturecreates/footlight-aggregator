@@ -50,7 +50,7 @@ export class PlaceService {
   async pushPlaceToFootlight(footlightBaseUrl: string, calendarId: string, token: string, placeToAdd: PlaceDTO,
                              currentUserId: string ) : Promise<string> {
     const url = footlightBaseUrl + FootlightPaths.ADD_PLACE;
-    return await SharedService.syncEntityWithFootlight(calendarId, token, url, placeToAdd, currentUserId);
+    return (await SharedService.syncEntityWithFootlight(calendarId, token, url, placeToAdd, currentUserId)).id;
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string, artsDataUri: string,

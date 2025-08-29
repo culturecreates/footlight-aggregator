@@ -12,7 +12,7 @@ export class PostalAddressService {
   private async _pushPostalAddressToFootlight(footlightBaseUrl: string, calendarId: string, token: string,
                                               postalAddressToAdd: PostalAddressDTO, currentUserId: string) {
     const url = footlightBaseUrl + FootlightPaths.ADD_POSTAL_ADDRESS;
-    return await SharedService.syncEntityWithFootlight(calendarId, token, url, postalAddressToAdd, currentUserId);
+    return (await SharedService.syncEntityWithFootlight(calendarId, token, url, postalAddressToAdd, currentUserId)).id;
   }
 
   async getFootlightIdentifier(calendarId: string, token: string, footlightBaseUrl: string,
