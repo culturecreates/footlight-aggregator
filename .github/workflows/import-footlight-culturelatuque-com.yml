@@ -3,7 +3,7 @@ name: Import footlight/culturelatuque-com
 on:
   workflow_dispatch:
   schedule:
-    - cron: "15 5 * * 4"  # Run at 1:15 AM ET every Thursday
+    - cron: "15 5 * * *"  # Run at 1:15 AM ET every Thursday
 jobs:
   push-to-cms:
     uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main
