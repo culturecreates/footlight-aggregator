@@ -665,7 +665,7 @@ export class EventService {
     const prices = [];
     offersWithPrice?.forEach(offer => {
       const priceValue = offer.price?.['@value'] || offer.price;
-      if (!priceValue) {
+      if (priceValue) {
         prices.push({
           name: offer.name ,
           price: offer.price ? parseInt(priceValue) : undefined ,
