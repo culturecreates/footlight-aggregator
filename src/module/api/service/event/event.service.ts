@@ -22,7 +22,7 @@ import { parse } from '@frogcat/ttl2jsonld';
 import { EntityPredicates , EventPredicates } from '../../constants/artsdata-urls/rdf-types.constants';
 import { Filters } from '../../model/FilterCondition.model';
 import { FilterEntityHelper } from '../../helper/filter-entity.helper';
-import { EVENT_CONFIGURATIONS } from '../../config';
+import { EVENT_CONFIGURATIONS, HEADER } from '../../config';
 
 @Injectable()
 export class EventService {
@@ -185,6 +185,7 @@ export class EventService {
     const headers = {
       "Authorization": `Bearer ${token}`,
       "calendar-id": calendarId,
+      'Referer': HEADER.CMS_REFERER_HEADER
     }
     const url = footlightBaseUrl + FootlightPaths.PUBLISH_MESSAGE;
     try {
