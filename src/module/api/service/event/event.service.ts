@@ -10,6 +10,7 @@ import {
   EventPropertyMappedToField ,
   EventType ,
   HttpMethodsEnum ,
+  MessageType,
   OfferCategory ,
 } from '../../enum';
 import { Exception , JsonLdParseHelper } from '../../helper';
@@ -54,6 +55,8 @@ export class EventService {
       maxTry = 3 , importedCount = 0 , skippedCount = 0;
     let createdCount = 0;
     let updatedCount = 0;
+    let createdIds = [];
+    let updatedIds = [];
     let cannotUpdateCount = 0;
     await this._fetchTaxonomies(calendarId , token , footlightBaseUrl , EntityType.EVENT);
     const mappingFile = (await SharedService.fetchJsonFromUrl(mappingUrl))?.data;
@@ -124,12 +127,14 @@ export class EventService {
               importedCount++;
             }
             const response = await this._pushEventsToFootlight(calendarId , token , footlightBaseUrl , eventsFormatted , currentUser.id);
-            switch (response) {
+            switch (response.status) {
               case HttpStatus.CREATED:
                 createdCount++;
+                createdIds.push(response.id);
                 break;
               case HttpStatus.OK:
                 updatedCount++;
+                updatedIds.push(response.id);
                 break;
               case HttpStatus.CONFLICT:
               case HttpStatus.UNAUTHORIZED:
@@ -157,6 +162,39 @@ export class EventService {
     } while (hasNext) ;
     await this._loggerService.infoLogs(`Importing events successfully completed.`);
     await this._loggerService.logStatistics(calendar.slug , calendarId , source , totalCount , errorCount , skippedCount , createdCount , updatedCount , cannotUpdateCount);
+    const senderName = currentUser.firstName + ' ' + currentUser.lastName;
+    const messageMetaForCreatedNotification = {
+      eventCount: createdCount.toString(),  
+      senderName: senderName,
+      eventIds: createdIds,
+    }
+    const messageMetaForUpdatedNotification = {
+      eventCount: updatedCount.toString(),
+      senderName: senderName,
+      eventIds: updatedIds,
+    }
+    await this._sendMessageToCms(token, calendarId, messageMetaForCreatedNotification, footlightBaseUrl, MessageType.AGGREGATOR_NEW_EVENTS);
+    await this._sendMessageToCms(token, calendarId, messageMetaForUpdatedNotification, footlightBaseUrl, MessageType.AGGREGATOR_UPDATED_EVENTS);
+  }
+
+  private async _sendMessageToCms(token: string, calendarId: string, messageMeta: any, footlightBaseUrl: string, messageType: MessageType) {
+    const message = {
+      messageType: messageType,
+      messageMeta: messageMeta
+    };
+    const headers = {
+      "Authorization": `Bearer ${token}`,
+      "calendar-id": calendarId,
+    }
+    const url = footlightBaseUrl + FootlightPaths.PUBLISH_MESSAGE;
+    try {
+      await SharedService.postUrl(url, message, headers);
+      await this._loggerService.infoLogs(`Message of type ${messageType} sent successfully to CMS.`);
+    }
+    catch(error) {
+      await this._loggerService.errorLogs('Error while sending message to CMS: ' + error.message);
+    }
+
   }
 
   private async _checkSubEventExists(subEvent: any , token: string , calendarId: string , footlightBaseUrl: string) {
@@ -403,7 +441,7 @@ export class EventService {
                                        eventToAdd: EventDTO , currentUserId: string) {
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
     if (eventToAdd) {
-      return await SharedService.syncEntityWithFootlight(calendarId , token , url , eventToAdd , currentUserId , true);
+      return await SharedService.syncEntityWithFootlight(calendarId , token , url , eventToAdd , currentUserId );
     }
   }
 

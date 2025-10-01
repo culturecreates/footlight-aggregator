@@ -16,7 +16,7 @@ export class PersonService {
   private async _pushPersonToFootlight(footlightUrl: string, calendarId: string, token: string,
                                        personToAdd: PersonDTO, currentUserId: string) {
     const url = footlightUrl + FootlightPaths.ADD_PEOPLE;
-    return await SharedService.syncEntityWithFootlight(calendarId, token, url, personToAdd, currentUserId);
+    return (await SharedService.syncEntityWithFootlight(calendarId, token, url, personToAdd, currentUserId)).id;
   }
 
   async formatAndPushJsonLdPerson(person: any, token: string, calendarId: string, footlightBaseUrl: string, currentUserId: string, context: any) {
