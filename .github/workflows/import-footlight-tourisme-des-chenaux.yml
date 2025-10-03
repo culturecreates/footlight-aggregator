@@ -1,0 +1,22 @@
+name: Import footlight/tourismedeschenaux-ca
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 9 * * *' # 5.30 AM EDT / 4.30 AM EST
+
+jobs:
+  push-to-cms:
+    uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main
+    with:
+      cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
+      aggregator_username: ${{ vars.AGGREGATOR_USER_TOURISME_DES_CHENAUX }}
+      source_url: http://kg.artsdata.ca/culture-creates/footlight/tourismedeschenaux-ca
+      footlight_base_url: https://api.cms.footlight.io
+      footlight_calendar_id: tourisme-mauricie
+      batch_size: 5
+    secrets:
+      aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_TOURISME_DES_CHENAUX }}
+      datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
+      AWS_SES_ACCESS_KEY: ${{ secrets.AWS_SES_ACCESS_KEY }}
+      AWS_SES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
