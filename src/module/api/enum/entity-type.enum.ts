@@ -10,3 +10,8 @@ export enum EventType {
     EVENT = 'Event',
     EVENT_SERIES = 'EventSeries'
 }
+
+export enum QueryVersion {
+  V3 = 'V3',
+  V4 = 'V4'
+}

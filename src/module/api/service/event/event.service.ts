@@ -1,25 +1,26 @@
-import { PersonOrganizationService , PlaceService , SharedService } from '../../service';
-import { forwardRef , HttpStatus , Inject , Injectable } from '@nestjs/common';
-import { ArtsDataConstants , ArtsDataAPIUrl } from '../../constants';
-import { ContactPointDTO , EventDTO , OfferDTO , OfferPrice } from '../../dto';
+import { PersonOrganizationService, PlaceService, SharedService } from '../../service';
+import { forwardRef, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ArtsDataAPIUrl, ArtsDataConstants } from '../../constants';
+import { ContactPointDTO, EventDTO, OfferDTO, OfferPrice } from '../../dto';
 import { TaxonomyService } from '../taxonomy';
 import {
-  AggregateOfferType ,
-  EntityType ,
-  EventProperty ,
-  EventPropertyMappedToField ,
-  EventType ,
-  HttpMethodsEnum ,
+  AggregateOfferType,
+  EntityType,
+  EventProperty,
+  EventPropertyMappedToField,
+  EventType,
+  HttpMethodsEnum,
   MessageType,
-  OfferCategory ,
+  OfferCategory,
+  QueryVersion,
 } from '../../enum';
-import { Exception , JsonLdParseHelper } from '../../helper';
-import { FacebookConstants , FootlightPaths , OfferConstants , SameAsTypes } from '../../constants/footlight-urls';
+import { Exception, JsonLdParseHelper } from '../../helper';
+import { FacebookConstants, FootlightPaths, OfferConstants, SameAsTypes } from '../../constants/footlight-urls';
 import * as moment from 'moment-timezone';
 import { LoggerService } from '../logger';
 import * as fs from 'fs';
 import { parse } from '@frogcat/ttl2jsonld';
-import { EntityPredicates , EventPredicates } from '../../constants/artsdata-urls/rdf-types.constants';
+import { EntityPredicates, EventPredicates } from '../../constants/artsdata-urls/rdf-types.constants';
 import { Filters } from '../../model/FilterCondition.model';
 import { FilterEntityHelper } from '../../helper/filter-entity.helper';
 import { EVENT_CONFIGURATIONS, HEADER } from '../../config';
@@ -46,7 +47,7 @@ export class EventService {
   private dynamicConceptMap;
 
   private async _syncEvents(calendarId: string , token: string , source: string , footlightBaseUrl: string ,
-                            batchSize: number , mappingUrl: string , eventType?: EventType) {
+                            batchSize: number , mappingUrl: string , queryVersion?: QueryVersion) {
     const currentUser = await this._sharedService.fetchCurrentUser(footlightBaseUrl , token);
     calendarId = await this._getCalendarId(calendarId , currentUser);
     const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl , token , calendarId);
@@ -75,7 +76,7 @@ export class EventService {
     }
 
     do {
-      let events = await this._fetchEventsFromArtsData(source , batchSize , offset , eventType);
+      let events = await this._fetchEventsFromArtsData(source , batchSize , offset , queryVersion);
       if (events === null) {
         if (tries !== maxTry) {
           await this._loggerService.errorLogs(`Unable to fetch Events from Arts Data for Batch ${batch}`);
@@ -164,7 +165,7 @@ export class EventService {
     await this._loggerService.logStatistics(calendar.slug , calendarId , source , totalCount , errorCount , skippedCount , createdCount , updatedCount , cannotUpdateCount);
     const senderName = currentUser.firstName + ' ' + currentUser.lastName;
     const messageMetaForCreatedNotification = {
-      eventCount: createdCount.toString(),  
+      eventCount: createdCount.toString(),
       senderName: senderName,
       eventIds: createdIds,
     }
@@ -228,8 +229,8 @@ export class EventService {
   }
 
   async syncEntities(token: string , calendarId: string , source: string , footlightBaseUrl: string , batchSize: number ,
-                     mappingUrl: string , eventType?: EventType) {
-    await this._syncEvents(calendarId , token , source , footlightBaseUrl , batchSize , mappingUrl , eventType);
+                     mappingUrl: string , queryVersion?: QueryVersion) {
+    await this._syncEvents(calendarId , token , source , footlightBaseUrl , batchSize , mappingUrl , queryVersion);
   }
 
   async formatEvent(calendarId: string , token: string , event: any , footlightBaseUrl: string , currentUserId: string ,
@@ -399,10 +400,10 @@ export class EventService {
     }
   }
 
-  private async _fetchEventsFromArtsData(source: string , batchSize: number , offset: number , eventType?: EventType) {
+  private async _fetchEventsFromArtsData(source: string , batchSize: number , offset: number , queryVersion?: QueryVersion) {
     const limit = batchSize ? batchSize : 300;
     let url , artsDataUrl;
-    if (eventType == EventType.EVENT_SERIES) {
+    if (queryVersion == QueryVersion.V4) {
       artsDataUrl = ArtsDataAPIUrl.EVENTS_V4;
     } else {
       artsDataUrl = ArtsDataAPIUrl.EVENTS_V3;
@@ -735,7 +736,7 @@ export class EventService {
         return prices.every(price => price.price === 0);
       };
 
-      //if price does not exist, set it as paid, only set the offer as free if price exists and all prices are 0. 
+      //if price does not exist, set it as paid, only set the offer as free if price exists and all prices are 0.
 
       if (!priceExists()) {
         offerConfiguration.category = OfferCategory.PAYING;
