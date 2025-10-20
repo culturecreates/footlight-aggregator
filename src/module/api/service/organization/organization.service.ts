@@ -2,7 +2,7 @@ import { OrganizationDTO } from "../../dto";
 import { SharedService } from "../shared";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
-import { ArtsDataConstants, ArtsDataUrls, CaligramUrls } from "../../constants";
+import { ArtsDataConstants, ArtsDataAPIUrl, CaligramUrls } from "../../constants";
 import { PlaceService } from "../place";
 import { PersonOrganizationService } from "../person-organization";
 import { LoggerService } from "..";
@@ -44,7 +44,7 @@ export class OrganizationService {
       try {
         let id = organization.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
         id = organization.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX_HTTPS, "");
-        const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PERSON_ORGANIZATION_BY_ID);
+        const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataAPIUrl.PERSON_ORGANIZATION_BY_ID);
         const { alternateName } = entityFetched;
         entityFetched.alternateName = alternateName?.length
           ? SharedService.formatAlternateNames(alternateName) : undefined;
@@ -59,7 +59,7 @@ export class OrganizationService {
   private async _fetchOrganizationsFromArtsData(source: string) {
     this._loggerService.infoLogs(`Fetching organizations from Artsdata. Source: ${source}`);
     const query = encodeURI(ArtsDataConstants.SPARQL_QUERY_FOR_ORGANIZATION.replace("GRAPH_NAME", source));
-    const url = ArtsDataUrls.ARTSDATA_SPARQL_ENDPOINT;
+    const url = ArtsDataAPIUrl.ARTSDATA_SPARQL_ENDPOINT;
     const artsDataResponse = await SharedService.postUrl(url, "query=" + query, {});
     return artsDataResponse.data.results.bindings.map(adid => {
       return { url: adid.adid.value };

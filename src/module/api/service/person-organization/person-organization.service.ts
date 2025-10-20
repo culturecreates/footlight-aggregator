@@ -1,5 +1,5 @@
 import { SharedService } from "../shared";
-import { ArtsDataConstants , ArtsDataUrls } from "../../constants";
+import { ArtsDataConstants , ArtsDataAPIUrl } from "../../constants";
 import { PersonOrganizationType } from "../../enum";
 import { OrganizationService , PersonService , PlaceService } from "../../service";
 import { forwardRef , Inject , Injectable } from "@nestjs/common";
@@ -107,7 +107,7 @@ export class PersonOrganizationService {
   }
 
   async getPersonOrganizationDetailsFromArtsdata(artsDataId: string , filters?: Filters[]) {
-    const personOrganizationFetched = await SharedService.fetchFromArtsDataById(artsDataId , ArtsDataUrls.PERSON_ORGANIZATION_BY_ID);
+    const personOrganizationFetched = await SharedService.fetchFromArtsDataById(artsDataId , ArtsDataAPIUrl.PERSON_ORGANIZATION_BY_ID);
     if (!personOrganizationFetched) {
       return undefined;
     }

@@ -1,6 +1,6 @@
 import { PersonOrganizationService , PlaceService , SharedService } from '../../service';
 import { forwardRef , HttpStatus , Inject , Injectable } from '@nestjs/common';
-import { ArtsDataConstants , ArtsDataUrls } from '../../constants';
+import { ArtsDataConstants , ArtsDataAPIUrl } from '../../constants';
 import { ContactPointDTO , EventDTO , OfferDTO , OfferPrice } from '../../dto';
 import { TaxonomyService } from '../taxonomy';
 import {
@@ -403,11 +403,12 @@ export class EventService {
     const limit = batchSize ? batchSize : 300;
     let url , artsDataUrl;
     if (eventType == EventType.EVENT_SERIES) {
-      url = ArtsDataUrls.EVENT_SERIES;
+      artsDataUrl = ArtsDataAPIUrl.EVENTS_V4;
     } else {
-      artsDataUrl = ArtsDataUrls.EVENTS;
-      url = artsDataUrl + '&source=' + source + '&limit=' + limit + '&offset=' + offset;
+      artsDataUrl = ArtsDataAPIUrl.EVENTS_V3;
     }
+    url = artsDataUrl + '&source=' + source + '&limit=' + limit + '&offset=' + offset;
+
     this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
     if (artsDataResponse?.status !== HttpStatus.OK) {
@@ -418,7 +419,7 @@ export class EventService {
 
   private async _fetchEventSeriesFromArtsData(source: string , batchSize: number , offset: number) {
     const limit = batchSize ? batchSize : 300;
-    const url = ArtsDataUrls.EVENT_SERIES + '&source=' + source + '&limit=' + limit + '&offset=' + offset;
+    const url = ArtsDataAPIUrl.EVENTS_V4 + '&source=' + source + '&limit=' + limit + '&offset=' + offset;
     await this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
     const artsDataResponse = await SharedService.fetchUrl(url);
     if (artsDataResponse.status !== HttpStatus.OK) {

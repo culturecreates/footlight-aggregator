@@ -1,6 +1,6 @@
 import { PostalAddressService, SharedService } from "../../service";
 import { PlaceDTO } from "../../dto";
-import { ArtsDataConstants, ArtsDataUrls, CaligramUrls } from "../../constants";
+import { ArtsDataConstants, ArtsDataAPIUrl, CaligramUrls } from "../../constants";
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { FootlightPaths } from "../../constants/footlight-urls";
 import { LoggerService } from "../logger";
@@ -29,7 +29,7 @@ export class PlaceService {
     if (artsDataId.startsWith("K")) {
       artsDataId = "http://kg.artsdata.ca/resource/" + artsDataId;
     }
-    const placeFetched = await SharedService.fetchFromArtsDataById(artsDataId, ArtsDataUrls.PLACE_BY_ID);
+    const placeFetched = await SharedService.fetchFromArtsDataById(artsDataId, ArtsDataAPIUrl.PLACE_BY_ID);
     if (!placeFetched) {
       return undefined;
     }
@@ -84,7 +84,7 @@ export class PlaceService {
       try {
         let id = place.url;
         this._loggerService.infoLogs(`Treating syncPlace ${id}`);
-        const placeFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataUrls.PLACE_BY_ID);
+        const placeFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataAPIUrl.PLACE_BY_ID);
         const placeFormatted = await this._formatPlaceFetched(calendarId, token, footlightBaseUrl,
           currentUser.id, placeFetched);
         await this.pushPlaceToFootlight(footlightBaseUrl, calendarId, token, placeFormatted, currentUser.id);
@@ -99,7 +99,7 @@ export class PlaceService {
   private async _fetchPlacesFromArtsData(source: string) {
     this._loggerService.infoLogs(`Fetching places from Arts data. Source: ${source}`);
     const query = encodeURI(ArtsDataConstants.SPARQL_QUERY_FOR_PLACES.replace("GRAPH_NAME", source));
-    const url = ArtsDataUrls.ARTSDATA_SPARQL_ENDPOINT;
+    const url = ArtsDataAPIUrl.ARTSDATA_SPARQL_ENDPOINT;
     const artsDataResponse = await SharedService.postUrl(url, "query=" + query, {});
     return artsDataResponse.data.results.bindings.map((adid) => {
       return { url: adid.adid.value };
