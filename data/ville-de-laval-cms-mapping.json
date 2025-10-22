@@ -1,0 +1,247 @@
+[
+    {
+        "fieldName": "additionalType",
+        "inputProperty": [
+            "additionalType",
+            "keywords"
+        ],
+        "mapping": {
+            ".*art-de-la-parole": [
+                "670057ac48f4030063f3cbed"
+            ],
+            ".*arts-de-la-parole": [
+                "670057ac48f4030063f3cbed"
+            ],
+            ".*conte.*": [
+                "670057ac48f4030063f3cbed"
+            ],
+            ".*histoire-et-patrimoine": [
+                "63c01a771c6b6c005aad85c4"
+            ],
+            ".*patrimoine": [
+                "63c01a771c6b6c005aad85c4"
+            ],
+            ".*virees-patrimoniales": [
+                "63c01a771c6b6c005aad85c4"
+            ],
+            ".*histoire": [
+                "63c01a771c6b6c005aad85c4"
+            ],
+            ".*arts-ephemeres-et-urbain": [
+                "63bc57dd1c6b6c005aad5778"
+            ],
+            ".*arts-et-litterature": [
+                "63c01e911c6b6c005aad89a6"
+            ],
+            "blues": [
+                "643d95811639f100642b4b8b"
+            ],
+            "broadway": [
+                "643d95811639f100642b4b7d"
+            ],
+            "cinema": [
+                "63c01a771c6b6c005aad85b8"
+            ],
+            ".*cirque": [
+                "63c01a771c6b6c005aad85ba"
+            ],
+            "classical": [
+                "643d95811639f100642b4b79"
+            ],
+            ".*osl": [
+                "643d95811639f100642b4b79"
+            ],
+            ".*orchestre-symphonique-de-laval": [
+                "643d95811639f100642b4b79"
+            ],
+            ".*escapade.*": [
+                "643eb7866f70e40064e0e7d8"
+            ],
+            ".*voyage.*": [
+                "643eb7866f70e40064e0e7d8"
+            ],
+            ".*festival-num": [
+                "63c01a771c6b6c005aad85c0"
+            ],
+            ".*techno": [
+                "63c01a771c6b6c005aad85c0"
+            ],
+            ".*histoire-et-societe": [
+                "643eb7866f70e40064e0e7da"
+            ],
+            "latin": [
+                "643eb7866f70e40064e0e7f1"
+            ],
+            "theatre à ciel ouvert": [
+                "63bc57dd1c6b6c005aad577a"
+            ],
+            ".*taco": [
+                "63bc57dd1c6b6c005aad577a"
+            ],
+            ".*theatre": [
+                "63bc57dd1c6b6c005aad577a"
+            ],
+            ".*petits-bonheurs-laval": [
+                "63bc57dd1c6b6c005aad577a"
+            ],
+            ".*zones-musicales": [
+                "63bc57dd1c6b6c005aad577c"
+            ],
+            ".*cours-de-danse": [
+                "671bc146017105006372afb7"
+            ],
+            "DEFAULT": [
+                "63c84d71230627006f5655d0"
+            ]
+        },
+        "excludeValues": [
+            "https://www.laval.ca/HiddenTaxonomy#jeune-public-ecole"
+        ]
+    },
+    {
+        "fieldName": "63bd80901c6b6c005aad6f4b",
+        "isDynamic": true,
+        "inputProperty": [
+            "additionalType",
+            "keywords"
+        ],
+        "mapping": {
+            ".*culture": [
+                "643d90d21639f100642b4610"
+            ],
+            ".*culturelles": [
+                "643d90d21639f100642b4610"
+            ],
+            ".*art-mediation-culturelle": [
+                "644bf731e19f7200646cf0a0"
+            ],
+            ".*mediation": [
+                "644bf731e19f7200646cf0a0"
+            ],
+            ".*conference": [
+                "63c01b741c6b6c005aad86c0"
+            ],
+            ".*cours-de-danse": [
+                "63c01b741c6b6c005aad86be"
+            ],
+            ".*exposition": [
+                "63c01b741c6b6c005aad86c2"
+            ],
+            ".*expositions": [
+                "63c01b741c6b6c005aad86c2"
+            ],
+            ".*festivites-ecc": [
+                "63c01b741c6b6c005aad86cc"
+            ],
+            ".*fêtes-de-quartier": [
+                "63c01b741c6b6c005aad86cc"
+            ],
+            ".*halloween": [
+                "63c01b741c6b6c005aad86cc"
+            ],
+            ".*journee-de-la-culture": [
+                "643d90d21639f100642b4610"
+            ],
+            ".*marche-de-noël": [
+                "643d90d21639f100642b461f"
+            ],
+            ".*petits-bonheurs-laval": [
+                "63c01b741c6b6c005aad86c4"
+            ],
+            ".*spectacle": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            ".*spectacle-petite-enfance": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            ".*spectacles": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            ".*zones-musicales": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            ".*theatre-a-ciel-ouvert": [
+                "63c01b741c6b6c005aad86c8"
+            ],
+            ".*virees-patrimoniales": [
+                "63c01b381c6b6c005aad8674"
+            ],
+            ".*station-culturelle-momo": [
+                "643d90d21639f100642b4612"
+            ],
+            ".*laval-en-blanc": [
+                "643d90d21639f100642b4612"
+            ],
+            ".*centre-de-la-nature": [
+                "643d90d21639f100642b4612"
+            ],
+            "DEFAULT": [
+                "63c84f08230627006f5659f2"
+            ]
+        }
+    },
+    {
+        "fieldName": "audience",
+        "inputProperty": [
+            "additionalType",
+            "keywords"
+        ],
+        "mapping": {
+            ".*ado.*": [
+                "63bc55b31c6b6c005aad56c0"
+            ],
+            ".*adulte.*": [
+                "63bc55b31c6b6c005aad56c2"
+            ],
+            ".*enfant.*": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "taco": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "jeune public": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "https://www.laval.ca/6f430cdc-7ce4-4770-aaae-9ddbfe1cd3b9": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "https://www.laval.ca/db9f974a-e5ae-4857-bab3-c4cde4c07f50": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "https://www.laval.ca/HiddenTaxonomy#theatre-a-ciel-ouvert": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "https://www.laval.ca/019b445a-815c-49a2-8adc-2ceb9b48cd9a": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "https://www.laval.ca/HiddenTaxonomy#fete-de-la-famille": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "https://www.laval.ca/HiddenTaxonomy#petits-bonheurs-laval": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            ".*familles": [
+                "64413a0d7a2993006450baa6"
+            ],
+            "spectacle petite enfance": [
+                "670058c548f4030063f3ceee"
+            ],
+            "theatre à ciel ouvert": [
+                "63bc55b31c6b6c005aad56be"
+            ],
+            "zones musicales": [
+                "63bc55b31c6b6c005aad56c2",
+                "64413a0d7a2993006450baa6"
+            ],
+            ".*semaine-lavalloise-des-aines": [
+                "670058c548f4030063f3cee7"
+            ],
+            ".*personnes-ainees": [
+                "670058c548f4030063f3cee7"
+            ],
+            ".*aine.*": [
+                "670058c548f4030063f3cee7"
+            ]
+        }
+    }
+]

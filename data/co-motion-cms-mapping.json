@@ -1,147 +1,440 @@
 [
-    {
-      "fieldName": "additionalType",
-      "inputProperty": [
-        "keywords"
+  {
+    "fieldName": "additionalType",
+    "inputProperty": [
+      "keywords"
+    ],
+    "mapping": {
+      "http://kg.footlight.io/resource/d4f77de6-e3ba-44c9-aec3-61c268bb4cd7": [
+        "63bc57dd1c6b6c005aad5778"
       ],
-      "mapping": {
-        "Arts visuels": [
-          "63bc57dd1c6b6c005aad5778"
-        ],
-        "Art numérique": [
-          "63c01a771c6b6c005aad85c0"
-        ],
-        "Cinéma": [
-          "63c01a771c6b6c005aad85b8"
-        ],
-        "Cirque": [
-          "63c01a771c6b6c005aad85ba"
-        ],
-        "Culture scientifique": [
-          "63c01a771c6b6c005aad85c6"
-        ],
-        ".*Danse.*": [
-          "63c01a771c6b6c005aad85bc"
-        ],
-        ".*Ballet.*": [
-          "63c01a771c6b6c005aad85bc"
-        ],
-        "Design": [
-          "643eb7866f70e40064e0e7a0"
-        ],
-        "Histoire et patrimoine": [
-          "63c01a771c6b6c005aad85c4"
-        ],
-        "Humour": [
-          "63bf00421c6b6c005aad80a2"
-        ],
-        "Littérature": [
-          "63c01e911c6b6c005aad89a6"
-        ],
-        "Métiers d'art": [
-          "63c01a771c6b6c005aad85c2"
-        ],
-        "Musique": [
-          "63bc57dd1c6b6c005aad577c"
-        ],
-        "Théâtre": [
-          "63bc57dd1c6b6c005aad577a"
-        ],
-        "Variété": [
-          "643eb7866f70e40064e0e7a7"
-        ],
-        "Autre": [
-          "63c84d71230627006f5655d0"
-        ],
-        "Conférence": [
-          "63c01b741c6b6c005aad86c0"
-        ],
-        "Documentaire": [
-          "643d95811639f100642b4ba7"
-        ],
-        "Festival": [
-          "63c01b741c6b6c005aad86c4"
-        ],
-        "Art de la parole": [
-          "63c84d71230627006f5655d0"
-        ],
-        "Chanson anglaise": [
-          "63bc57dd1c6b6c005aad577c"
-        ],
-        "Chanson autochtone": [
-          "63bc57dd1c6b6c005aad577c"
-        ],
-        "Chanson Française": [
-          "63bc57dd1c6b6c005aad577c"
-        ],
-        "Chorale": [
-          "63bc57dd1c6b6c005aad577c"
-        ],
-        "Conte": [
-          "64651bdcad41e50064355b0c"
-        ],
-        "Magie": [
-          "643eb7866f70e40064e0e7fc"
-        ],
-        "Musique classique": [
-          "643d95811639f100642b4b8f"
-        ],
-        "Musique du monde": [
-          "63bc57dd1c6b6c005aad577c"
-        ],
-        "Noël": [
-          "63c84d71230627006f5655d0"
-        ],
-        "Orchestre symphonique": [
-          "643d95811639f100642b4b8f"
-        ],
-        ".*Blues.*": [
-          "643d95811639f100642b4b8b"
-        ],
-        ".*Jazz.*": [
-          "643d95811639f100642b4b95"
-        ],
-        ".*Rock.*": [
-          "643d95811639f100642b4b9f"
-        ],
-        ".*pop.*": [
-          "643d95811639f100642b4b99"
-        ],
-        "DEFAULT": [
-          "63c84d71230627006f5655d0"
-        ]
-      },
-      "excludeValues": [
-        "Boxe"
+      "arts visuels": [
+        "63bc57dd1c6b6c005aad5778"
+      ],
+      "art visuel": [
+        "63bc57dd1c6b6c005aad5778"
+      ],
+      "arts visuel": [
+        "63bc57dd1c6b6c005aad5778"
+      ],
+      "art visuels": [
+        "63bc57dd1c6b6c005aad5778"
+      ],
+      "Art numérique": [
+        "63c01a771c6b6c005aad85c0"
+      ],
+      "Cinéma": [
+        "63c01a771c6b6c005aad85b8"
+      ],
+      "http://kg.footlight.io/resource/8f57c4c9-da91-4809-83ae-b5e8db471f39": [
+        "63c01a771c6b6c005aad85ba"
+      ],
+      "http://kg.footlight.io/resource/f080c3b4-4948-4abe-a734-b6ac2df250f4": [
+        "63c01a771c6b6c005aad85ba"
+      ],
+      "Culture scientifique": [
+        "63c01a771c6b6c005aad85c6"
+      ],
+      ".*danse.*": [
+        "63c01a771c6b6c005aad85bc"
+      ],
+      ".*Ballet.*": [
+        "63c01a771c6b6c005aad85bc",
+        "643eb7866f70e40064e0e7c8"
+      ],
+      "Design": [
+        "643eb7866f70e40064e0e7a0"
+      ],
+      "Histoire et patrimoine": [
+        "63c01a771c6b6c005aad85c4"
+      ],
+      "Humour": [
+        "63bf00421c6b6c005aad80a2"
+      ],
+      "http://kg.footlight.io/resource/c0d618dc-edbe-4c1f-a0b0-6611de8368f8": [
+        "63bf00421c6b6c005aad80a2"
+      ],
+      "Littérature": [
+        "63c01e911c6b6c005aad89a6"
+      ],
+      "Métiers d'art": [
+        "63c01a771c6b6c005aad85c2"
+      ],
+      "Metiers d'art": [
+        "63c01a771c6b6c005aad85c2"
+      ],
+      "Métier d'arts": [
+        "63c01a771c6b6c005aad85c2"
+      ],
+      "Musique.*": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      "http://kg.footlight.io/resource/a9a70dca-dffc-430f-8afa-7b69674e5a1c": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      "instrumental.*": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      ".*musical.*": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      ".*sonore.*": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      "théâtre.*": [
+        "63bc57dd1c6b6c005aad577a"
+      ],
+      "théâtre visuel": [
+        "63bc57dd1c6b6c005aad577a"
+      ],
+      "performance.*": [
+        "63bc57dd1c6b6c005aad577a"
+      ],
+      ".*théâtrale.*": [
+        "63bc57dd1c6b6c005aad577a"
+      ],
+      "http://kg.footlight.io/resource/a3d98623-7743-46f9-978e-a5d7575d43c0": [
+        "63bc57dd1c6b6c005aad577a"
+      ],
+      "http://kg.footlight.io/resource/b71d9b1c-a2b4-41f9-96c6-f206b0c4b8ae": [
+        "63bc57dd1c6b6c005aad577a",
+        "64651bdcad41e50064355b0c"
+      ],
+      "http://kg.footlight.io/resource/1e8d3b57-0ab0-4d33-9de1-9c51d22a3210": [
+        "63bc57dd1c6b6c005aad577a"
+      ],
+      "variété.*": [
+        "643eb7866f70e40064e0e7a7"
+      ],
+      "drag.*": [
+        "643eb7866f70e40064e0e7a7"
+      ],
+      "lutte.*": [
+        "643eb7866f70e40064e0e7a7"
+      ],
+      "http://kg.footlight.io/resource/3606443d-f818-479a-991e-19cb7912bb8c": [
+        "643eb7866f70e40064e0e7a7"
+      ],
+      "http://kg.footlight.io/resource/13e0bcf7-d24f-40a1-8fe3-992b01ce8694": [
+        "643eb7866f70e40064e0e7a7"
+      ],
+      "Conférence": [
+        "63c01b741c6b6c005aad86c0"
+      ],
+      "Documentaire": [
+        "643d95811639f100642b4ba7"
+      ],
+      "Grands Explorateurs": [
+        "643d95811639f100642b4ba7"
+      ],
+      "http://kg.footlight.io/resource/5e5310d0-73e4-4421-8401-75c6c4aaf047": [
+        "643d95811639f100642b4ba7"
+      ],
+      "http://kg.footlight.io/resource/70fcb243-f4c8-4dfb-8b21-479fd4929d7b": [
+        "643d95811639f100642b4ba7"
+      ],
+      "http://kg.footlight.io/resource/b2247adc-cc22-4473-bf6b-243b51f1e723": [
+        "643d95811639f100642b4ba7"
+      ],
+      "art de la parole": [
+        "63c84d71230627006f5655d0"
+      ],
+      "http://kg.footlight.io/resource/0ca65e4b-02a1-448b-8c39-6b7eace7383a": [
+        "63c84d71230627006f5655d0"
+      ],
+      "http://kg.footlight.io/resource/31c03853-dde1-4a69-a03b-46ef1946cb63": [
+        "63c84d71230627006f5655d0"
+      ],
+      "http://kg.footlight.io/resource/7ef94492-be52-493d-8332-c4120090976c": [
+        "63c84d71230627006f5655d0"
+      ],
+      "http://kg.footlight.io/resource/93c502d4-e7cf-4899-ae85-3849cc581863": [
+        "63c84d71230627006f5655d0"
+      ],
+      "Chanson anglaise": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      "Chanson autochtone": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      "Chanson Française": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      "Chanson francophone": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      "Chanson anglophone": [
+        "63bc57dd1c6b6c005aad577c"
+      ],
+      "Conte": [
+        "64651bdcad41e50064355b0c"
+      ],
+      "Magie": [
+        "643eb7866f70e40064e0e7fc"
+      ],
+      "Hypnose": [
+        "643eb7866f70e40064e0e7fc"
+      ],
+      "http://kg.footlight.io/resource/75fd4d7c-18ad-4560-818a-42232b15137c": [
+        "643eb7866f70e40064e0e7fc"
+      ],
+      "http://kg.footlight.io/resource/ca47a18e-6e55-4b1b-8d1f-0355ce47c249": [
+        "643eb7866f70e40064e0e7fc"
+      ],
+      "Musique classique": [
+        "643d95811639f100642b4b8f"
+      ],
+      "Orchestre symphonique": [
+        "643d95811639f100642b4b8f"
+      ],
+      "Orchestre Symphonique de Laval": [
+        "643d95811639f100642b4b8f"
+      ],
+      "http://kg.footlight.io/resource/f56c4b49-240a-447d-8212-5f0c6333e42a": [
+        "643d95811639f100642b4b8f"
+      ],
+      "http://kg.footlight.io/resource/a61d248a-990f-410f-ac5b-d43940f9d4f3": [
+        "643d95811639f100642b4b8f"
+      ],
+      ".*Blues.*": [
+        "643d95811639f100642b4b8b"
+      ],
+      "http://kg.footlight.io/resource/9da661fe-089b-4061-a274-ac91dfdc45c8": [
+        "643d95811639f100642b4b8b",
+        "643d95811639f100642b4b95"
+      ],
+      ".*Jazz.*": [
+        "643d95811639f100642b4b95"
+      ],
+      "http://kg.footlight.io/resource/87ea892d-4cb8-496d-b02f-959afd46db77": [
+        "643d95811639f100642b4b95"
+      ],
+      "http://kg.footlight.io/resource/9dbac47f-e77d-49ea-8a0d-18345e19e61f": [
+        "643d95811639f100642b4b95",
+        "643d95811639f100642b4b9f",
+        "643d95811639f100642b4b99"
+      ],
+      ".*Rock.*": [
+        "643d95811639f100642b4b9f"
+      ],
+      "Rock indépendant": [
+        "643d95811639f100642b4b9f"
+      ],
+      ".*pop.*": [
+        "643d95811639f100642b4b99"
+      ],
+      "Musique Pop": [
+        "643d95811639f100642b4b99"
+      ],
+      "Impro.*": [
+        "643d95811639f100642b4b81"
+      ],
+      "Improvisation": [
+        "643d95811639f100642b4b81"
+      ],
+      "Théâtre d'improvisation": [
+        "643d95811639f100642b4b81"
+      ],
+      ".*improvisation": [
+        "643d95811639f100642b4b81"
+      ],
+      "http://kg.footlight.io/resource/715f6769-baa7-40ee-91c4-1bf54ed61af5": [
+        "643d95811639f100642b4b81"
+      ],
+      "Location": [
+        "671bc146017105006372afb7"
+      ],
+      ".*Country.*": [
+        "67d327dbbe76000064084464"
+      ],
+      "http://kg.footlight.io/resource/5261209a-b995-4fba-9cc0-93d020fa696b": [
+        "67d327dbbe76000064084464"
+      ],
+      "http://kg.footlight.io/resource/1214a7a4-6a0b-41df-98e0-d21bcbee69ad": [
+        "67d327dbbe76000064084464"
+      ],
+      "Chorale": [
+        "666a000a7a706500645dae86"
+      ],
+      "http://kg.footlight.io/resource/ff29826e-df67-451f-8aa7-8a7947a9d9d4": [
+        "666a000a7a706500645dae86"
+      ],
+      "Marionnettes": [
+        "643d95811639f100642b4b85"
+      ],
+      "Marionnette.*": [
+        "643d95811639f100642b4b85"
+      ],
+      "Théâtre d’objets en papier": [
+        "643d95811639f100642b4b85"
+      ],
+      "Théâtre d’objets.*": [
+        "643d95811639f100642b4b85"
+      ],
+      "http://kg.footlight.io/resource/a9e00c6a-1e97-484a-b8ef-91e02a06c51b": [
+        "643d95811639f100642b4b85"
+      ],
+      "Musique du monde": [
+        "643eb7866f70e40064e0e7f1"
+      ],
+      "http://kg.footlight.io/resource/98447dea-0eaa-4182-893c-01cf7baada1d": [
+        "643eb7866f70e40064e0e7f1"
+      ],
+      "http://kg.footlight.io/resource/0d3320ed-3509-40ff-966d-10abfa78df15": [
+        "643eb7866f70e40064e0e7f1"
+      ],
+      ".*Opéra.*": [
+        "643d95811639f100642b4b87"
+      ],
+      ".*Opérette.*": [
+        "643d95811639f100642b4b87"
+      ],
+      "http://kg.footlight.io/resource/0decc844-7a52-433b-99ab-8ebbf69c7ff1": [
+        "643d95811639f100642b4b87"
+      ],
+      "rap.*": [
+        "643d95811639f100642b4b93"
+      ],
+      "hip.*": [
+        "643d95811639f100642b4b93"
+      ],
+      "hop.*": [
+        "643d95811639f100642b4b93"
+      ],
+      ".*r&b.*": [
+        "643d95811639f100642b4b9d"
+      ],
+      "rnb": [
+        "643d95811639f100642b4b9d"
+      ],
+      "Street dance": [
+        "643eb7866f70e40064e0e7cc"
+      ],
+      "Théâtre musical": [
+        "643d95811639f100642b4b7d"
+      ],
+      "Divers": [
+        "63c84d71230627006f5655d0"
+      ],
+      "Autre": [
+        "63c84d71230627006f5655d0"
+      ],
+      "http://kg.footlight.io/resource/df67baf9-8815-4978-8174-d50758829d73": [
+        "63c84d71230627006f5655d0"
+      ],
+      "http://kg.footlight.io/resource/7437fe7b-e1db-4401-85b1-f8b8ba95d7fc": [
+        "643eb7866f70e40064e0e7c8"
+      ],
+      "http://kg.footlight.io/resource/bc07ab19-198e-47b1-b6e7-731373b343a9": [
+        "643eb7866f70e40064e0e7c8"
       ]
     },
-    {
-      "fieldName": "audience",
-      "inputProperty": [
-        "audience", "keywords"
+    "excludeValues": [
+      "Boxe"
+    ]
+  },
+  {
+    "fieldName": "63bd80901c6b6c005aad6f4b",
+    "isDynamic": true,
+    "inputProperty": [
+      "additionalType",
+      "keywords"
+    ],
+    "mapping": {
+      ".*spectacle.*": [
+        "63c01b741c6b6c005aad86c8"
       ],
-      "mapping": {
-        "Adulte": [
-          "63bc55b31c6b6c005aad56c2"
-        ],
-        "Adolescent": [
-          "63bc55b31c6b6c005aad56c0"
-        ],
-        "Jeune public": [
-          "63bc55b31c6b6c005aad56be"
-        ],
-        "Famille": [
-          "63bc55b31c6b6c005aad56be"
-        ],
-        ".*Enfant.*": [
-          "63bc55b31c6b6c005aad56be"
-        ],
-        ".*jeunesse.*": [
-          "63bc55b31c6b6c005aad56be"
-        ],
-        "Pour tous": [
-          "64413a0d7a2993006450baa6"
-        ]
-      }
+      "Spectacle en salle": [
+        "63c01b741c6b6c005aad86c8"
+      ],
+      "Événement extérieur": [
+        "643d90d21639f100642b4612"
+      ],
+      "Grands Explorateurs": [
+        "643d90d21639f100642b4623"
+      ],
+      "Orchestre Symphonique de Laval": [
+        "63c01b741c6b6c005aad86c8"
+      ],
+      "Zones musicales": [
+        "63c01b741c6b6c005aad86c8"
+      ],
+      ".*conference.*": [
+        "63c01b741c6b6c005aad86c0"
+      ],
+      "http://kg.footlight.io/resource/ebd8375e-c68e-4aab-95a8-4b45f1b456a6": [
+        "63c01b741c6b6c005aad86c0"
+      ],
+      ".*entrevue.*": [
+        "63c01b741c6b6c005aad86c6"
+      ],
+      ".*podcast": [
+        "63c01b741c6b6c005aad86c6"
+      ],
+      "Festival": [
+        "63c01b741c6b6c005aad86c4"
+      ],
+      "Atelier": [
+        "63c01b741c6b6c005aad86be"
+      ],
+      "Lecture-spectacle": [
+        "643d90d21639f100642b461d"
+      ],
+      ".*lecture.*": [
+        "643d90d21639f100642b461d"
+      ],
+      "http://kg.footlight.io/resource/de687c91-db97-41fb-a467-edd3ac81b3b5": [
+        "643d90d21639f100642b461d"
+      ]
     }
-  ]
+  },
+  {
+    "fieldName": "audience",
+    "inputProperty": [
+      "additionalType",
+      "keywords"
+    ],
+    "mapping": {
+      "Adulte": [
+        "63bc55b31c6b6c005aad56c2"
+      ],
+      "Adolescent": [
+        "63bc55b31c6b6c005aad56c0"
+      ],
+      "Jeune public": [
+        "63bc55b31c6b6c005aad56be"
+      ],
+      "Famille": [
+        "63bc55b31c6b6c005aad56be",
+        "64413a0d7a2993006450baa6"
+      ],
+      ".*Enfant.*": [
+        "63bc55b31c6b6c005aad56be"
+      ],
+      ".*jeunesse.*": [
+        "63bc55b31c6b6c005aad56be"
+      ],
+      "http://kg.footlight.io/resource/d653d259-aa21-4ee9-9118-bc880fda0895": [
+        "63bc55b31c6b6c005aad56be"
+      ],
+      "http://kg.footlight.io/resource/28a3089c-a79c-464b-870f-25261350c663": [
+        "63bc55b31c6b6c005aad56be"
+      ],
+      "http://kg.footlight.io/resource/8ef97de8-48c7-4f61-999f-b78d95bd35c2": [
+        "63bc55b31c6b6c005aad56be"
+      ],
+      "http://kg.footlight.io/resource/22f50ba1-3403-48a8-a279-460952d3c134": [
+        "63bc55b31c6b6c005aad56be"
+      ],
+      "http://kg.footlight.io/resource/edadeb31-ff86-45c7-bbe9-211089d63340": [
+        "63bc55b31c6b6c005aad56be"
+      ],
+      "http://kg.footlight.io/resource/60bbabb3-8ab7-46ea-bee9-b3ff33b895fa": [
+        "63bc55b31c6b6c005aad56be"
+      ],
+      "Pour tous": [
+        "64413a0d7a2993006450baa6"
+      ]
+    }
+  }
+]
