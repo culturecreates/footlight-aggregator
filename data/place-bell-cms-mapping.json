@@ -109,7 +109,10 @@
             "famille": [
                 "64413a0d7a2993006450baa6"
             ],
-            ".*concert": [
+            ".*musicperformance": [
+                "64413a0d7a2993006450baa6"
+            ],
+            ".*comedyperformance": [
                 "64413a0d7a2993006450baa6"
             ]
         }
