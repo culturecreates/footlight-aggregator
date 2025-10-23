@@ -2,7 +2,8 @@
   {
     "fieldName": "additionalType",
     "inputProperty": [
-      "keywords"
+      "keywords",
+      "additionalType"
     ],
     "mapping": {
       "http://kg.footlight.io/resource/d4f77de6-e3ba-44c9-aec3-61c268bb4cd7": [
