@@ -114,9 +114,6 @@ export class EventService {
                   updatedSubEvents.push(subEvent);
                 }
               }
-              if (!updatedSubEvents.length) {
-                continue;
-              }
               eventWithLocation.subEvent = updatedSubEvents;
             }
             const participants = [eventWithLocation.organizer , eventWithLocation.performer , eventWithLocation.sponsor].flat();
@@ -253,7 +250,7 @@ export class EventService {
       contactPoint ,
       type ,
     } = event;
-    if (subEvent) {
+    if (subEvent?.length) {
       if (type == EventType.EVENT) {
         const dates = subEvent.map(event => event.startDateTime);
         const customDates = [];
