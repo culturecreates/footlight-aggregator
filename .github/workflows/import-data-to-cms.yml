@@ -64,7 +64,7 @@ jobs:
             -i ${{inputs.footlight_base_url}} \
             -c ${{inputs.footlight_calendar_id}} \
             -b ${{inputs.batch_size}} \
-            -m ${{inputs.mapping_file_url}}
+            -m ${{inputs.mapping_file_url}} \
             -q ${{inputs.query_version}}
 
   send-failure-notification:
