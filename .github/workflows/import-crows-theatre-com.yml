@@ -1,4 +1,4 @@
-name: Import orion/capitol-nb-ca
+name: Import footlight/crowstheatre-com
 
 on:
   workflow_dispatch:
