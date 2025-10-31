@@ -1,0 +1,21 @@
+name: Import orion/capitol-nb-ca
+
+on:
+  workflow_dispatch:
+
+jobs:
+  push-to-cms:
+    uses: culturecreates/footlight-aggregator/.github/workflows/import-data-to-cms.yml@main
+    with:
+      cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
+      aggregator_username: ${{ vars.AGGREGATOR_USER_CROWS_THEATRE }}
+      source_url: kg.artsdata.ca/culture-creates/footlight/crowstheatre-com
+      footlight_base_url: https://staging.api.cms.footlight.io # staging
+      footlight_calendar_id: crows-theatre
+      batch_size: 5
+      query_version: V4
+    secrets:
+      aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_CROWS_THEATRE }}
+      datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
+      AWS_SES_ACCESS_KEY: ${{ secrets.AWS_SES_ACCESS_KEY }}
+      AWS_SES_SECRET_ACCESS_KEY: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
