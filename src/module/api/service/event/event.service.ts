@@ -226,7 +226,8 @@ export class EventService {
   }
 
   async syncEntities(token: string , calendarId: string , source: string , footlightBaseUrl: string , batchSize: number ,
-                     mappingUrl: string , queryVersion?: QueryVersion) {
+                     mappingUrl: string , queryVersion: QueryVersion) {
+    console.log('query version in sync entities' , queryVersion);
     await this._syncEvents(calendarId , token , source , footlightBaseUrl , batchSize , mappingUrl , queryVersion);
   }
 
