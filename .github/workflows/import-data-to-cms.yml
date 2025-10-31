@@ -26,6 +26,10 @@ on:
       mapping_file_url:
         required: false
         type: string
+      query_version:
+        required: false
+        type: string
+        default: "V3"
     secrets:
       aggregator_password:
         required: true
@@ -61,6 +65,7 @@ jobs:
             -c ${{inputs.footlight_calendar_id}} \
             -b ${{inputs.batch_size}} \
             -m ${{inputs.mapping_file_url}}
+            -q ${{inputs.query_version}}
 
   send-failure-notification:
     runs-on: ubuntu-latest
