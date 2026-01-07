@@ -39,7 +39,8 @@ export class PersonOrganizationService {
         continue;
       }
       if (entityFetched) {
-        const { alternateName , contactPoint } = entityFetched;
+        const { alternateName , contactPoint, url, name } = entityFetched;
+          entityFetched.url=  url?.length ? url?.filter(url=>url.uri): url;
 
         let { type } = entityFetched;
         if (Array.isArray(type)) {
