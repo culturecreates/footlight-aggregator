@@ -8,9 +8,6 @@ on:
         description: 'Mode of the action (fetch/push/fetch-push)'
         required: true
         default: 'push'
-      cloudflare-private-key:
-        description: 'cloudflare-private-key'
-        required: true
 
 jobs:
   run-test:
@@ -21,7 +18,7 @@ jobs:
           cat <<EOF > config.yml
           mode: ${{ github.event.inputs.mode }}
           cloudflare_private_key: |
-            ${{ secrets.TEST_SECRET}}
+          $(printf "%s" "${{ secrets.TEST_SECRET }}" | sed 's/^/ /')
           EOF
 
       - name: Show config
