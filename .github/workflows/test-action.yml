@@ -1,0 +1,26 @@
+name: 'Test workflow'
+description: 'This is a test workflow'
+
+on:
+  workflow_dispatch:
+
+inputs:
+  mode: 
+    description: 'Mode of the action(fetch/push/fetch-push)'
+    required: true
+    default: 'push'
+  cloudflare-private-key:
+    description: 'cloudflare-private-key'
+    required: true
+
+runs: 
+  steps:
+    - name: Run
+      run: |
+        cat <<EOF > config.yml
+          mode: ${{ inputs.mode }}
+          cloudflare_private_key: |
+            ${{ inputs.cloudflare-private-key }}
+        EOF
+
+        cat  config.yml
