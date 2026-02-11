@@ -21,7 +21,7 @@ jobs:
           cat <<EOF > config.yml
           mode: ${{ github.event.inputs.mode }}
           cloudflare_private_key: |
-            ${{ secrets.CLOUDFLARE_PRIVATE_KEY }}
+            ${{ secrets.TEST_SECRET}}
           EOF
 
       - name: Show config
