@@ -52,7 +52,7 @@ export class EventService {
         calendarId = await this._getCalendarId(calendarId, currentUser);
         const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl, token, calendarId);
         const calendarTimezone = calendar.timezone;
-        let offset = 0, hasNext = true, batch = 1, totalCount = 0, errorCount = 0, tries = 0,
+        let offset = 38, hasNext = true, batch = 1, totalCount = 0, errorCount = 0, tries = 0,
             maxTry = 3, importedCount = 0, skippedCount = 0;
         let createdCount = 0;
         let updatedCount = 0;
@@ -106,16 +106,18 @@ export class EventService {
                     const eventsWithMultipleLocations = await this._checkForMultipleLocations(event);
                     for (const eventWithLocation of eventsWithMultipleLocations) {
                         const subEvents = eventWithLocation.subEvent;
-                        if (subEvents?.length) {
-                            const updatedSubEvents = [];
-                            for (const subEvent of subEvents) {
-                                const exists = await this._checkSubEventExists(subEvent, token, calendarId, footlightBaseUrl);
-                                if (!exists) {
-                                    updatedSubEvents.push(subEvent);
-                                }
-                            }
-                            eventWithLocation.subEvent = updatedSubEvents;
-                        }
+                        // if (subEvents?.length) {
+                        //     const updatedSubEvents = [];
+                        //     for (const subEvent of subEvents) {
+                        //         // TODO Issue is here.
+                        //         // I think we should chcek if the subEvents exists in another eventSeries or ???
+                        //         const exists = await this._checkSubEventExists(subEvent, token, calendarId, footlightBaseUrl);
+                        //         if (!exists) {
+                        //             updatedSubEvents.push(subEvent);
+                        //         }
+                        //     }
+                        //     eventWithLocation.subEvent = updatedSubEvents;
+                        // }
                         const participants = [eventWithLocation.organizer, eventWithLocation.performer, eventWithLocation.sponsor].flat();
                         await this._filterEvent(filters, eventWithLocation.location, participants, entitiesMap);
                         const eventsFormatted = await this.formatEvent(calendarId, token, eventWithLocation, footlightBaseUrl, currentUser.id,
