@@ -105,19 +105,6 @@ export class EventService {
                     this.checkExcludedValues(event, mappingFile, EventProperty.AUDIENCE);
                     const eventsWithMultipleLocations = await this._checkForMultipleLocations(event);
                     for (const eventWithLocation of eventsWithMultipleLocations) {
-                        const subEvents = eventWithLocation.subEvent;
-                        // if (subEvents?.length) {
-                        //     const updatedSubEvents = [];
-                        //     for (const subEvent of subEvents) {
-                        //         // TODO Issue is here.
-                        //         // I think we should chcek if the subEvents exists in another eventSeries or ???
-                        //         const exists = await this._checkSubEventExists(subEvent, token, calendarId, footlightBaseUrl);
-                        //         if (!exists) {
-                        //             updatedSubEvents.push(subEvent);
-                        //         }
-                        //     }
-                        //     eventWithLocation.subEvent = updatedSubEvents;
-                        // }
                         const participants = [eventWithLocation.organizer, eventWithLocation.performer, eventWithLocation.sponsor].flat();
                         await this._filterEvent(filters, eventWithLocation.location, participants, entitiesMap);
                         const eventsFormatted = await this.formatEvent(calendarId, token, eventWithLocation, footlightBaseUrl, currentUser.id,
