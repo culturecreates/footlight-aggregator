@@ -52,7 +52,7 @@ export class EventService {
         calendarId = await this._getCalendarId(calendarId, currentUser);
         const calendar = await this._sharedService.fetchCalendar(footlightBaseUrl, token, calendarId);
         const calendarTimezone = calendar.timezone;
-        let offset = 38, hasNext = true, batch = 1, totalCount = 0, errorCount = 0, tries = 0,
+        let offset = 0, hasNext = true, batch = 1, totalCount = 0, errorCount = 0, tries = 0,
             maxTry = 3, importedCount = 0, skippedCount = 0;
         let createdCount = 0;
         let updatedCount = 0;
