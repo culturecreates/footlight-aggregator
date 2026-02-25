@@ -961,7 +961,7 @@ export class EventService {
             endTime: event.endDateTime?.split('T')[1]?.slice(0, 5),
             name: event.name,
             description: event.description,
-            sameAs: {uri: event.uri, type: 'ArtsdataIdentifier'},
+            sameAs: [{uri: event.uri, type: 'ArtsdataIdentifier'}]
         };
         if (event.location) {
             const locationId = await this._placeService.getFootlightIdentifier(calendarId, token, footlightBaseUrl,
