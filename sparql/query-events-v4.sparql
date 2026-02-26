@@ -44,7 +44,7 @@ construct {
 }
 where {
     {
-        select ?event_adid (sample(?event) as ?event) where {
+        select ?event_adid (MIN(?event) as ?event) where {
             {
                 select  ?event_adid ?event where {
                     graph <http://kg.artsdata.ca/culture-creates/footlight/crowstheatre-com> {
