@@ -1,6 +1,6 @@
 [
   {
-    "fieldName": "additionalType",
+    "fieldName": "discipline",
     "inputProperty": [
       "keywords",
       "additionalType"
@@ -335,8 +335,7 @@
     ]
   },
   {
-    "fieldName": "63bd80901c6b6c005aad6f4b",
-    "isDynamic": true,
+    "fieldName": "additionalType",
     "inputProperty": [
       "additionalType",
       "keywords"
