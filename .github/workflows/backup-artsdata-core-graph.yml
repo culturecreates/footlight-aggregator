@@ -22,7 +22,7 @@ jobs:
           curl -f -X GET \
             "https://${{ secrets.GRAPHDB_HOST }}/repositories/artsdata/statements?context=%3Chttp%3A%2F%2Fkg.artsdata.ca%2Fcore%3E" \
             -H "accept: application/x-binary-rdf" \
-            -o "artsdata-core.brf"
+            -o "${{ steps.vars.outputs.DATE }}-artsdata-core.brf"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -31,15 +31,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ vars.S3_REGION }}
 
-      - name: Upload daily backup to S3
+      - name: Upload daily backup
         run: |
           aws s3 cp \
-            artsdata-core.brf \
-            "s3://${{ vars.S3_BUCKET_NAME }}/daily-${{ steps.vars.outputs.DATE }}-artsdata-core.brf"
+            "${{ steps.vars.outputs.DATE }}-artsdata-core.brf" \
+            "s3://${{ vars.S3_BUCKET_NAME }}/daily/${{ steps.vars.outputs.DATE }}-artsdata-core.brf"
 
       - name: Upload monthly snapshot (1st of month only)
         if: steps.vars.outputs.DAY == '01'
         run: |
           aws s3 cp \
-            artsdata-core.brf \
-            "s3://${{ vars.S3_BUCKET_NAME }}/monthly-${{ steps.vars.outputs.MONTH }}-artsdata-core.brf"
+            "${{ steps.vars.outputs.DATE }}-artsdata-core.brf" \
+            "s3://${{ vars.S3_BUCKET_NAME }}/monthly/${{ steps.vars.outputs.DATE }}-artsdata-core.brf"
