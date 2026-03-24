@@ -736,7 +736,7 @@ export class EventService {
         }
 
         if (!offerConfiguration.url && priceUrl.length) {
-            offerConfiguration.url = {uri : priceUrl.find(price => price)?.trim()}
+            offerConfiguration.url = {uri : priceUrl.find(price => price)?.uri?.trim()}
         }
 
         return offerConfiguration;
