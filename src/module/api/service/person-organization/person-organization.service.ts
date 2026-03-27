@@ -122,6 +122,10 @@ export class PersonOrganizationService {
     } else {
       personOrganizationFetched.type = PersonOrganizationType[type.toUpperCase() as keyof typeof PersonOrganizationType];
     }
+
+    const { alternateName } = personOrganizationFetched;
+    personOrganizationFetched.alternateName = alternateName ? SharedService.formatAlternateNames(alternateName) : undefined;
+
     const personOrganizationCondition = filters
       ?.find(filter => filter?.entityType === type);
     const validatePersonOrganization = personOrganizationCondition ?
