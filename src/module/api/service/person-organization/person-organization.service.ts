@@ -70,14 +70,11 @@ export class PersonOrganizationService {
           if (contactPoint) {
             entityFetched.contactPoint = contactPoint?.length ? contactPoint[0] : contactPoint;
           }
+          entityFetched.alternateName = alternateName? SharedService.formatAlternateNames(alternateName) : undefined;
+
           entityId = await this._organizationService.getFootlightIdentifier(calendarId , token , footlightUrl ,
             entityFetched , currentUserId);
         }
-        // else{
-        //   return undefined
-        // }
-        entityFetched.alternateName = alternateName?.length
-          ? SharedService.formatAlternateNames(alternateName) : undefined;
         const personOrOrganization = { entityId , type };
         this.synchronisedPersonOrganizationMap.set(id , personOrOrganization);
         personOrganizations.push(personOrOrganization);
@@ -122,10 +119,6 @@ export class PersonOrganizationService {
     } else {
       personOrganizationFetched.type = PersonOrganizationType[type.toUpperCase() as keyof typeof PersonOrganizationType];
     }
-
-    const { alternateName } = personOrganizationFetched;
-    personOrganizationFetched.alternateName = alternateName ? SharedService.formatAlternateNames(alternateName) : undefined;
-
     const personOrganizationCondition = filters
       ?.find(filter => filter?.entityType === type);
     const validatePersonOrganization = personOrganizationCondition ?
