@@ -184,6 +184,7 @@ export class SharedService {
       Authorization: `Bearer ${token}` ,
       'Content-Type': 'application/json' ,
       'Referer': HEADER.CMS_REFERER_HEADER ,
+      'Connection': 'close'
     };
     if (calendarId) {
       headers['calendar-id'] = calendarId;
