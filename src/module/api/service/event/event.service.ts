@@ -959,8 +959,8 @@ export class EventService {
             startTime: event.startDateTime?.split('T')[1]?.slice(0, 5),
             endDate: event.endDate ? event.endDate : event.endDateTime?.split('T')[0],
             endTime: event.endDateTime?.split('T')[1]?.slice(0, 5),
-            name: event.name,
-            description: event.description,
+            name: JsonLdParseHelper.formatMultilingualField(event.name),
+            description: JsonLdParseHelper.formatMultilingualField(event.description),
             sameAs: [{uri: event.uri, type: 'ArtsdataIdentifier'}]
         };
         if (event.location) {
