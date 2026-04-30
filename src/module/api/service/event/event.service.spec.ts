@@ -279,43 +279,6 @@ describe("Event service tests", () => {
         };
     }
 
-    it('should reproduce bug: subEvent name is raw JSON-LD array with duplicate languages instead of MultilingualString', async () => {
-        const mockPlaceService = {
-            getFootlightIdentifier: jest.fn().mockResolvedValue('645bd8f67db98f0065dd251b'),
-        };
-        const mockPersonOrganizationService = {
-            fetchPersonOrganizationFromFootlight: jest.fn().mockResolvedValue([]),
-        };
-        jest.spyOn(placeService, 'getFootlightIdentifier').mockImplementation(mockPlaceService.getFootlightIdentifier);
-        jest.spyOn(personOrganizationService, 'fetchPersonOrganizationFromFootlight').mockImplementation(mockPersonOrganizationService.fetchPersonOrganizationFromFootlight);
-
-        const sampleEvent = createMockEventSeriesWithDuplicateSubEventNames();
-
-        const formattedEvent = await eventService.formatEvent(
-            'calendarId',
-            'token',
-            sampleEvent,
-            'footlightBaseUrl',
-            'currentUserId',
-            undefined,
-            'Canada/Eastern',
-            undefined,
-            undefined
-        );
-
-        const subEventConfig = formattedEvent.subEventConfiguration;
-        expect(subEventConfig).toBeDefined();
-        expect(subEventConfig.length).toBe(1);
-
-        const subEventName = subEventConfig[0].name;
-
-        // ---- BUG: name is still a raw JSON-LD array, not a MultilingualString ----
-        // This assertion demonstrates the broken state BEFORE the fix.
-        // It passes before the fix (proving the bug exists) and fails after the fix.
-        expect(Array.isArray(subEventName)).toBe(false);
-        // assertion flipped after fix
-    });
-
     it('should fix bug: subEvent name should be a MultilingualString with one entry per language', async () => {
         const mockPlaceService = {
             getFootlightIdentifier: jest.fn().mockResolvedValue('645bd8f67db98f0065dd251b'),
