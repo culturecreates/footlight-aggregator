@@ -10,7 +10,7 @@ jobs:
       cms_referer_header: ${{ vars.CMS_REFERER_HEADER }}
       aggregator_username: ${{ vars.AGGREGATOR_USER_CROWS_THEATRE }}
       source_url: kg.artsdata.ca/culture-creates/footlight/crowstheatre-com
-      footlight_base_url: https://staging.api.cms.footlight.io # staging
+      footlight_base_url: https://staging-api-cms.footlight.io # staging
       footlight_calendar_id: crows-theatre
       batch_size: 5
       query_version: V4
