@@ -3,10 +3,10 @@ import argparse
 import requests
 
 def get_access_token(email, password):
-    login_url = "https://api.cms.footlight.io/login"
+    login_url = "https://api-cms.footlight.io/login"
     headers = {
         'Content-Type': 'application/json',
-        'Referer': 'https://api.cms.footlight.io/api/'
+        'Referer': 'https://api-cms.footlight.io/api/'
     }
     data = {'email': email, 'password': password}
 
@@ -23,10 +23,10 @@ def import_events(access_token, source_calendar_id, destination_calendar_id, map
     headers = {
         'Authorization': f'Bearer {access_token}',
         'calendar-id': destination_calendar_id,
-        'Referer': 'https://api.cms.footlight.io/api/'
+        'Referer': 'https://api-cms.footlight.io/api/'
     }
     try:
-        put_url = "https://api.cms.footlight.io/entities/import/SOURCE_CALENDAR_ID"  # Replace with your actual PUT API endpoint
+        put_url = "https://api-cms.footlight.io/entities/import/SOURCE_CALENDAR_ID"  # Replace with your actual PUT API endpoint
         put_url = put_url.replace('SOURCE_CALENDAR_ID', source_calendar_id)
         put_url = put_url + "?mapping-file-url=" + mapping_file_url
 
