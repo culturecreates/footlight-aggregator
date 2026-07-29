@@ -11,4 +11,4 @@ This script gets a list of CMS entities (Collections: Events, Places, Organizati
 
 Artsdata URIs Removed from CMS Events
 --------------------
-The script queries Artsdata using `unlink-entities.sparql` which returns a list of CMS and Artsdata Events that are linked together but have *different startDates*. This indicates that an event in CMS in incorrectly linked to Artsdata. The script removes the incorrect Artsdata URIs from CMS.  Note that CMS also has some internal business logic that removes Artsdata URIs when an event is edited in the CMS (i.e. event series with multiple dates is edited). However this script is ultimately responsible for unlinking Artsdata URIs and no other business logic in CMS is needed (existing internal business logic in the CMS code should be removed if issues arise). 
+The script queries Artsdata using `unlink-entities.sparql` which returns a list of CMS and Artsdata Events that are linked together but have *different startDates*. This indicates that an event in CMS in incorrectly linked to Artsdata. The script removes the incorrect Artsdata URIs from CMS. However this script is ultimately responsible for unlinking Artsdata URIs. 
