@@ -16,7 +16,7 @@ jobs:
       DD_API_KEY: ${{ secrets.DATA_DOG_CLIENT_KEY }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Copy directory to AWS instance
         run: |
