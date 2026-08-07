@@ -53,7 +53,7 @@ jobs:
         run: npm install
 
       - name: Make envfile
-        uses: SpicyPizza/create-envfile@v1.3
+        uses: SpicyPizza/create-envfile@v2
         with:
           envkey_DATA_DOG_CLIENT_TOKEN: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
           envkey_ENABLING_LOG_TO_DATA_DOG: true
