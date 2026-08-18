@@ -236,4 +236,92 @@ describe("Event service tests", () => {
       ]
       expect(() => eventService.checkExcludedValues(createMockEventWithExcludedTaxonomy(), patternToConceptIdMapping, EventProperty.ADDITIONAL_TYPE)).toThrow();    
     })
+
+    function createMockEventSeriesWithDuplicateSubEventNames() {
+        return {
+            "uri": "http://kg.artsdata.ca/resource/K23-800",
+            "type": "EventSeries",
+            "name": {
+                "fr": "Jean-Michel Anctil - SURPRISE c'est ma fête"
+            },
+            "description": {
+                "fr": "Une description de la série."
+            },
+            "startDate": "2024-03-01",
+            "startDateTime": "2024-03-01T20:00:00",
+            "endDate": "2024-03-01",
+            "endDateTime": "2024-03-01T22:00:00",
+            "location": {
+                "Place": "http://kg.artsdata.ca/resource/K5-13"
+            },
+            "sameAs": [
+                { "uri": "http://kg.artsdata.ca/resource/K23-800" }
+            ],
+            "subEvent": [
+                {
+                    "uri": "http://kg.artsdata.ca/resource/K23-801",
+                    "type": "Event",
+                    "startDate": "2024-03-01",
+                    "startDateTime": "2024-03-01T20:00:00",
+                    "endDate": "2024-03-01",
+                    "endDateTime": "2024-03-01T22:00:00",
+                    // Sub-event has two 'fr' names — this is the bug scenario
+                    "name": [
+                        { "@language": "fr", "@value": "Jean-Michel Anctil - SURPRISE c'est ma fête" },
+                        { "@language": "fr", "@value": "SURPRISE c'est ma fête" }
+                    ],
+                    "description": [
+                        { "@language": "fr", "@value": "Description longue et détaillée du sous-événement." },
+                        { "@language": "fr", "@value": "Description courte." }
+                    ]
+                }
+            ]
+        };
+    }
+
+    it('should fix bug: subEvent name should be a MultilingualString with one entry per language', async () => {
+        const mockPlaceService = {
+            getFootlightIdentifier: jest.fn().mockResolvedValue('645bd8f67db98f0065dd251b'),
+        };
+        const mockPersonOrganizationService = {
+            fetchPersonOrganizationFromFootlight: jest.fn().mockResolvedValue([]),
+        };
+        jest.spyOn(placeService, 'getFootlightIdentifier').mockImplementation(mockPlaceService.getFootlightIdentifier);
+        jest.spyOn(personOrganizationService, 'fetchPersonOrganizationFromFootlight').mockImplementation(mockPersonOrganizationService.fetchPersonOrganizationFromFootlight);
+
+        const sampleEvent = createMockEventSeriesWithDuplicateSubEventNames();
+
+        const formattedEvent = await eventService.formatEvent(
+            'calendarId',
+            'token',
+            sampleEvent,
+            'footlightBaseUrl',
+            'currentUserId',
+            undefined,
+            'Canada/Eastern',
+            undefined,
+            undefined
+        );
+
+        const subEventConfig = formattedEvent.subEventConfiguration;
+        const subEventName = subEventConfig[0].name;
+        const subEventDescription = subEventConfig[0].description;
+
+        // After fix: name must be a MultilingualString object, not an array
+        expect(Array.isArray(subEventName)).toBe(false);
+        expect(typeof subEventName).toBe('object');
+
+        // Exactly one 'fr' key — no duplicate language entries
+        const languageKeys = Object.keys(subEventName);
+        const frCount = languageKeys.filter(k => k === 'fr').length;
+        expect(frCount).toBe(1);
+
+        // A single string value, not an array, under 'fr'
+        expect(typeof subEventName['fr']).toBe('string');
+
+        // Same guarantee for description
+        expect(Array.isArray(subEventDescription)).toBe(false);
+        expect(typeof subEventDescription['fr']).toBe('string');
+    });
+
 })

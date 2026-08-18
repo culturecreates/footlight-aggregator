@@ -11,7 +11,11 @@ export class JsonLdParseHelper{
         }
         fields = Array.isArray(fields) ? fields : [fields];
         
-        fields.forEach(field => multilingualField[field["@language"]] = field["@value"]);
+        fields.forEach(field => {
+            if (!multilingualField[field["@language"]]) {
+                multilingualField[field["@language"]] = field["@value"]
+            }
+        });
         return multilingualField;
     }
 
