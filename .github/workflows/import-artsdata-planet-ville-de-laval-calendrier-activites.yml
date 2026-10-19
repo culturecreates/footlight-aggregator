@@ -17,7 +17,7 @@ jobs:
       batch_size: 10
       mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/ville-de-laval-cms-mapping.json
       notify_artsdata_changes: true
-      change_log_lookback_hours: 120
+      change_log_lookback_hours: 504  # ~21 days back to 2026-09-29; revert to 120 after first successful run
     secrets:
       aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_VILLELAVAL }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
