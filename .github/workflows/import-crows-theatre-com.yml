@@ -14,6 +14,7 @@ jobs:
       footlight_calendar_id: crows-theatre
       batch_size: 5
       query_version: V4
+      notify_artsdata_changes: true
     secrets:
       aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_CROWS_THEATRE }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}

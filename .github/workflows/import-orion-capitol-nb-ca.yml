@@ -16,6 +16,7 @@ jobs:
       footlight_calendar_id: artsculturenb
       batch_size: 5
       mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/theplayhouse-cms-mapping.json
+      notify_artsdata_changes: true
     secrets:
       aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_CAPITOL_NB }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}
