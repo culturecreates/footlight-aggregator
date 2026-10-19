@@ -30,6 +30,14 @@ on:
         required: false
         type: string
         default: "V3"
+      notify_artsdata_changes:
+        required: false
+        type: boolean
+        default: false
+      change_log_lookback_hours:
+        required: false
+        type: number
+        default: 24
     secrets:
       aggregator_password:
         required: true
@@ -65,6 +73,33 @@ jobs:
             -b ${{inputs.batch_size}} \
             -m ${{inputs.mapping_file_url}} \
             -q ${{inputs.query_version}}
+      - name: Find start of Artsdata change window
+        id: change-window
+        if: ${{ inputs.notify_artsdata_changes }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+        run: |
+          # Start from the last successful run of the calling workflow so no change is missed or repeated
+          workflow_file=$(basename "${WORKFLOW_REF%%@*}")
+          since=$(gh run list --repo "${{ github.repository }}" --workflow "$workflow_file" --status success \
+            --limit 1 --json startedAt --jq '.[0].startedAt' || true)
+          echo "since=${since}" >> "$GITHUB_OUTPUT"
+      - name: Notify CMS about Artsdata changes
+        if: ${{ inputs.notify_artsdata_changes }}
+        continue-on-error: true
+        env:
+          SINCE: ${{ steps.change-window.outputs.since }}
+        run: |
+          window="--lookback-hours ${{ inputs.change_log_lookback_hours }}"
+          if [ -n "$SINCE" ] && [ "$SINCE" != "null" ]; then window="--since $SINCE"; fi
+          node ./dist/main-commander.js  \
+            notify:artsdata-changes -u ${{inputs.aggregator_username}} -p ${{secrets.aggregator_password}} \
+            -s ${{inputs.source_url}} \
+            -i ${{inputs.footlight_base_url}} \
+            -c ${{inputs.footlight_calendar_id}} \
+            $window
 
   send-failure-notification:
     runs-on: ubuntu-latest
