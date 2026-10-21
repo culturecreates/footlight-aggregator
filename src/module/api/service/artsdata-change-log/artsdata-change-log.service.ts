@@ -10,7 +10,7 @@ import { LoggerService } from '../logger';
 export interface ChangedValue {
   value: string;
   language?: string;
-  name?: { [language: string]: string };
+  name?: string;
 }
 
 export interface PropertyChange {
@@ -25,7 +25,6 @@ export interface ChangedEvent {
   artsdataUri: string;
   name?: any;
   cmsUrl?: string;
-  editedInCms?: boolean;
   changes: PropertyChange[];
 }
 
@@ -61,11 +60,15 @@ export class ArtsdataChangeLogService {
         await this._loggerService.infoLogs(`\tSkipping ${changedEvent.id}: not found in calendar ${calendarSlug}`);
         continue;
       }
+      const editedInCms = !!cmsEvent.modifiedByUserId && cmsEvent.modifiedByUserId !== currentUser.id;
+      if (editedInCms) {
+        await this._loggerService.infoLogs(`\tSkipping ${changedEvent.id}: last modified by a CMS user, not the aggregator`);
+        continue;
+      }
       eventsToNotify.push({
         ...changedEvent ,
         name: cmsEvent.name ,
         cmsUrl: CMS.EVENT_URL_TEMPLATE.replace('CALENDAR_ID' , calendarId).replace('EVENT_ID' , changedEvent.id) ,
-        editedInCms: !!cmsEvent.modifiedByUserId && cmsEvent.modifiedByUserId !== currentUser.id
       });
     }
 
@@ -166,8 +169,8 @@ export class ArtsdataChangeLogService {
       changedValue = language ? { value: rawValue , language } : { value: rawValue };
       values.push(changedValue);
     }
-    if (valueName?.value) {
-      changedValue.name = { ...changedValue.name , [valueName['xml:lang'] ?? 'none']: valueName.value };
+    if (valueName?.value && !changedValue.name) {
+      changedValue.name = valueName.value;
     }
   }
 

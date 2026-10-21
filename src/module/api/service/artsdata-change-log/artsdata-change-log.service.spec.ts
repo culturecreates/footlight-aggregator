@@ -37,15 +37,15 @@ describe("ArtsdataChangeLogService", () => {
         }]);
     });
 
-    it("adds place names to location values and removes duplicate rows", () => {
+    it("adds a preferred-language place name to location values and deduplicates rows", () => {
         const place = {type: "uri", value: "http://kg.artsdata.ca/resource/K11-1"};
         const result = ArtsdataChangeLogService.groupChanges([
-            row("location", "added", place, {valueName: {type: "literal", "xml:lang": "fr", value: "Salle André-Mathieu"}}),
-            row("location", "added", place, {valueName: {type: "literal", "xml:lang": "en", value: "André-Mathieu Hall"}}),
+            row("location", "added", place, {valueName: {type: "literal", value: "Salle André-Mathieu"}}),
+            row("location", "added", place, {valueName: {type: "literal", value: "Salle André-Mathieu"}}),
         ]);
         expect(result[0].changes[0].added).toEqual([{
             value: "http://kg.artsdata.ca/resource/K11-1",
-            name: {fr: "Salle André-Mathieu", en: "André-Mathieu Hall"}
+            name: "Salle André-Mathieu"
         }]);
     });
 
