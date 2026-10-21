@@ -81,8 +81,12 @@ export class ArtsdataChangeLogService {
       since: since.toISOString() ,
       changedEvents: eventsToNotify
     };
-    await this._sharedService.sendMessageToCms(token , calendarId , messageMeta , footlightBaseUrl ,
+    const sent = await this._sharedService.sendMessageToCms(token , calendarId , messageMeta , footlightBaseUrl ,
       MessageType.ARTSDATA_EVENT_CHANGES);
+    // Fail the run so the next one retries the same window instead of skipping these changes
+    if (!sent) {
+      throw new Error('Could not send the Artsdata changes message to the CMS');
+    }
   }
 
   private async _fetchChangeLog(calendarSlug: string , sourceGraph: string , since: Date) {
@@ -104,7 +108,11 @@ export class ArtsdataChangeLogService {
   private async _fetchCmsEvent(token: string , calendarId: string , eventId: string , footlightBaseUrl: string) {
     const url = `${footlightBaseUrl}${FootlightPaths.ADD_EVENT}/${eventId}`;
     const response = await SharedService.fetchUrl(url , SharedService.createHeaders(token , calendarId));
-    return response?.status === HttpStatus.OK ? response.data : null;
+    // No response or a server error means the CMS is unavailable, not that the event is missing
+    if (!response || response.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      throw new Error(`Could not fetch event ${eventId} from the CMS (status ${response?.status ?? 'none'})`);
+    }
+    return response.status === HttpStatus.OK ? response.data : null;
   }
 
   static normaliseGraphUri(uri: string): string {

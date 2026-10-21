@@ -15,7 +15,6 @@ jobs:
       footlight_calendar_id: tourisme-mauricie
       batch_size: 5
       mapping_file_url: https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/data/dici-to-tourisme-mauricie-calendars-concepts-mapping.json
-      notify_artsdata_changes: true
     secrets:
       aggregator_password: ${{ secrets.AGGREGATOR_PASSWORD_CULTURE_MAURICIE_2 }}
       datadog_token: ${{ secrets.DATA_DOG_CLIENT_TOKEN }}

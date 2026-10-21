@@ -233,8 +233,10 @@ export class SharedService {
     try {
       await SharedService.postUrl(url , message , headers);
       await this._loggerService.infoLogs(`Message of type ${messageType} sent successfully to CMS.`);
+      return true;
     } catch (error) {
       await this._loggerService.errorLogs('Error while sending message to CMS: ' + error.message);
+      return false;
     }
   }
 
