@@ -30,13 +30,10 @@ on:
         required: false
         type: string
         default: "V3"
-      # On for every caller unless it passes `notify_artsdata_changes: false`
       notify_artsdata_changes:
         required: false
         type: boolean
         default: true
-      # Only used when the caller has no previous successful run (e.g. its first run);
-      # otherwise the window starts at that run. 168 h covers the longest gap between scheduled runs.
       change_log_lookback_hours:
         required: false
         type: number
@@ -53,7 +50,6 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    # Read by send-failure-notification to say which part failed
     outputs:
       import_outcome: ${{ steps.import.outcome }}
       notify_outcome: ${{ steps.notify.outcome }}
@@ -82,7 +78,6 @@ jobs:
             -b ${{inputs.batch_size}} \
             -m ${{inputs.mapping_file_url}} \
             -q ${{inputs.query_version}}
-      # The Artsdata steps don't depend on the import, so they still run when it fails (but not if the build failed)
       - name: Find start of Artsdata change window
         id: change-window
         if: ${{ !cancelled() && inputs.notify_artsdata_changes && steps.build.outcome == 'success' }}
@@ -92,7 +87,6 @@ jobs:
           REPO: ${{ github.repository }}
           WORKFLOW_REF: ${{ github.workflow_ref }}
           NOTIFY_STEP: Notify CMS about Artsdata changes
-          # Used until the calling workflow has a run that notified, i.e. on its first run with this feature
           BACKFILL_FROM: ${{ vars.ARTSDATA_CHANGES_BACKFILL_FROM }}
         run: |
           # Start from the last finished run of the calling workflow whose notify step succeeded (even if
@@ -111,7 +105,6 @@ jobs:
             fi
           done
           echo "since=${since}" >> "$GITHUB_OUTPUT"
-      # No continue-on-error: a failed notification must fail the run, so the next run's
       # window still starts before these changes and they are retried rather than skipped
       - name: Notify CMS about Artsdata changes
         id: notify

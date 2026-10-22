@@ -5,7 +5,6 @@ PREFIX adp:    <http://kg.artsdata.ca/plugin#>
 
 SELECT ?changedAt ?activity ?event ?src ?property ?change ?value (adp:prefLangLiteral(?value, schema:name) AS ?valueName)
 WHERE {
-  # Upcoming Footlight events of the calendar that are also linked from the aggregator's source graph
   { SELECT DISTINCT ?src ?event WHERE {
       GRAPH <CALENDAR_GRAPH> {
         ?src a schema:Event ; schema:startDate ?startDate .
@@ -20,7 +19,6 @@ WHERE {
   VALUES ?property { schema:name schema:startDate schema:endDate schema:location schema:eventStatus }
   VALUES (?ann ?change) { (prov:wasGeneratedBy "added") (prov:wasInvalidatedBy "removed") }
 
-  # Change log: quoted triples annotated with the refresh activity that added/removed them
   GRAPH <http://kg.artsdata.ca/logs> {
     << ?event ?property ?value >> ?ann ?activity .
     ?activity prov:startedAtTime ?changedAt .

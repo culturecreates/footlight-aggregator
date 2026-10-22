@@ -86,7 +86,6 @@ export class ArtsdataChangeLogService {
     };
     const sent = await this._sharedService.sendMessageToCms(token , calendarId , messageMeta , footlightBaseUrl ,
       MessageType.ARTSDATA_EVENT_CHANGES);
-    // Fail the run so the next one retries the same window instead of skipping these changes
     if (!sent) {
       throw new Error('Could not send the Artsdata changes message to the CMS');
     }
@@ -126,10 +125,6 @@ export class ArtsdataChangeLogService {
     return /^https?:\/\//.test(trimmed) ? trimmed : `http://${trimmed}`;
   }
 
-  /**
-   * Groups SPARQL change-log rows into one entry per Footlight event, with one change per
-   * (refresh activity, property) holding the removed (old) and added (new) values.
-   */
   static groupChanges(bindings: any[]): ChangedEvent[] {
     const events = new Map<string , ChangedEvent>();
     const changes = new Map<string , PropertyChange>();

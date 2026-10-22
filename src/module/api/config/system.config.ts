@@ -16,7 +16,6 @@ export const HEADER: { CMS_REFERER_HEADER : string } = {
 }
 
 export const CMS: { EVENT_URL_TEMPLATE: string } = {
-    // Link to an event in the Footlight CMS front end. CALENDAR_ID and EVENT_ID are replaced at runtime.
     EVENT_URL_TEMPLATE: env.CMS_EVENT_URL_TEMPLATE
         || `${HEADER.CMS_REFERER_HEADER.replace(/\/$/, '')}/dashboard/CALENDAR_ID/events/event/EVENT_ID`
 }
