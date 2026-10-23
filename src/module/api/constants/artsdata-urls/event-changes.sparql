@@ -1,0 +1,27 @@
+PREFIX schema: <http://schema.org/>
+PREFIX prov:   <http://www.w3.org/ns/prov#>
+PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
+PREFIX adp:    <http://kg.artsdata.ca/plugin#>
+
+SELECT ?changedAt ?activity ?event ?property ?change ?value (adp:prefLangLiteral(?value, schema:name) AS ?valueName)
+WHERE {
+  { SELECT DISTINCT ?event WHERE {
+      GRAPH <SOURCE_GRAPH> {
+        ?sourceRecord a schema:Event ; schema:startDate ?startDate .
+        FILTER(?startDate > NOW())
+      }
+      ?sourceRecord schema:sameAs ?event .
+      FILTER(STRSTARTS(STR(?event), "http://kg.artsdata.ca/resource/K"))
+  } }
+
+  VALUES ?property { schema:name schema:startDate schema:endDate schema:location schema:eventStatus }
+  VALUES (?ann ?change) { (prov:wasGeneratedBy "added") (prov:wasInvalidatedBy "removed") }
+
+  GRAPH <http://kg.artsdata.ca/logs> {
+    << ?event ?property ?value >> ?ann ?activity .
+    ?activity prov:startedAtTime ?changedAt .
+  }
+  FILTER(?changedAt >= "SINCE"^^xsd:dateTime)
+}
+ORDER BY DESC(?changedAt) ?event ?property ?change
+LIMIT 5000

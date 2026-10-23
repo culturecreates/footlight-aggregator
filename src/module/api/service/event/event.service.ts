@@ -160,28 +160,8 @@ export class EventService {
             senderName: senderName,
             eventIds: updatedIds,
         }
-        await this._sendMessageToCms(token, calendarId, messageMetaForCreatedNotification, footlightBaseUrl, MessageType.AGGREGATOR_NEW_EVENTS);
-        await this._sendMessageToCms(token, calendarId, messageMetaForUpdatedNotification, footlightBaseUrl, MessageType.AGGREGATOR_UPDATED_EVENTS);
-    }
-
-    private async _sendMessageToCms(token: string, calendarId: string, messageMeta: any, footlightBaseUrl: string, messageType: MessageType) {
-        const message = {
-            messageType: messageType,
-            messageMeta: messageMeta
-        };
-        const headers = {
-            "Authorization": `Bearer ${token}`,
-            "calendar-id": calendarId,
-            'Referer': HEADER.CMS_REFERER_HEADER
-        }
-        const url = footlightBaseUrl + FootlightPaths.PUBLISH_MESSAGE;
-        try {
-            await SharedService.postUrl(url, message, headers);
-            await this._loggerService.infoLogs(`Message of type ${messageType} sent successfully to CMS.`);
-        } catch (error) {
-            await this._loggerService.errorLogs('Error while sending message to CMS: ' + error.message);
-        }
-
+        await this._sharedService.sendMessageToCms(token, calendarId, messageMetaForCreatedNotification, footlightBaseUrl, MessageType.AGGREGATOR_NEW_EVENTS);
+        await this._sharedService.sendMessageToCms(token, calendarId, messageMetaForUpdatedNotification, footlightBaseUrl, MessageType.AGGREGATOR_UPDATED_EVENTS);
     }
 
     private async _checkSubEventExists(subEvent: any, token: string, calendarId: string, footlightBaseUrl: string) {

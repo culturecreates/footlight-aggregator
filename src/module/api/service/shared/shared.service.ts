@@ -2,7 +2,7 @@ import { ArtsDataConstants } from '../../constants';
 import { Exception } from '../../helper';
 import { forwardRef , HttpStatus , Inject , Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { EntityType , HttpMethodsEnum } from '../../enum';
+import { EntityType , HttpMethodsEnum , MessageType } from '../../enum';
 import { FootlightPaths } from '../../constants/footlight-urls';
 import { LoggerService } from '..';
 import { HEADER } from '../../config';
@@ -216,6 +216,27 @@ export class SharedService {
     } catch (e) {
       this._loggerService.errorLogs('Authorisation failed. Please check your credentials and access to the calendar');
       Exception.unauthorized('Something went wrong.');
+    }
+  }
+
+  async sendMessageToCms(token: string , calendarId: string , messageMeta: any , footlightBaseUrl: string , messageType: MessageType) {
+    const message = {
+      messageType: messageType ,
+      messageMeta: messageMeta
+    };
+    const headers = {
+      'Authorization': `Bearer ${token}` ,
+      'calendar-id': calendarId ,
+      'Referer': HEADER.CMS_REFERER_HEADER
+    };
+    const url = footlightBaseUrl + FootlightPaths.PUBLISH_MESSAGE;
+    try {
+      await SharedService.postUrl(url , message , headers);
+      await this._loggerService.infoLogs(`Message of type ${messageType} sent successfully to CMS.`);
+      return true;
+    } catch (error) {
+      await this._loggerService.errorLogs('Error while sending message to CMS: ' + error.message);
+      return false;
     }
   }
 

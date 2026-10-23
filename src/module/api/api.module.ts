@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import {
+  ArtsdataChangeLogService,
   AuthenticationService,
   EventService,
   OrganizationService,
@@ -21,7 +22,7 @@ import { LoggerService } from "./service";
   imports: [],
   controllers: [AuthenticationController, EventController, PlaceController, OrganizationController, InvitationController],
   providers: [PersonOrganizationService, EventService, PostalAddressService, PersonService, PlaceService,
-    OrganizationService, AuthenticationService, TaxonomyService, InvitationService, SharedService, LoggerService]
+    OrganizationService, AuthenticationService, TaxonomyService, InvitationService, SharedService, LoggerService, ArtsdataChangeLogService]
 })
 
 export class ApiModule {
