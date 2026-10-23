@@ -3,17 +3,15 @@ PREFIX prov:   <http://www.w3.org/ns/prov#>
 PREFIX xsd:    <http://www.w3.org/2001/XMLSchema#>
 PREFIX adp:    <http://kg.artsdata.ca/plugin#>
 
-SELECT ?changedAt ?activity ?event ?src ?property ?change ?value (adp:prefLangLiteral(?value, schema:name) AS ?valueName)
+SELECT ?changedAt ?activity ?event ?property ?change ?value (adp:prefLangLiteral(?value, schema:name) AS ?valueName)
 WHERE {
-  { SELECT DISTINCT ?src ?event WHERE {
-      GRAPH <CALENDAR_GRAPH> {
-        ?src a schema:Event ; schema:startDate ?startDate .
+  { SELECT DISTINCT ?event WHERE {
+      GRAPH <SOURCE_GRAPH> {
+        ?sourceRecord a schema:Event ; schema:startDate ?startDate .
         FILTER(?startDate > NOW())
-        FILTER(STRSTARTS(STR(?src), "FOOTLIGHT_EVENT_URI_PREFIX"))
       }
-      ?src schema:sameAs ?event .
+      ?sourceRecord schema:sameAs ?event .
       FILTER(STRSTARTS(STR(?event), "http://kg.artsdata.ca/resource/K"))
-      GRAPH <SOURCE_GRAPH> { ?sourceRecord schema:sameAs ?event }
   } }
 
   VALUES ?property { schema:name schema:startDate schema:endDate schema:location schema:eventStatus }

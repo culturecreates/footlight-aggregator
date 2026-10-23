@@ -21,7 +21,7 @@ export interface PropertyChange {
 }
 
 export interface ChangedEvent {
-  id: string;
+  id?: string;
   artsdataUri: string;
   name?: any;
   cmsUrl?: string;
@@ -49,26 +49,22 @@ export class ArtsdataChangeLogService {
 
     const sourceGraph = ArtsdataChangeLogService.normaliseGraphUri(source);
     await this._loggerService.infoLogs(`Fetching Artsdata changes since ${since.toISOString()} for calendar ${calendarSlug} and source ${sourceGraph}`);
-    const bindings = await this._fetchChangeLog(calendarSlug , sourceGraph , since);
+    const bindings = await this._fetchChangeLog(sourceGraph , since);
     const changedEvents = ArtsdataChangeLogService.groupChanges(bindings);
-    await this._loggerService.infoLogs(`Found changes on ${changedEvents.length} Footlight event(s) in Artsdata`);
+    await this._loggerService.infoLogs(`Found changes on ${changedEvents.length} upcoming event(s) in Artsdata`);
 
     const eventsToNotify: ChangedEvent[] = [];
     for (const changedEvent of changedEvents) {
-      const cmsEvent = await this._fetchCmsEvent(token , calendarId , changedEvent.id , footlightBaseUrl);
+      const cmsEvent = await this._findCmsEventByArtsdataUri(token , calendarId , changedEvent.artsdataUri , footlightBaseUrl);
       if (!cmsEvent) {
-        await this._loggerService.infoLogs(`\tSkipping ${changedEvent.id}: not found in calendar ${calendarSlug}`);
-        continue;
-      }
-      const editedInCms = !!cmsEvent.modifiedByUserId && cmsEvent.modifiedByUserId !== currentUser.id;
-      if (editedInCms) {
-        await this._loggerService.infoLogs(`\tSkipping ${changedEvent.id}: last modified by a CMS user, not the aggregator`);
+        await this._loggerService.infoLogs(`\tSkipping ${changedEvent.artsdataUri}: no matching event in calendar ${calendarSlug}`);
         continue;
       }
       eventsToNotify.push({
         ...changedEvent ,
+        id: cmsEvent.id ,
         name: cmsEvent.name ,
-        cmsUrl: CMS.EVENT_URL_TEMPLATE.replace('CALENDAR_ID' , calendarId).replace('EVENT_ID' , changedEvent.id) ,
+        cmsUrl: CMS.EVENT_URL_TEMPLATE.replace('CALENDAR_ID' , calendarId).replace('EVENT_ID' , cmsEvent.id) ,
       });
     }
 
@@ -91,13 +87,9 @@ export class ArtsdataChangeLogService {
     }
   }
 
-  private async _fetchChangeLog(calendarSlug: string , sourceGraph: string , since: Date) {
-    const calendarGraph = ArtsdataChangeLogService.normaliseGraphUri(
-      ArtsDataChangeLogConstants.FOOTLIGHT_CALENDAR_GRAPH.replace('CALENDAR_SLUG' , calendarSlug));
+  private async _fetchChangeLog(sourceGraph: string , since: Date) {
     const query = ArtsDataChangeLogConstants.SPARQL_QUERY_FOR_EVENT_CHANGES
-      .replace('CALENDAR_GRAPH' , calendarGraph)
       .replace('SOURCE_GRAPH' , sourceGraph)
-      .replace('FOOTLIGHT_EVENT_URI_PREFIX' , ArtsDataChangeLogConstants.FOOTLIGHT_EVENT_URI_PREFIX)
       .replace('SINCE' , since.toISOString());
     const body = new URLSearchParams({ query }).toString();
     const response = await SharedService.postUrl(ArtsDataAPIUrl.ARTSDATA_SPARQL_ENDPOINT , body , {
@@ -107,14 +99,15 @@ export class ArtsdataChangeLogService {
     return response?.data?.results?.bindings ?? [];
   }
 
-  private async _fetchCmsEvent(token: string , calendarId: string , eventId: string , footlightBaseUrl: string) {
-    const url = `${footlightBaseUrl}${FootlightPaths.ADD_EVENT}/${eventId}`;
+  private async _findCmsEventByArtsdataUri(token: string , calendarId: string , artsdataUri: string , footlightBaseUrl: string) {
+    const url = `${footlightBaseUrl}${FootlightPaths.SEARCH}?query=${encodeURIComponent(artsdataUri)}&classes=Event`;
     const response = await SharedService.fetchUrl(url , SharedService.createHeaders(token , calendarId));
     // No response or a server error means the CMS is unavailable, not that the event is missing
     if (!response || response.status >= HttpStatus.INTERNAL_SERVER_ERROR) {
-      throw new Error(`Could not fetch event ${eventId} from the CMS (status ${response?.status ?? 'none'})`);
+      throw new Error(`Could not search the CMS for ${artsdataUri} (status ${response?.status ?? 'none'})`);
     }
-    return response.status === HttpStatus.OK ? response.data : null;
+    const results = response.status === HttpStatus.OK ? response.data : null;
+    return Array.isArray(results) && results.length ? results[0] : null;
   }
 
   static normaliseGraphUri(uri: string): string {
@@ -129,18 +122,17 @@ export class ArtsdataChangeLogService {
     const events = new Map<string , ChangedEvent>();
     const changes = new Map<string , PropertyChange>();
     for (const binding of bindings) {
-      const src: string = binding.src?.value;
-      if (!src?.startsWith(ArtsDataChangeLogConstants.FOOTLIGHT_EVENT_URI_PREFIX)) {
+      const artsdataUri: string = binding.event?.value;
+      if (!artsdataUri) {
         continue;
       }
-      const id = src.substring(ArtsDataChangeLogConstants.FOOTLIGHT_EVENT_URI_PREFIX.length);
-      let event = events.get(id);
+      let event = events.get(artsdataUri);
       if (!event) {
-        event = { id , artsdataUri: binding.event?.value , changes: [] };
-        events.set(id , event);
+        event = { artsdataUri , changes: [] };
+        events.set(artsdataUri , event);
       }
       const property = this._localName(binding.property?.value);
-      const changeKey = `${id}|${binding.activity?.value}|${property}`;
+      const changeKey = `${artsdataUri}|${binding.activity?.value}|${property}`;
       let change = changes.get(changeKey);
       if (!change) {
         change = { property , changedAt: binding.changedAt?.value , removed: [] , added: [] };

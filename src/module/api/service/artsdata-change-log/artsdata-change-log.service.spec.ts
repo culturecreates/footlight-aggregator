@@ -26,7 +26,6 @@ describe("ArtsdataChangeLogService", () => {
             row("name", "removed", {type: "literal", "xml:lang": "fr", value: "Bleu Jeans Bleu Record NºV"}),
         ]);
         expect(result).toEqual([{
-            id: "691ea2236278b1919c520853",
             artsdataUri: EVENT,
             changes: [{
                 property: "name",
@@ -56,9 +55,9 @@ describe("ArtsdataChangeLogService", () => {
         expect(result[0].changes[0].added).toEqual([{value: "EventCancelled"}]);
     });
 
-    it("ignores rows that are not Footlight events", () => {
+    it("ignores rows without an Artsdata event URI", () => {
         const result = ArtsdataChangeLogService.groupChanges([
-            row("name", "added", {type: "literal", value: "x"}, {src: {type: "uri", value: "http://kg.footlight.io/resource/x"}}),
+            row("name", "added", {type: "literal", value: "x"}, {event: undefined}),
         ]);
         expect(result).toEqual([]);
     });

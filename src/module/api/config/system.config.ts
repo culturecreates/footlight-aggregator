@@ -17,5 +17,5 @@ export const HEADER: { CMS_REFERER_HEADER : string } = {
 
 export const CMS: { EVENT_URL_TEMPLATE: string } = {
     EVENT_URL_TEMPLATE: env.CMS_EVENT_URL_TEMPLATE
-        || `${HEADER.CMS_REFERER_HEADER.replace(/\/$/, '')}/dashboard/CALENDAR_ID/events/event/EVENT_ID`
+        || `${HEADER.CMS_REFERER_HEADER.replace(/\/$/, '')}/dashboard/CALENDAR_ID/events/EVENT_ID`
 }
