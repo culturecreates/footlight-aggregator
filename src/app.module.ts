@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ApiModule } from './module/api/api.module';
 import {
+  ArtsdataChangeLogService ,
   AuthenticationService ,
   EventService ,
   LoggerService ,
@@ -12,13 +13,14 @@ import {
   SharedService ,
 } from './module/api/service';
 import { TaxonomyService } from './module/api/service/taxonomy';
-import { ImportEntities , ImportRdf } from './module/api/script';
+import { ImportEntities , ImportRdf , NotifyArtsdataChanges } from './module/api/script';
 
 @Module({
   controllers: [] ,
   imports: [ApiModule] ,
   providers: [AuthenticationService , EventService , PostalAddressService , PersonService , PlaceService ,
-    OrganizationService , TaxonomyService , PersonOrganizationService , SharedService , ImportEntities , ImportRdf , LoggerService] ,
+    OrganizationService , TaxonomyService , PersonOrganizationService , SharedService , ImportEntities , ImportRdf , NotifyArtsdataChanges , LoggerService ,
+    ArtsdataChangeLogService] ,
 })
 export class AppModule {
 }

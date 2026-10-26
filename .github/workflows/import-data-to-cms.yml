@@ -30,6 +30,14 @@ on:
         required: false
         type: string
         default: "V3"
+      notify_artsdata_changes:
+        required: false
+        type: boolean
+        default: true
+      change_log_lookback_hours:
+        required: false
+        type: number
+        default: 168
     secrets:
       aggregator_password:
         required: true
@@ -42,6 +50,9 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    outputs:
+      import_outcome: ${{ steps.import.outcome }}
+      notify_outcome: ${{ steps.notify.outcome }}
     steps:
       - uses: actions/checkout@v5
       - name: Install dependencies
@@ -54,8 +65,10 @@ jobs:
           CMS_REFERER_HEADER=${{ vars.CMS_REFERER_HEADER }}
           EOF
       - name: Build Footlight Aggregator
+        id: build
         run: npm run build
       - name: Import entities to footlight
+        id: import
         run: |
           node ./dist/main-commander.js  \
             import:entities -u ${{inputs.aggregator_username}} -p ${{secrets.aggregator_password}} \
@@ -65,6 +78,48 @@ jobs:
             -b ${{inputs.batch_size}} \
             -m ${{inputs.mapping_file_url}} \
             -q ${{inputs.query_version}}
+      - name: Find start of Artsdata change window
+        id: change-window
+        if: ${{ !cancelled() && inputs.notify_artsdata_changes && steps.build.outcome == 'success' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+          NOTIFY_STEP: Notify CMS about Artsdata changes
+          BACKFILL_FROM: ${{ vars.ARTSDATA_CHANGES_BACKFILL_FROM }}
+        run: |
+          # Start from the last finished run of the calling workflow whose notify step succeeded (even if
+          # its import failed), so no change is missed or repeated. Runs from before this feature have no such step.
+          # If GitHub can't be queried, exit without a date and the notify step uses the lookback hours.
+          workflow_file=$(basename "${WORKFLOW_REF%%@*}")
+          run_ids=$(gh run list --repo "$REPO" --workflow "$workflow_file" --status completed \
+            --limit 20 --json databaseId --jq '.[].databaseId') || exit 0
+          since="$BACKFILL_FROM"
+          for id in $run_ids; do
+            started_at=$(gh run view "$id" --repo "$REPO" --json startedAt,jobs --jq \
+              'if any(.jobs[].steps[]?; .name == env.NOTIFY_STEP and .conclusion == "success") then .startedAt else empty end') || exit 0
+            if [ -n "$started_at" ]; then
+              since="$started_at"
+              break
+            fi
+          done
+          echo "since=${since}" >> "$GITHUB_OUTPUT"
+      # window still starts before these changes and they are retried rather than skipped
+      - name: Notify CMS about Artsdata changes
+        id: notify
+        if: ${{ !cancelled() && inputs.notify_artsdata_changes && steps.build.outcome == 'success' }}
+        env:
+          SINCE: ${{ steps.change-window.outputs.since }}
+        run: |
+          window="--lookback-hours ${{ inputs.change_log_lookback_hours }}"
+          if [ -n "$SINCE" ] && [ "$SINCE" != "null" ]; then window="--since $SINCE"; fi
+          node ./dist/main-commander.js  \
+            notify:artsdata-changes -u ${{inputs.aggregator_username}} -p ${{secrets.aggregator_password}} \
+            -s ${{inputs.source_url}} \
+            -i ${{inputs.footlight_base_url}} \
+            -c ${{inputs.footlight_calendar_id}} \
+            $window
 
   send-failure-notification:
     runs-on: ubuntu-latest
@@ -78,8 +133,27 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SES_SECRET_ACCESS_KEY }}
         aws-region: ca-central-1
     - name: Send email
+      env:
+        IMPORT_OUTCOME: ${{ needs.run.outputs.import_outcome }}
+        NOTIFY_OUTCOME: ${{ needs.run.outputs.notify_outcome }}
+        WORKFLOW: ${{ github.workflow }}
+        REPO: ${{ github.repository }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       run: |
+        if [ "$IMPORT_OUTCOME" = "failure" ] && [ "$NOTIFY_OUTCOME" = "failure" ]; then
+          failed="Import and Artsdata change notification both failed"
+        elif [ "$IMPORT_OUTCOME" = "failure" ]; then
+          failed="Import failed"
+        elif [ "$NOTIFY_OUTCOME" = "failure" ]; then
+          failed="Artsdata change notification failed (the import succeeded)"
+        else
+          failed="Setup failed before the import (checkout, install or build)"
+        fi
+        # Build the message with jq so names and URLs are escaped safely
+        jq -n --arg subject "Medium Alert - $REPO [$WORKFLOW] - $failed" \
+          --arg body "$WORKFLOW in $REPO: $failed."$'\n\n'"Import: ${IMPORT_OUTCOME:-not run}"$'\n'"Artsdata change notification: ${NOTIFY_OUTCOME:-not run}"$'\n\n'"Run: $RUN_URL" \
+          '{Subject: {Data: $subject}, Body: {Text: {Data: $body}}}' > message.json
         aws ses send-email \
           --from ${{vars.FOOTLIGHT_INFO_EMAIL}} \
           --destination "ToAddresses=${{ vars.MEDIUM_ALERTS_EMAIL }}" \
-          --message "Subject={Data='Medium Alert - ${{github.repository}} [${{github.workflow}}]'},Body={Text={Data='${{github.workflow}} in ${{github.repository}} failed.'}}"
+          --message file://message.json
