@@ -5,7 +5,8 @@
 #   source_placeholder: Graph where the event is stored
 # 
 # CHANGE LOG: 
-# - v4 is a change to load sub-events that are minted as separate events, skipping their super-event
+# - v4 changes the subject of the contruct to use the external event URI, because an event series may not be minted in Artsdata. 
+#      Also includes <sub-event> schema:sameAs <artsdata event> that are minted in Artsdata. 
 #
 # NOTES:
 # - To use, pass this SPARQL Github raw URL as a parm to Artsdata query API:
@@ -19,8 +20,8 @@
 #
 PREFIX schema: <http://schema.org/>
 construct {
-    ?event_adid a ?event_type .
-    ?event_adid schema:name ?name ;
+    ?event a ?event_type .
+    ?event schema:name ?name ;
                 schema:description ?description ;
                 schema:location ?place_coalesced ;
                 schema:startDate ?startDate ;
@@ -37,8 +38,9 @@ construct {
                 schema:subEvent ?subEvent ;
                 schema:contactPoint ?contact_point .
     ?place_coalesced a schema:Place .
-    ?subEvent  schema:startDate ?subEventStartDate ;
-               schema:endDate ?subEventEndDate .
+    ?subEvent   schema:startDate ?subEventStartDate ;
+                schema:endDate ?subEventEndDate ;
+    		    schema:sameAs ?subEventArtsdataId .
     ?contact_point  schema:name ?contact_name ;
                     schema:url ?contact_url_uri ;
                     schema:telephone ?contact_telephone ;
@@ -68,11 +70,6 @@ where {
                 filter(contains(str(?event_adid2),"kg.artsdata.ca/resource/K"))
             }
             bind(coalesce(?event_adid1, ?event_adid2) as ?event_adid)
-            filter(BOUND(?event_adid))
-            FILTER NOT EXISTS { # Exclude event series by checking if event has sub-events with Artsdata IDs
-                ?event schema:subEvent ?subEvent .
-                filter(contains(str(?subEvent),"kg.artsdata.ca/resource/K"))
-            }
         }				
     }
     graph <source_placeholder> {
@@ -147,6 +144,11 @@ where {
             ?subEvent schema:startDate ?subEventStartDate .
             OPTIONAL {
                 ?subEvent schema:endDate ?subEventEndDate .
+            }
+            OPTIONAL {
+                graph <http://kg.artsdata.ca/core> {
+                    ?subEvent schema:sameAs ?subEventArtsdataId .
+                }
             }
         }
         optional {
