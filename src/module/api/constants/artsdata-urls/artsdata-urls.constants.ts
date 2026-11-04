@@ -1,9 +1,15 @@
 export const ArtsDataAPIUrl = {
-  EVENTS_V3:"https://api.artsdata.ca/query?sparql=https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/sparql/query-events-v3.sparql&frame=event_footlight&format=json",
-  EVENTS_V4: "https://api.artsdata.ca/query?sparql=https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/sparql/query-events-v4.sparql&frame=event_footlight&format=json",
-  PLACE_BY_ID: "http://api.artsdata.ca/query?uri=ARTS_DATA_ID&format=json&frame=ranked_place_footlight&sparql=https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/sparql/query-place-v2.sparql",
-  PERSON_ORGANIZATION_BY_ID: "http://api.artsdata.ca/query?adid=ARTS_DATA_ID&format=json&frame=ranked_org_person_footlight&sparql=ranked_org_person_footlight",
-  ARTSDATA_SPARQL_ENDPOINT: "https://db.artsdata.ca/repositories/artsdata"
+  EVENTS_V3:
+    'https://api.artsdata.ca/query?sparql=https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/sparql/query-events-v3.sparql&frame=event_footlight&format=json' ,
+  EVENTS_V4:
+    'https://api.artsdata.ca/query?sparql=https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/sparql/query-events-v4.sparql&frame=event_footlight&format=json' ,
+  CROWS_THEATRE_EVENTS:
+    'https://api.artsdata.ca/query?sparql=https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/sparql/query-events-crows-theatre.sparql&frame=event_footlight&format=json' ,
+  PLACE_BY_ID:
+    'http://api.artsdata.ca/query?uri=ARTS_DATA_ID&format=json&frame=ranked_place_footlight&sparql=https://raw.githubusercontent.com/culturecreates/footlight-aggregator/main/sparql/query-place-v2.sparql' ,
+  PERSON_ORGANIZATION_BY_ID:
+    'http://api.artsdata.ca/query?adid=ARTS_DATA_ID&format=json&frame=ranked_org_person_footlight&sparql=ranked_org_person_footlight' ,
+  ARTSDATA_SPARQL_ENDPOINT: 'https://db.artsdata.ca/repositories/artsdata' ,
 };
 
 export const ArtsDataConstants = {
