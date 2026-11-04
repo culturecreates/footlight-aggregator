@@ -127,7 +127,6 @@ where {
                 }
             }
         }
-        group by ?event
         order by ?event
         limit 10 offset 0
     }
