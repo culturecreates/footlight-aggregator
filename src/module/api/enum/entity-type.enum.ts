@@ -13,5 +13,6 @@ export enum EventType {
 
 export enum QueryVersion {
   V3 = 'V3',
-  V4 = 'V4'
+  V4 = 'V4' ,
+  V_CROWS_THEATRE = 'V_CROWS_THEATRE' ,
 }
