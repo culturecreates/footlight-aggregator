@@ -69,7 +69,7 @@ where {
                         ?event a ?type .
                     }
 
-                    ?event_adid1 schema:sameAs ?event;
+                    ?event_adid schema:sameAs ?event;
                     a ado:Event.
 
                     # Remove events that are sub-events of an event series.
