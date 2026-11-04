@@ -69,8 +69,8 @@ where {
                         ?event a ?type .
                     }
 
-                    ?event_adid schema:sameAs ?event;
-                    a ado:Event.
+                    ?event schema:sameAs ?event_adid.
+                    ?event_adid a ado:Event.
 
                     # Remove events that are sub-events of an event series.
                     filter(not exists {
