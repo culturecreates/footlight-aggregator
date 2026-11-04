@@ -52,14 +52,14 @@ construct {
     schema:additionalType ?aggregate_offer_type  ;
     schema:name ?aggregate_offer_name ;
     schema:url ?aggregate_offer_url_uri .
-    ?event_adid schema:image ?id_imageObject .
+    ?event schema:image ?id_imageObject .
     ?id_imageObject schema:url ?image_uri .
-    ?event_adid schema:location ?virtual_location .
+    ?event schema:location ?virtual_location .
     ?virtual_location  ?virtual_location_prop ?virtual_location_obj .
 }
 where {
     {
-        select ?event_adid ?event where {
+        select distinct ?event_adid ?event where {
             {
                 {
                     graph <source_placeholder> {
