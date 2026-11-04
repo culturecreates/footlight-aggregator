@@ -367,15 +367,17 @@ export class EventService {
         }
     }
 
-    private async _fetchEventsFromArtsData(source: string, batchSize: number, offset: number, queryVersion?: QueryVersion) {
-        const limit = batchSize ? batchSize : 300;
-        let url, artsDataUrl;
-        if (queryVersion == QueryVersion.V4) {
-            artsDataUrl = ArtsDataAPIUrl.EVENTS_V4;
-        } else {
-            artsDataUrl = ArtsDataAPIUrl.EVENTS_V3;
-        }
-        url = artsDataUrl + '&source=' + source + '&limit=' + limit + '&offset=' + offset;
+  private async _fetchEventsFromArtsData(source: string , batchSize: number , offset: number , queryVersion?: QueryVersion) {
+    const limit = batchSize ? batchSize : 300;
+    let url , artsDataUrl;
+    if (queryVersion == QueryVersion.V4) {
+      artsDataUrl = ArtsDataAPIUrl.EVENTS_V4;
+    } else if (queryVersion == QueryVersion.V_CROWS_THEATRE) {
+      artsDataUrl = ArtsDataAPIUrl.CROWS_THEATRE_EVENTS;
+    } else {
+      artsDataUrl = ArtsDataAPIUrl.EVENTS_V3;
+    }
+    url = artsDataUrl + '&source=' + source + '&limit=' + limit + '&offset=' + offset;
 
         this._loggerService.infoLogs(`Fetching Events From ArtsData.\n\tSource: ${source}\n\tUrl: ${url}.\n`);
         const artsDataResponse = await SharedService.fetchUrl(url);
