@@ -59,7 +59,7 @@ construct {
 }
 where {
     {
-        select ?event_adid (MIN(?event) as ?event) where {
+        select ?event_adid ?event where {
             {
                 {
                     graph <source_placeholder> {
@@ -127,7 +127,8 @@ where {
                 }
             }
         }
-        group by ?event_adid order by ?event_adid
+        group by ?event
+        order by ?event
         limit 10 offset 0
     }
 
