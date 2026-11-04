@@ -23,7 +23,7 @@ import {parse} from '@frogcat/ttl2jsonld';
 import {EntityPredicates, EventPredicates} from '../../constants/artsdata-urls/rdf-types.constants';
 import {Filters} from '../../model/FilterCondition.model';
 import {FilterEntityHelper} from '../../helper/filter-entity.helper';
-import {EVENT_CONFIGURATIONS, HEADER} from '../../config';
+import { EVENT_CONFIGURATIONS } from '../../config';
 
 @Injectable()
 export class EventService {
@@ -676,7 +676,7 @@ export class EventService {
             if (priceValue) {
                 prices.push({
                     name: offer.name,
-                    price: offer.price ? parseInt(priceValue) : undefined,
+                  price: offer.price ? parseFloat(priceValue) : undefined ,
                     url: offer.url ? {uri: offer.url} : undefined,
                 });
             }
