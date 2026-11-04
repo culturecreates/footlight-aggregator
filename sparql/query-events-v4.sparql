@@ -1,13 +1,27 @@
-
-# Experimental: Using Crow's Theatre graph to view a list of events and event series data as seen by Footlight CMS aggregator
-
-# Note: This returns subEvents with location. The frame needs to be modified "subEvent":{ "location":[{"@embed": "@always"}] to ensure the location will have enough data to be @contained wih Place @type.
-
+# Used to debug a single event as seen by Footlight CMS aggregator v4
+#
+# INPUTS: 
+#   uri_placeholder: URI of the event to debug  
+#   source_placeholder: Graph where the event is stored
+# 
+# CHANGE LOG: 
+# - v4 changes the subject of the contruct to use the external event URI, because an event series may not be minted in Artsdata. 
+#      Also includes <sub-event> schema:sameAs <artsdata event> that are minted in Artsdata. 
+#
+# NOTES:
+# - To use, pass this SPARQL Github raw URL as a parm to Artsdata query API:
+#   https://api.artsdata.ca/query?frame=event_footlight&format=json
+#       &sparql={{THIS_SPARQL_GITHUB_URL}}
+#       &uri={{URI}}
+#       &source={{GRAPH}}
+# - Not used in production
+# - Used in Artsdata Nebula to debug (visible to Artsdata stewards level 2 users)
+# - Same logic as query-events-v4.sparql except for a single uri
+#
 PREFIX schema: <http://schema.org/>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 construct {
-    ?event_adid a ?event_type .
-    ?event_adid schema:name ?name ;
+    ?event a ?event_type .
+    ?event schema:name ?name ;
                 schema:description ?description ;
                 schema:location ?place_coalesced ;
                 schema:startDate ?startDate ;
@@ -17,17 +31,16 @@ construct {
                 schema:performer ?performer_coalesced ;
                 schema:url ?url_uri ;
                 schema:keywords ?keywords ;
-                schema:additionalType ?additionalType;
+                schema:additionalType ?additionalType ;
                 schema:recordedIn ?recordedIn_str ;
                 schema:audience ?audience ;
                 schema:sameAs ?self_adid , ?event , ?social_uri ;
                 schema:subEvent ?subEvent ;
                 schema:contactPoint ?contact_point .
     ?place_coalesced a schema:Place .
-    ?subEventLocation a schema:Place .
-    ?subEvent  schema:startDate ?subEventStartDate ;
-               schema:location ?subEventLocation;
-               schema:endDate ?subEventEndDate .
+    ?subEvent   schema:startDate ?subEventStartDate ;
+                schema:endDate ?subEventEndDate ;
+    		    schema:sameAs ?subEventArtsdataId .
     ?contact_point  schema:name ?contact_name ;
                     schema:url ?contact_url_uri ;
                     schema:telephone ?contact_telephone ;
@@ -47,29 +60,52 @@ where {
         select ?event_adid (MIN(?event) as ?event) where {
             {
                 select  ?event_adid ?event where {
-                    graph <http://kg.artsdata.ca/culture-creates/footlight/crowstheatre-com> {
-                        ?event a schema:Event .
+                    graph <source_placeholder> {
+                        values ?type {
+                            schema:Event schema:EventSeries
+                        }
+                        ?event a ?type .
                     }
-                    ?event_adid schema:sameAs ?event .
-                    filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
-                }
-            }
-            UNION
-            {
-                select  ?event_adid ?event where {
-                    graph <http://kg.artsdata.ca/culture-creates/footlight/crowstheatre-com> {
-                        ?event a schema:EventSeries .
+                    OPTIONAL {
+                        ?event_adid1 schema:sameAs ?event .
+                        filter(contains(str(?event_adid1),"kg.artsdata.ca/resource/K"))
                     }
-                    ?event_adid schema:sameAs ?event .
-                    filter(contains(str(?event_adid),"kg.artsdata.ca/resource/K"))
+                    OPTIONAL {
+                        ?event schema:sameAs ?event_adid2 .
+                        filter(contains(str(?event_adid2),"kg.artsdata.ca/resource/K"))
+                    }
+                    bind(coalesce(?event_adid1, ?event_adid2) as ?event_adid)
+
+                     # Remove events that are sub-events of an event series.
+                    filter(not exists {?event ^schema:subEvent ?superEvent .})
                 }
             }
             MINUS
+             # CMS limitation: Remove events with more than 1 location
             {
                 select ?event
                 where {
-                    graph <http://kg.artsdata.ca/culture-creates/footlight/crowstheatre-com> {
-                        ?event a schema:EventSeries ;
+                    graph <source_placeholder> {
+                        values ?type {
+                            schema:Event schema:EventSeries
+                        }
+                        ?event a ?type ;
+                               schema:name ?name ;
+                               schema:subEvent ?subEvent  .
+                        ?subEvent  schema:location ?subLocation .
+                    }
+                } group by ?event ?name  having (count( distinct ?subLocation) > 1)
+            }
+            MINUS
+            # CMS limitation: Remove events with sub-events that are mult-day subevents
+            {
+                select ?event
+                where {
+                    graph <source_placeholder> {
+                        values ?type {
+                            schema:Event schema:EventSeries
+                        }
+                        ?event a ?type ;
                                schema:name ?name ;
                                schema:subEvent ?subEvent  .
                         ?subEvent  schema:startDate ?startDate ;
@@ -81,14 +117,16 @@ where {
                 }
             }
         }
-        group by ?event_adid
+        group by ?event_adid order by ?event_adid
         limit 10 offset 0
     }
-    graph <http://kg.artsdata.ca/culture-creates/footlight/crowstheatre-com> {
+    graph <source_placeholder> {
         ?event a ?event_type ;
                schema:name ?name ;
-               schema:description ?description ;
                schema:startDate ?startDate .
+        optional {
+            ?event schema:description ?description .
+        }
         optional {
             ?event schema:endDate ?endDate .
         }
@@ -105,11 +143,22 @@ where {
             ?event schema:url ?url_str .
             bind(URI(str(?url_str)) as ?url_uri)
         }
+        
+        # The next 2 parts load images
         optional {
+            # This loads event.image 
             ?event schema:image ?image .
-            bind(URI(concat(str(?event),"#imageObject")) as ?id_imageObject)
+            bind(URI(concat(str(?event),"#imageObject")) as ?id_imageObject) 
             bind(URI(?image) as ?image_uri)
-        }
+            filter( not exists { ?image schema:url ?some_url } )
+        } 
+        optional {
+            # This loads event.image.url 
+            ?event schema:image/schema:url ?image .
+            bind(URI(concat(str(?event),"#imageObject")) as ?id_imageObject) 
+            bind(URI(?image) as ?image_uri)
+        } 
+        
         optional {
             ?event schema:offers ?offer .
             ?offer a schema:Offer ;
@@ -139,6 +188,18 @@ where {
             bind(str(?recordedIn) as ?recordedIn_str)
         }
         optional {
+            ?event schema:subEvent ?subEvent .
+            ?subEvent schema:startDate ?subEventStartDate .
+            OPTIONAL {
+                ?subEvent schema:endDate ?subEventEndDate .
+            }
+            OPTIONAL {
+                graph <http://kg.artsdata.ca/core> {
+                    ?subEvent schema:sameAs ?subEventArtsdataId .
+                }
+            }
+        }
+        optional {
             ?event schema:contactPoint ?contact_point .
             OPTIONAL {
                 ?contact_point schema:email ?contact_email .
@@ -162,7 +223,7 @@ where {
         }
     }
     # Add location
-    ?event_adid schema:sameAs/schema:location ?place  .
+    ?event schema:location ?place  .
     optional {
         ?place_adid schema:sameAs ?place .
         filter(contains(str(?place_adid),"kg.artsdata.ca/resource/K"))
@@ -171,49 +232,44 @@ where {
         ?place schema:sameAs ?place_adid2 .
         filter(contains(str(?place_adid2),"kg.artsdata.ca/resource/K"))
         bind(URI(?place_adid2) as ?place_adid2_uri)
-    }
-    bind(coalesce(?place_adid, ?place_adid2_uri, ?place) as ?place_coalesced)
-    filter(contains(str(?place_coalesced),"kg.artsdata.ca/resource/K"))
+    } 
+    bind(coalesce(?place_adid, ?place_adid2_uri, ?place) as ?place_coalesced) 
+    # filter(contains(str(?place_coalesced),"kg.artsdata.ca/resource/K"))
+    
+    # Add organizer
     optional {
-        ?event_adid schema:sameAs/schema:organizer ?organizer .
+        ?event schema:organizer ?organizer .
         filter(contains(str(?organizer),"kg.artsdata.ca/resource/K"))
     }
     optional {
-        ?event_adid schema:sameAs/schema:organizer ?organizer  .
+        ?event schema:organizer ?organizer  .
         ?organizer_adid schema:sameAs ?organizer .
         filter(contains(str(?organizer_adid),"kg.artsdata.ca/resource/K"))
     }
     optional {
-        ?event_adid schema:sameAs/schema:organizer ?organizer  .
+        ?event schema:organizer ?organizer  .
         ?organizer schema:sameAs ?organizer_adid .
         filter(contains(str(?organizer_adid),"kg.artsdata.ca/resource/K"))
         bind(URI(?organizer_adid) as ?organizer_adid_uri)
     }
     bind(URI(coalesce(?organizer_adid, ?organizer_adid_uri, ?organizer)) as ?organizer_coalesced)
+    
+    # Add performer
     optional {
-        ?event_adid schema:sameAs/schema:performer ?performer .
+        ?event schema:performer ?performer .
         filter(contains(str(?performer),"kg.artsdata.ca/resource/K"))
     }
     optional {
-        ?event_adid schema:sameAs/schema:performer ?performer .
+        ?event schema:performer ?performer .
         ?performer_adid schema:sameAs ?performer .
         filter(contains(str(?performer_adid),"kg.artsdata.ca/resource/K"))
     }
     optional {
-        ?event_adid schema:sameAs/schema:performer ?performer .
+        ?event schema:performer ?performer .
         ?performer schema:sameAs ?performer_adid .
         bind(URI(?performer_adid) as ?performer_adid_uri)
         filter(contains(str(?performer_adid),"kg.artsdata.ca/resource/K"))
     }
     bind(URI(coalesce( ?performer_adid, ?performer_adid_uri, ?performer)) as ?performer_coalesced)
-    optional {
-        ?event schema:subEvent/^schema:sameAs ?subEvent .
-        ?subEvent schema:startDate ?subEventStartDate ;
-		schema:location ?subEventLocation.
-        OPTIONAL {
-            ?subEvent schema:endDate ?subEventEndDate .
-        }
-        filter(contains(str(?subEvent),"kg.artsdata.ca/resource/K"))
-    }
     bind(?event_adid as ?self_adid)
 }
