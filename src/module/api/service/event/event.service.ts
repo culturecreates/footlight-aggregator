@@ -384,7 +384,7 @@ export class EventService {
     if (artsDataResponse?.status !== HttpStatus.OK) {
       return null;
     }
-    return artsDataResponse.data.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
+    return artsDataResponse.data.data;
   }
 
   private async _fetchEventSeriesFromArtsData(source: string , batchSize: number , offset: number) {
@@ -594,14 +594,14 @@ export class EventService {
   }
 
   private _formatSameAs(elements: { uri: string }[]) {
-    return elements.map(element => {
-      if (element.uri.startsWith(FacebookConstants.HTTPS) || element.uri.startsWith(FacebookConstants.HTTP)) {
-        return {
-          uri: element.uri ,
-          type: SameAsTypes.FACEBOOK_LINK ,
-        };
+    return elements.map(({ uri }) => {
+      if (uri.startsWith(FacebookConstants.HTTPS) || uri.startsWith(FacebookConstants.HTTP)) {
+        return { uri , type: SameAsTypes.FACEBOOK_LINK };
       }
-      return element;
+      if (uri.includes('kg.artsdata.ca/resource/')) {
+        return { uri , type: SameAsTypes.ARTSDATA_IDENTIFIER };
+      }
+      return { uri };
     });
   }
 
@@ -943,14 +943,14 @@ export class EventService {
       endTime: event.endDateTime?.split('T')[1]?.slice(0 , 5) ,
       name: event.name ,
       description: event.description ,
-      sameAs: [{ uri: event.uri , type: 'ArtsdataIdentifier' }] ,
     };
+    subEventToReturn['sameAs'] = event.sameAs ? this._formatSameAs(event.sameAs) : undefined;
+
     if (event.location) {
       const locationId = await this._placeService.getFootlightIdentifier(calendarId , token , footlightBaseUrl ,
         event.location['@none'] || event.location['Place'] , currentUserId , mappingFile);
       subEventToReturn['locationId'] = locationId ? { place: { entityId: locationId } } : locationId;
     }
-
     return subEventToReturn;
   }
 

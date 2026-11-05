@@ -8,7 +8,8 @@ export const FacebookConstants = {
 };
 
 export const SameAsTypes = {
-  FACEBOOK_LINK: "http://www.wikidata.org/entity/P2013"
+  FACEBOOK_LINK: 'http://www.wikidata.org/entity/P2013' ,
+  ARTSDATA_IDENTIFIER: 'ArtsdataIdentifier' ,
 };
 
 export const OfferConstants = {
