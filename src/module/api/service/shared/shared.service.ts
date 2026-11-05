@@ -13,7 +13,8 @@ import { EventPredicates } from '../../constants/artsdata-urls/rdf-types.constan
 export class SharedService {
   constructor(
     @Inject(forwardRef(() => LoggerService))
-    private readonly _loggerService: LoggerService) {
+    private readonly _loggerService: LoggerService ,
+  ) {
   }
 
   public static async fetchFromArtsDataById(id: string , baseUrl: string) {
@@ -36,8 +37,14 @@ export class SharedService {
     return await axios.post(url , body , { headers });
   }
 
-
-  static async callFootlightAPI(method: string , calendarId: string , token: string , url: string , body , language?: string) {
+  static async callFootlightAPI(
+    method: string ,
+    calendarId: string ,
+    token: string ,
+    url: string ,
+    body ,
+    language?: string ,
+  ) {
     const headers = this.createHeaders(token , calendarId , language);
     let responseData;
     let responseStatus;
@@ -47,31 +54,43 @@ export class SharedService {
         responseData = response.data;
         responseStatus = response.status;
       } catch (reason) {
-
         responseData = reason.response?.data;
         responseStatus = reason.response?.status;
       }
       return { status: responseStatus , response: responseData };
     }
     if (method === HttpMethodsEnum.PATCH) {
-      await axios.patch(url , body , { headers }).then(response => {
-        responseData = response.data;
-        responseStatus = response.status;
-      }).catch((error) => {
-        responseData = error?.response?.data;
-        responseStatus = error?.response?.status;
-      });
+      await axios
+        .patch(url , body , { headers })
+        .then((response) => {
+          responseData = response.data;
+          responseStatus = response.status;
+        })
+        .catch((error) => {
+          responseData = error?.response?.data;
+          responseStatus = error?.response?.status;
+        });
       return { status: responseStatus , response: responseData };
     }
     this._loggerService(`Method unsupported`);
     Exception.internalServerError('Method unsupported');
   }
 
-  public static async patchEventInFootlight(calendarId: string , token: string , footlightBaseUrl: string ,
-                                            eventId: string , dto: any) {
-
+  public static async patchEventInFootlight(
+    calendarId: string ,
+    token: string ,
+    footlightBaseUrl: string ,
+    eventId: string ,
+    dto: any ,
+  ) {
     const url = footlightBaseUrl + FootlightPaths.ADD_EVENT;
-    const updateResponse = await this.updateEntityInFootlight(calendarId , token , eventId , url , dto);
+    const updateResponse = await this.updateEntityInFootlight(
+      calendarId ,
+      token ,
+      eventId ,
+      url ,
+      dto ,
+    );
     if (updateResponse.status === HttpStatus.OK) {
       this._loggerService(`The event successfully synchronised.`);
       return { message: 'The event successfully synchronised.' };
@@ -81,27 +100,59 @@ export class SharedService {
     }
   }
 
-  public static async syncEntityWithFootlight(calendarId: string, token: string, url: string, body: any,
-                                              currentUserId: string) {
-    const addResponse = await this.addEntityToFootlight(calendarId, token, url, body);
+  public static async syncEntityWithFootlight(
+    calendarId: string ,
+    token: string ,
+    url: string ,
+    body: any ,
+    currentUserId: string ,
+  ) {
+    const addResponse = await this.addEntityToFootlight(
+      calendarId ,
+      token ,
+      url ,
+      body ,
+    );
     const { status, response } = addResponse;
     if (status === HttpStatus.CREATED) {
-      this._loggerService(`\tAdded Entity (${response.id} : ${body.uri}) to Footlight!`);
-      return { status: status, id: response.id }
+      this._loggerService(
+        `\tAdded Entity (${response.id} : ${body.uri}) to Footlight!` ,
+      );
+      return { status: status , id: response.id };
     } else if (status === HttpStatus.CONFLICT) {
       const existingEntityId = await response.error;
-      const existingEntity = await this._getEntityFromFootlight(calendarId , token , existingEntityId , url);
-      if (!existingEntity?.modifiedByUserId || existingEntity?.modifiedByUserId === currentUserId) {
-        const updateResponse = await this.updateEntityInFootlight(calendarId , token , existingEntityId , url , body);
+      const existingEntity = await this._getEntityFromFootlight(
+        calendarId ,
+        token ,
+        existingEntityId ,
+        url ,
+      );
+      if (
+        !existingEntity?.modifiedByUserId ||
+        existingEntity?.modifiedByUserId === currentUserId
+      ) {
+        const updateResponse = await this.updateEntityInFootlight(
+          calendarId ,
+          token ,
+          existingEntityId ,
+          url ,
+          body ,
+        );
         if (updateResponse.status === HttpStatus.OK) {
-          this._loggerService(`\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!`);
+          this._loggerService(
+            `\tUpdated Entity (${existingEntityId} : ${body.uri}) in Footlight!` ,
+          );
           return { status: updateResponse.status, id: existingEntityId };
         } else {
-          this._loggerService(`\tUpdating Entity (${existingEntityId}) failed!`);
+          this._loggerService(
+            `\tUpdating Entity (${existingEntityId}) failed!` ,
+          );
           return { status: updateResponse.status, id: existingEntityId };
         }
       } else {
-        this._loggerService(`\tEntity cannot be modified. Since this entity is updated latest by a different user.`);
+        this._loggerService(
+          `\tEntity cannot be modified. Since this entity is updated latest by a different user.` ,
+        );
         return { status: HttpStatus.CONFLICT, id: existingEntityId };
       }
     } else if (status === HttpStatus.UNAUTHORIZED) {
@@ -114,19 +165,46 @@ export class SharedService {
     }
   }
 
-  static async addEntityToFootlight(calendarId: string , token: string , url: string , body: any) {
+  static async addEntityToFootlight(
+    calendarId: string ,
+    token: string ,
+    url: string ,
+    body: any ,
+  ) {
     this._loggerService(`\tAdding ${url.split('/').slice(-1)}...`);
-    return await this.callFootlightAPI(HttpMethodsEnum.POST , calendarId , token , url , body);
+    return await this.callFootlightAPI(
+      HttpMethodsEnum.POST ,
+      calendarId ,
+      token ,
+      url ,
+      body ,
+    );
   }
 
-  static async updateEntityInFootlight(calendarId: string , token: string , existingEntityId: string ,
-                                       url: string , body: any) {
+  static async updateEntityInFootlight(
+    calendarId: string ,
+    token: string ,
+    existingEntityId: string ,
+    url: string ,
+    body: any ,
+  ) {
     this._loggerService(`\tUpdating ${url.split('/').slice(-1)}...`);
     url = url + '/' + existingEntityId;
-    return await this.callFootlightAPI(HttpMethodsEnum.PATCH , calendarId , token , url , body);
+    return await this.callFootlightAPI(
+      HttpMethodsEnum.PATCH ,
+      calendarId ,
+      token ,
+      url ,
+      body ,
+    );
   }
 
-  private static async _getEntityFromFootlight(calendarId: string , token: string , existingEntityId: any , url: string) {
+  private static async _getEntityFromFootlight(
+    calendarId: string ,
+    token: string ,
+    existingEntityId: any ,
+    url: string ,
+  ) {
     this._loggerService(`\tFetching entity ${url.split('/').slice(-1)}...`);
     url = url + '/' + existingEntityId;
 
@@ -135,32 +213,61 @@ export class SharedService {
     return existingEntity?.data;
   }
 
-  static async getAllEntitiesFromFootlight(calendarId: string , footlightBaseUrl: string , token: string , entityType: EntityType) {
+  static async getAllEntitiesFromFootlight(
+    calendarId: string ,
+    footlightBaseUrl: string ,
+    token: string ,
+    entityType: EntityType ,
+  ) {
     switch (entityType) {
       case EntityType.PERSON:
-        return await this._fetchAllPeopleFromFootlight(calendarId , footlightBaseUrl , token);
+        return await this._fetchAllPeopleFromFootlight(
+          calendarId ,
+          footlightBaseUrl ,
+          token ,
+        );
       case EntityType.ORGANIZATION:
-        return await this._fetchAllOrganizationsFromFootlight(calendarId , footlightBaseUrl , token);
+        return await this._fetchAllOrganizationsFromFootlight(
+          calendarId ,
+          footlightBaseUrl ,
+          token ,
+        );
       case EntityType.PLACE:
-        return await this._fetchAllPlacesFromFootlight(calendarId , footlightBaseUrl , token);
+        return await this._fetchAllPlacesFromFootlight(
+          calendarId ,
+          footlightBaseUrl ,
+          token ,
+        );
       default:
         return null;
     }
   }
 
-  private static async _fetchAllPeopleFromFootlight(calendarId: string , footlightBaseUrl: string , token: string) {
+  private static async _fetchAllPeopleFromFootlight(
+    calendarId: string ,
+    footlightBaseUrl: string ,
+    token: string ,
+  ) {
     const url = `${footlightBaseUrl}${FootlightPaths.ADD_PEOPLE}?page=1&limit=300`;
     const headers = this.createHeaders(token , calendarId);
     return await SharedService.fetchUrl(url , headers);
   }
 
-  private static async _fetchAllOrganizationsFromFootlight(calendarId: string , footlightBaseUrl: string , token: string) {
+  private static async _fetchAllOrganizationsFromFootlight(
+    calendarId: string ,
+    footlightBaseUrl: string ,
+    token: string ,
+  ) {
     const url = `${footlightBaseUrl}${FootlightPaths.ADD_ORGANIZATION}?page=1&limit=300`;
     const headers = this.createHeaders(token , calendarId);
     return await SharedService.fetchUrl(url , headers);
   }
 
-  private static async _fetchAllPlacesFromFootlight(calendarId: string , footlightBaseUrl: string , token: string) {
+  private static async _fetchAllPlacesFromFootlight(
+    calendarId: string ,
+    footlightBaseUrl: string ,
+    token: string ,
+  ) {
     const url = `${footlightBaseUrl}${FootlightPaths.ADD_PLACE}?page=1&limit=300`;
     const headers = this.createHeaders(token , calendarId);
     return await SharedService.fetchUrl(url , headers);
@@ -175,16 +282,25 @@ export class SharedService {
     if(Array.isArray(fr)){
       alternateNames.push(...fr.map(label => ({ fr: label })));
     }
+    if (Array.isArray(alternateName['@none'])) {
+      alternateNames.push(
+        ...alternateName['@none'].map((label) => ({ '@none': label })) ,
+      );
+    }
     return alternateNames.length ? alternateNames : undefined;
   }
 
-  static createHeaders(token: string , calendarId?: string , languagePreference?: string) {
+  static createHeaders(
+    token: string ,
+    calendarId?: string ,
+    languagePreference?: string ,
+  ) {
     const headers = {
       Accept: '*/*' ,
       Authorization: `Bearer ${token}` ,
       'Content-Type': 'application/json' ,
-      'Referer': HEADER.CMS_REFERER_HEADER ,
-      'Connection': 'close'
+      Referer: HEADER.CMS_REFERER_HEADER ,
+      Connection: 'close' ,
     };
     if (calendarId) {
       headers['calendar-id'] = calendarId;
@@ -201,12 +317,18 @@ export class SharedService {
       const userResponse = await SharedService.fetchUrl(url , headers);
       return userResponse.data;
     } catch (e) {
-      this._loggerService.errorLogs('Authorisation failed. Please check your credentials and access to the calendar');
+      this._loggerService.errorLogs(
+        'Authorisation failed. Please check your credentials and access to the calendar' ,
+      );
       Exception.unauthorized('Something went wrong.');
     }
   }
 
-  async fetchCalendar(footlightBaseUrl: string , token: string , calendarId: string) {
+  async fetchCalendar(
+    footlightBaseUrl: string ,
+    token: string ,
+    calendarId: string ,
+  ) {
     this._loggerService.infoLogs(`Fetching current user info`);
     const url = `${footlightBaseUrl}${FootlightPaths.GET_CALENDAR}/${calendarId} `;
     const headers = SharedService.createHeaders(token , calendarId);
@@ -214,30 +336,70 @@ export class SharedService {
       const calendarResponse = await SharedService.fetchUrl(url , headers);
       return calendarResponse.data;
     } catch (e) {
-      this._loggerService.errorLogs('Authorisation failed. Please check your credentials and access to the calendar');
+      this._loggerService.errorLogs(
+        'Authorisation failed. Please check your credentials and access to the calendar' ,
+      );
       Exception.unauthorized('Something went wrong.');
     }
   }
 
-  async sendMessageToCms(token: string , calendarId: string , messageMeta: any , footlightBaseUrl: string , messageType: MessageType) {
+  async sendMessageToCms(
+    token: string ,
+    calendarId: string ,
+    messageMeta: any ,
+    footlightBaseUrl: string ,
+    messageType: MessageType ,
+  ) {
     const message = {
       messageType: messageType ,
-      messageMeta: messageMeta
+      messageMeta: messageMeta ,
     };
     const headers = {
-      'Authorization': `Bearer ${token}` ,
+      Authorization: `Bearer ${token}` ,
       'calendar-id': calendarId ,
-      'Referer': HEADER.CMS_REFERER_HEADER
+      Referer: HEADER.CMS_REFERER_HEADER ,
     };
     const url = footlightBaseUrl + FootlightPaths.PUBLISH_MESSAGE;
     try {
       await SharedService.postUrl(url , message , headers);
-      await this._loggerService.infoLogs(`Message of type ${messageType} sent successfully to CMS.`);
+      await this._loggerService.infoLogs(
+        `Message of type ${messageType} sent successfully to CMS.` ,
+      );
       return true;
     } catch (error) {
-      await this._loggerService.errorLogs('Error while sending message to CMS: ' + error.message);
+      await this._loggerService.errorLogs(
+        'Error while sending message to CMS: ' + error.message ,
+      );
       return false;
     }
+  }
+
+  static formatMultiLingualString(languageMap) {
+    return Object.fromEntries(
+      Object.entries(languageMap).map(([lang , value]) => {
+        const name = Array.isArray(value) ? value[0] : value;
+        return [lang , name || undefined];
+      }) ,
+    );
+  }
+
+  static formatImageObject(rawImageObject) {
+    if (!rawImageObject) return undefined;
+
+    const images = Array.isArray(rawImageObject)
+      ? rawImageObject
+      : [rawImageObject];
+
+    const formatedImages = images
+      .map((image) => image?.url?.uri)
+      .filter(Boolean)
+      .map((url , index) =>
+        index === 0
+          ? { url: { uri: url } , isMain: true }
+          : { url: { uri: url } } ,
+      );
+    if (formatedImages.length === 0) return undefined;
+    return formatedImages;
   }
 
   static _loggerService(args: string) {
@@ -250,7 +412,9 @@ export class SharedService {
       const response = await axios.get(url);
       return response;
     } catch (error) {
-      this._loggerService(`Error fetching JSON from URL: ${url}, Error message: ${error.message}`);
+      this._loggerService(
+        `Error fetching JSON from URL: ${url}, Error message: ${error.message}` ,
+      );
       return null;
     }
   }

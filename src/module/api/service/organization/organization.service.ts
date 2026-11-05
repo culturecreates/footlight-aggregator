@@ -45,9 +45,15 @@ export class OrganizationService {
         let id = organization.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX, "");
         id = organization.url.replace(ArtsDataConstants.RESOURCE_URI_PREFIX_HTTPS, "");
         const entityFetched = await SharedService.fetchFromArtsDataById(id, ArtsDataAPIUrl.PERSON_ORGANIZATION_BY_ID);
-        const { alternateName } = entityFetched;
+        const { name , description , alternateName } = entityFetched;
+
+        entityFetched.name = SharedService.formatMultiLingualString(name);
+        entityFetched.description = SharedService.formatMultiLingualString(description);
+
         entityFetched.alternateName = alternateName?.length
-          ? SharedService.formatAlternateNames(alternateName) : undefined;
+          ? SharedService.formatAlternateNames(alternateName)
+          : undefined;
+
         await this._pushOrganizationToFootlight(footlightBaseUrl,calendarId, token, entityFetched, currentUser.id);
         this._loggerService.infoLogs(`(${syncCount}/${fetchedOrganizationCount}) Synchronised event with id: ${JSON.stringify(fetchedOrganizationCount.sameAs)}`);
       } catch (e) {

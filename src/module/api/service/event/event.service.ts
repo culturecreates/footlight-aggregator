@@ -202,6 +202,8 @@ export class EventService {
                     mappingFile: any , calendarTimezone: string , existingEventTypeConceptIDs?: any ,
                     existingAudienceConceptIDs?: any , existingDisciplineConceptIDs?: any , existingDynamicConceptIDs?: any) {
     const {
+      name ,
+      description ,
       location: locations ,
       performer ,
       organizer ,
@@ -217,6 +219,7 @@ export class EventService {
       offers ,
       contactPoint ,
       type ,
+      image ,
     } = event;
     if (subEvent?.length) {
       if (type == EventType.EVENT) {
@@ -279,15 +282,6 @@ export class EventService {
       Exception.preconditionFailed(`Event ${event.uri} does not satisfy the filter conditions`);
     }
 
-    delete event?.image?.uri;
-    if (event.image?.url) {
-      if (Array.isArray(event.image.url)) {
-        event.image.url = event.image.url[0];
-      }
-      event.image = [{ url: event.image.url , isMain: true }];
-    } else {
-      delete event.image;
-    }
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate , startDateTime , endDate , endDateTime);
 
     if (Array.isArray(event.url)) {
@@ -307,11 +301,18 @@ export class EventService {
       };
     }
 
+    eventToAdd.image = SharedService.formatImageObject(image);
+
     eventToAdd.performers = performers;
     eventToAdd.organizers = organizers;
     eventToAdd.collaborators = collaborators;
     eventToAdd.keywords = this._formattedValues(keywords);
+
+    eventToAdd.name = SharedService.formatMultiLingualString(name);
+    eventToAdd.description = SharedService.formatMultiLingualString(description);
+
     eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
+
     eventToAdd.additionalType = await this._findMatchingConcepts(event , EventProperty.ADDITIONAL_TYPE ,
       mappingFile , existingEventTypeConceptIDs);
     eventToAdd.audience = await this._findMatchingConcepts(event , EventProperty.AUDIENCE ,
