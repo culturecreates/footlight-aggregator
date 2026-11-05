@@ -337,6 +337,7 @@ export class EventService {
     if (endDateTime) {
       eventToAdd.endDateTime = this.convertDateToISO(endDateTime , calendarTimezone);
     }
+    eventToAdd.derivedFrom = { uri: event.uri };
     return eventToAdd;
   }
 
