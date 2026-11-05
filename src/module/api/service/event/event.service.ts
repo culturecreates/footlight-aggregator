@@ -202,6 +202,8 @@ export class EventService {
                     mappingFile: any , calendarTimezone: string , existingEventTypeConceptIDs?: any ,
                     existingAudienceConceptIDs?: any , existingDisciplineConceptIDs?: any , existingDynamicConceptIDs?: any) {
     const {
+      name ,
+      description ,
       location: locations ,
       performer ,
       organizer ,
@@ -217,6 +219,7 @@ export class EventService {
       offers ,
       contactPoint ,
       type ,
+      image ,
     } = event;
     if (subEvent?.length) {
       if (type == EventType.EVENT) {
@@ -279,15 +282,6 @@ export class EventService {
       Exception.preconditionFailed(`Event ${event.uri} does not satisfy the filter conditions`);
     }
 
-    delete event?.image?.uri;
-    if (event.image?.url) {
-      if (Array.isArray(event.image.url)) {
-        event.image.url = event.image.url[0];
-      }
-      event.image = [{ url: event.image.url , isMain: true }];
-    } else {
-      delete event.image;
-    }
     const isSingleDayEvent = this._findIfSingleDayEvent(startDate , startDateTime , endDate , endDateTime);
 
     if (Array.isArray(event.url)) {
@@ -307,11 +301,18 @@ export class EventService {
       };
     }
 
+    eventToAdd.image = SharedService.formatImageObject(image);
+
     eventToAdd.performers = performers;
     eventToAdd.organizers = organizers;
     eventToAdd.collaborators = collaborators;
     eventToAdd.keywords = this._formattedValues(keywords);
+
+    eventToAdd.name = SharedService.formatMultiLingualString(name);
+    eventToAdd.description = SharedService.formatMultiLingualString(description);
+
     eventToAdd.alternateName = alternateName?.length ? SharedService.formatAlternateNames(alternateName) : [];
+
     eventToAdd.additionalType = await this._findMatchingConcepts(event , EventProperty.ADDITIONAL_TYPE ,
       mappingFile , existingEventTypeConceptIDs);
     eventToAdd.audience = await this._findMatchingConcepts(event , EventProperty.AUDIENCE ,
@@ -336,6 +337,7 @@ export class EventService {
     if (endDateTime) {
       eventToAdd.endDateTime = this.convertDateToISO(endDateTime , calendarTimezone);
     }
+    eventToAdd.derivedFrom = { uri: event.uri };
     return eventToAdd;
   }
 
@@ -384,7 +386,7 @@ export class EventService {
     if (artsDataResponse?.status !== HttpStatus.OK) {
       return null;
     }
-    return artsDataResponse.data.data?.filter(event => event.uri.startsWith(ArtsDataConstants.RESOURCE_URI_PREFIX));
+    return artsDataResponse.data.data;
   }
 
   private async _fetchEventSeriesFromArtsData(source: string , batchSize: number , offset: number) {
@@ -594,14 +596,14 @@ export class EventService {
   }
 
   private _formatSameAs(elements: { uri: string }[]) {
-    return elements.map(element => {
-      if (element.uri.startsWith(FacebookConstants.HTTPS) || element.uri.startsWith(FacebookConstants.HTTP)) {
-        return {
-          uri: element.uri ,
-          type: SameAsTypes.FACEBOOK_LINK ,
-        };
+    return elements.map(({ uri }) => {
+      if (uri.startsWith(FacebookConstants.HTTPS) || uri.startsWith(FacebookConstants.HTTP)) {
+        return { uri , type: SameAsTypes.FACEBOOK_LINK };
       }
-      return element;
+      if (uri.includes('kg.artsdata.ca/resource/')) {
+        return { uri , type: SameAsTypes.ARTSDATA_IDENTIFIER };
+      }
+      return { uri };
     });
   }
 
@@ -943,14 +945,14 @@ export class EventService {
       endTime: event.endDateTime?.split('T')[1]?.slice(0 , 5) ,
       name: event.name ,
       description: event.description ,
-      sameAs: [{ uri: event.uri , type: 'ArtsdataIdentifier' }] ,
     };
+    subEventToReturn['sameAs'] = event.sameAs ? this._formatSameAs(event.sameAs) : undefined;
+
     if (event.location) {
       const locationId = await this._placeService.getFootlightIdentifier(calendarId , token , footlightBaseUrl ,
         event.location['@none'] || event.location['Place'] , currentUserId , mappingFile);
       subEventToReturn['locationId'] = locationId ? { place: { entityId: locationId } } : locationId;
     }
-
     return subEventToReturn;
   }
 
