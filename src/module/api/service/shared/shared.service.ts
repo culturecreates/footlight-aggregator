@@ -375,6 +375,9 @@ export class SharedService {
   }
 
   static formatMultiLingualString(languageMap) {
+    if (!languageMap) {
+      return undefined;
+    }
     return Object.fromEntries(
       Object.entries(languageMap).map(([lang , value]) => {
         const name = Array.isArray(value) ? value[0] : value;
